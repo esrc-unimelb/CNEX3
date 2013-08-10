@@ -21,9 +21,19 @@
         <div ng-show="dataset_error">
             <h4 class="text-center">Requested dataset unavailable</h4>
         </div>
+        <div>
+            <dl class="dl-horizontal">
+                <dt>Entity Id:</dt>
+                <dd>{{node_data.id}}</dd>
+                <dt>Entity Type:</dt>
+                <dd>{{node_data.type}}</dd>
+                <dt>Original Document:</dt>
+                <dd><a href="{{node_data.source}}" target="_blank">{{node_data.source}}</a></dd>
+            </dl>
+        </div>
     </div>
     </div>
-        <div class="span12">
+        <div class="span10">
             <div id="graph" class=""></div>
         </div>
     </div>

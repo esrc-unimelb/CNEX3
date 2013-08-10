@@ -244,7 +244,11 @@ EntityNetworkController.$inject = ['$scope', '$routeParams', '$http', '$location
 function SiteNetworkController($scope, $routeParams, $http, $timeout) {
 
     $scope.init = function() {
-
+        $scope.node_data = {
+            'id': '',
+            'type': '',
+            'source':''
+        }
         $scope.progress = false;
         $scope.dataset_error = false;
 
@@ -289,8 +293,8 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         var color = d3.scale.category20();
 
         var force = d3.layout.force()
-            .charge(-400)
-            .linkDistance(20)
+            .charge(-1000)
+            .linkDistance(100)
             .linkStrength(1)
             .size([width, height]);
 
@@ -300,19 +304,11 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         var svg = d3.select("#graph").append("svg")
             .attr("width", width)
             .attr("height", height)
-            .call(d3.behavior.zoom().on("zoom", function() {
-                    var trans = d3.event.translate;
-                    var scale = d3.event.scale;
-                    svg.attr("transform",
-                        "translate(" + trans + ") (scale" + scale + ")"
-                    );
-                }
-            ));
-            //    svg.attr("transform", 
-            //        "translate(" + d3.event.translate + ")"
-            //              + " scale(" + d3.event.scale + ")");
-            //}));
-
+            .attr("viewBox", "0 500 " + width + " " + height )
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .attr("pointer-events", "all")
+            .call(d3.behavior.zoom().on("zoom", redraw))
+            .append('svg:g');
 
         force
             .nodes(nodes)
@@ -335,17 +331,14 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             .style("fill", function(d) { return color(d.type); })
             .call(force.drag);
 
-/*
         node.on("click", function(d) {
-            if ( d.type === 'Publication' ) {
-                $scope.node_data =  $scope.publicationInformation(d.id);
-                $scope.$apply();
-            } else {
-                $scope.node_data = $scope.recordInformation(d.id);
-                $scope.$apply();
-            }
+            $scope.node_data.id = d.id;
+            $scope.node_data.source = d.source;
+            $scope.node_data.type = d.type;
+            //console.log(d);
+            console.log($scope.node_data);
+            $scope.$apply();
         });
-*/
 
         var text = svg.append("g")
             .selectAll("g")
@@ -370,6 +363,11 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             text.attr("transform", transform);
           });
 
+        function redraw() {
+            svg.attr("transform",
+                "translate(" + d3.event.translate + ")"
+                + " scale(" + d3.event.scale + ")");
+        }
         var transform = function(d) {
             return "translate(" + d.x + "," + d.y + ")";
         }
