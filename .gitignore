@@ -1,0 +1,6 @@
+*.pyc
+*.cache
+*.lock
+*.swp
+*.coverage
+*.cover
