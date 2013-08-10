@@ -1,6 +1,7 @@
 from sqlalchemy import (
     Column,
     Integer,
+    String,
     Text,
     )
 
@@ -17,12 +18,9 @@ DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
 
-class MyModel(Base):
-    __tablename__ = 'models'
+class Progress(Base):
+    __tablename__ = 'progress'
     id = Column(Integer, primary_key=True)
-    name = Column(Text, unique=True)
-    value = Column(Integer)
-
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
+    total = Column(String)
+    processed = Column(String)
+    uuid = Column(String, index=True)
