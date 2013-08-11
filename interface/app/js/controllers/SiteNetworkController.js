@@ -3,6 +3,9 @@
 */
 function SiteNetworkController($scope, $routeParams, $http, $timeout) {
 
+    var base_url = 'http://dev01:3000';
+    $scope.code = $routeParams.code;
+
     $scope.init = function() {
         $scope.node_data = {
             'id': '',
@@ -16,7 +19,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         var t = $timeout(function() { $scope.update(); }, 500);
 
         // get the data
-        var site_url = 'http://dev01:3000/site/' + $routeParams.code + '?callback=JSON_CALLBACK';
+        var site_url = base_url + '/site/' + $scope.code + '?callback=JSON_CALLBACK';
         $http.jsonp(site_url)
             .then(function(response) {
                 drawGraph($scope.$eval(response.data.graph));
@@ -30,7 +33,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
     // method to handle status updates
     $scope.update = function() {
         $scope.progress = true;
-        var url = 'http://dev01:3000/status?callback=JSON_CALLBACK';
+        var url = base_url + '/status?callback=JSON_CALLBACK';
         $http.jsonp(url)
             .then(function(response) {
                 $scope.processed = parseInt(response.data['processed']);
@@ -40,6 +43,25 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
                 } else {
                     $scope.progress = false;
                 }
+            });
+    }
+
+    $scope.getNodeData = function(id) {
+        var config = {};
+        config.params = {
+            'id': id,
+            'site': $scope.code
+        };
+        var url = base_url + '/data?callback=JSON_CALLBACK';
+        $http.jsonp(url, config)
+            .then(function(response) {
+                data = response.data.data;
+                $scope.node_data.name = data['name']
+                $scope.node_data.from = data['from']
+                $scope.node_data.to = data['to']
+            },
+            function(response) {
+                console.log('$scope.getNodeData: JSONP failed:', response.status);
             });
     }
 
@@ -67,7 +89,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             .attr("viewBox", "0 0 " + width + " " + height )
             .attr("preserveAspectRatio", "xMidYMid meet")
             .attr("pointer-events", "all")
-            .call(d3.behavior.zoom().on("zoom", redraw))
+            .call(d3.behavior.zoom().scaleExtent([0.2, 8]).on("zoom", redraw))
             .append('svg:g');
 
         force
@@ -88,15 +110,14 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             .enter()
             .append("circle")
             .attr("r", 10)
-            .style("fill", function(d) { return color(d.type); })
-            .call(force.drag);
+            .style("fill", function(d) { return color(d.type); });
+            //.call(force.drag);
 
         node.on("click", function(d) {
             $scope.node_data.id = d.id;
             $scope.node_data.source = d.source;
             $scope.node_data.type = d.type;
-            //console.log(d);
-            console.log($scope.node_data);
+            $scope.getNodeData(d.id);
             $scope.$apply();
         });
 

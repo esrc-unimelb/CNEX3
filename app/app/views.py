@@ -92,6 +92,11 @@ def get_xml(href):
 
 @view_config(route_name='site_graph', request_method='GET', renderer='jsonp')
 def site_graph(request):
+    """For a given site - assemble the entity graph
+    
+    @params:
+    request.matchdict: code, the site of interest
+    """
     t1 = time.time()
     dbs = DBSession()
 
@@ -144,6 +149,7 @@ def site_graph(request):
             tree = etree.parse(fname)
         except (TypeError, etree.XMLSyntaxError):
             log.error("Invalid XML file: %s. Likely not well formed." % fname)
+            continue
 
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         if type(node_id) == str:
@@ -159,9 +165,7 @@ def site_graph(request):
                     neighbour_data = node.attrib['{http://www.w3.org/1999/xlink}href']
                     try:
                         tree = etree.parse(get_xml(href=neighbour_data))
-                    except IOError, etree.XMLSyntaxError:
-                        continue
-                    except TypeError:
+                    except (IOError, TypeError, etree.XMLSyntaxError):
                         continue
                     neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
                     graph.add_edge(node_id, neighbour_id)
@@ -199,5 +203,43 @@ def status(request):
     except sq.orm.exc.NoResultFound:
         return { 'total': '', 'processed': '' }
 
+@view_config(route_name='node_data', request_method="GET", renderer="jsonp")
+def node_data(request):
+    """More info - specific entity
+    
+    @params:
+    id: request.params['id']
+    site: request.params['site']
+    """
+    entity_id = request.params['id']
+    site = request.params['site']
+
+    # read the site config and bork if bad site requested
+    conf = Config(request)
+    try:
+        eac_path = getattr(conf, site.lower())
+    except AttributeError:
+        raise HTTPNotFound
+
+    tree = etree.parse("%s/%s.xml" % (eac_path, entity_id))
+    name = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part')
+    if type(name) == list:
+        name = ', '.join(name)
+
+    efrom = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate')
+    if len(efrom) == 0:
+        efrom = ''
+    
+    eto = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate')
+    if len(eto) == 0:
+        eto = ''
+
+    entity_data = {
+        'name': name,
+        'from': efrom,
+        'to': eto
+    }
+
+    return { 'data': entity_data }
 
     

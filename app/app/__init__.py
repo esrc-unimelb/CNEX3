@@ -20,5 +20,6 @@ def main(global_config, **settings):
     config.add_route('site_graph', '/site/{code}')
     config.add_route('entity_graph', '/entity/{id}')
     config.add_route('status', '/status')
+    config.add_route('node_data', '/data')
     config.scan()
     return config.make_wsgi_app()
