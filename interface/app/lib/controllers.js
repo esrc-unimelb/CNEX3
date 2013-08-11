@@ -17,22 +17,14 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
 
     var base_url = 'http://dev01:3000';
     $scope.code = $routeParams.code;
+    $scope.entity_id = $routeParams.id;
 
     $scope.init = function() {
-/*
-        $scope.node_data = {
-            'id': '',
-            'type': '',
-            'source':''
-        }
-        $scope.progress = false;
-        $scope.dataset_error = false;
-
         // kick off an update in a second - needs time to get going 
-        var t = $timeout(function() { $scope.update(); }, 500);
+        //var t = $timeout(function() { $scope.update(); }, 500);
 
         // get the data
-        var site_url = base_url + '/site/' + $scope.code + '?callback=JSON_CALLBACK';
+        var site_url = base_url + '/entity/' + $scope.code + '/' + $scope.entity_id + '?callback=JSON_CALLBACK';
         $http.jsonp(site_url)
             .then(function(response) {
                 drawGraph($scope.$eval(response.data.graph));
@@ -40,42 +32,6 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
             function(response) {
                 // error raised by backend
                 $scope.dataset_error = true;
-            });
-*/
-    }
-
-    // method to handle status updates
-    $scope.update = function() {
-        $scope.progress = true;
-        var url = base_url + '/status?callback=JSON_CALLBACK';
-        $http.jsonp(url)
-            .then(function(response) {
-                $scope.processed = parseInt(response.data['processed']);
-                $scope.total = parseInt(response.data['total']);
-                if ($scope.processed < $scope.total) {
-                    var $t = $timeout(function() { $scope.update(); }, 100);
-                } else {
-                    $scope.progress = false;
-                }
-            });
-    }
-
-    $scope.getNodeData = function(id) {
-        var config = {};
-        config.params = {
-            'id': id,
-            'site': $scope.code
-        };
-        var url = base_url + '/data?callback=JSON_CALLBACK';
-        $http.jsonp(url, config)
-            .then(function(response) {
-                data = response.data.data;
-                $scope.node_data.name = data['name']
-                $scope.node_data.from = data['from']
-                $scope.node_data.to = data['to']
-            },
-            function(response) {
-                console.log('$scope.getNodeData: JSONP failed:', response.status);
             });
     }
 
@@ -123,15 +79,44 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
             .data(nodes)
             .enter()
             .append("circle")
-            .attr("r", 10)
-            .style("fill", function(d) { return color(d.type); });
+            .attr("r", function(d) {
+                if (d.tag === 'eac-cpf') { 
+                    return 40;
+                } else if (['control', 'cpfDescription', 'identity', 'description', 'relations'].indexOf(d.tag) >= 0) {
+                    return 30;
+                } else {
+                    return 10;
+                }
+            })
+            .style("fill", function(d) { 
+                if (d.tag === 'eac-cpf') {
+                    return color(1); 
+                } else if ( d.tag === 'control' ) {
+                    return color(2);
+                } else if ( d.tag === 'cpfDescription' ) {
+                    return color(3);
+                } else if ( d.tag.match(/relation/gi)) {
+                    return color(7);
+                } else if (d.tag === 'identity') {
+                    return color(8);
+                } else if  (d.tag === 'description') {
+                    return color(9);
+                } else {
+                    return color(6);
+                }
+            });
             //.call(force.drag);
 
         node.on("click", function(d) {
-            $scope.node_data.id = d.id;
-            $scope.node_data.source = d.source;
-            $scope.node_data.type = d.type;
-            $scope.getNodeData(d.id);
+            $scope.element = {};
+            $scope.element.name = d.tag;
+            $scope.element.data = {};
+            for (var elem in d) {
+                if (['x', 'y', 'px', 'py', 'id', 'tag', 'index', 'weight'].indexOf(elem) === -1) {
+                    $scope.element.data[elem] = d[elem];
+                }
+
+            }
             $scope.$apply();
         });
 
@@ -229,9 +214,9 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         $http.jsonp(url, config)
             .then(function(response) {
                 data = response.data.data;
-                $scope.node_data.name = data['name']
-                $scope.node_data.from = data['from']
-                $scope.node_data.to = data['to']
+                $scope.node_data.name = data['name'];
+                $scope.node_data.from = data['from'];
+                $scope.node_data.to = data['to'];
             },
             function(response) {
                 console.log('$scope.getNodeData: JSONP failed:', response.status);

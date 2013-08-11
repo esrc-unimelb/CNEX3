@@ -8,7 +8,7 @@ angular.module('eac-viewer', [ 'ui.bootstrap', 'eac-viewer.filters', 'eac-viewer
         templateUrl: 'partials/site-network.html', 
         controller: 'SiteNetworkController'
     });
-    $routeProvider.when('/entity/:id', {
+    $routeProvider.when('/entity/:code/:id', {
         templateUrl: 'partials/entity-network.html', 
         controller: 'EntityNetworkController'
     });

@@ -56,9 +56,9 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         $http.jsonp(url, config)
             .then(function(response) {
                 data = response.data.data;
-                $scope.node_data.name = data['name']
-                $scope.node_data.from = data['from']
-                $scope.node_data.to = data['to']
+                $scope.node_data.name = data['name'];
+                $scope.node_data.from = data['from'];
+                $scope.node_data.to = data['to'];
             },
             function(response) {
                 console.log('$scope.getNodeData: JSONP failed:', response.status);
