@@ -173,12 +173,19 @@ def site_graph(request):
                     pass
             #print node_id, node_source, node_type
 
+    # get the site name out of the last file
     t2 = time.time()
     log.debug("Time taken to prepare data '/site': %s" % (t2 - t1))
-    return { 'graph': json_graph.dumps(graph) }
+    return { 'graph': json_graph.dumps(graph), 'site_name': get(tree, '/e:eac-cpf/e:control/e:maintenanceAgency/e:agencyName') }
 
 @view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
 def entity_graph(request):
+    """For a given entity - assemble the graph of its XML structure
+    
+    @params:
+    request.matchdict: code, the site of interest
+    request.matchdict: id, the entity of interest
+    """
     t1 = time.time()
     conf = Config(request)
     site = request.matchdict['code']
@@ -235,8 +242,8 @@ def node_data(request):
     id: request.params['id']
     site: request.params['site']
     """
-    entity_id = request.params['id']
-    site = request.params['site']
+    entity_id = request.matchdict['id']
+    site = request.matchdict['code']
 
     # read the site config and bork if bad site requested
     conf = Config(request)
