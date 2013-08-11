@@ -18,7 +18,7 @@ def main(global_config, **settings):
     config.add_renderer('jsonp', JSONP(param_name='callback'))
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('site_graph', '/site/{code}')
-    config.add_route('entity_graph', '/entity/{id}')
+    config.add_route('entity_graph', '/entity/{code}/{id}')
     config.add_route('status', '/status')
     config.add_route('node_data', '/data')
     config.scan()

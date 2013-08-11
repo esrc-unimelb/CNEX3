@@ -177,17 +177,41 @@ def site_graph(request):
     log.debug("Time taken to prepare data '/site': %s" % (t2 - t1))
     return { 'graph': json_graph.dumps(graph) }
 
-
 @view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
 def entity_graph(request):
     t1 = time.time()
     conf = Config(request)
     site = request.matchdict['code']
+    entity_id = request.matchdict['id']
     eac_path = getattr(conf, site.lower())
+
+    datafile = "%s/%s.xml" % (eac_path, entity_id)
+    try:
+        tree = etree.parse(datafile)
+    except (TypeError, etree.XMLSyntaxError):
+        log.error("Invalid XML file: %s. Likely not well formed." % datafile)
+
+    graph = nx.DiGraph()
+    start = get(tree, '/e:eac-cpf', element=True)
+
+    start_uid = str(tree.getpath(start))
+    graph.add_node(start_uid, { 'tag': bare_tag(start.tag), 'data': start.text })
+
+    for c in start.iterdescendants():
+        parent_uid = str(tree.getpath(c.getparent()))
+        child_uid = str(tree.getpath(c))
+        node_data = dict({ 'tag': bare_tag(c.tag), 'data': c.text }.items() + c.attrib.items())
+        node_data = { bare_tag(k): v for k,v in node_data.items() }
+
+        graph.add_node(child_uid, node_data)
+        graph.add_edge(child_uid, parent_uid)
 
     t2 = time.time()
     log.debug("Time taken to prepare data '/entity': %s" % (t2 - t1))
-    return { 'graph': 'entity graph here' }
+    return { 'graph': json_graph.dumps(graph) }
+
+def bare_tag(tag):
+    return tag.rsplit("}", 1)[-1]
 
 @view_config(route_name='status', request_method='GET', renderer='jsonp')
 def status(request):
