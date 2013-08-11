@@ -11,6 +11,8 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
         // kick off an update in a second - needs time to get going 
         //var t = $timeout(function() { $scope.update(); }, 500);
 
+        $scope.getNodeData($scope.entity_id);
+
         // get the data
         var site_url = base_url + '/entity/' + $scope.code + '/' + $scope.entity_id + '?callback=JSON_CALLBACK';
         $http.jsonp(site_url)
@@ -22,6 +24,20 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
                 $scope.dataset_error = true;
             });
     }
+
+    $scope.getNodeData = function(id) {
+        var url = base_url + '/data/' + $scope.code + '/' + id + '?callback=JSON_CALLBACK';
+        $http.jsonp(url)
+            .then(function(response) {
+                data = response.data.data;
+                $scope.node_data = {};
+                $scope.node_data.name = data['name'];
+            },
+            function(response) {
+                console.log('$scope.getNodeData: JSONP failed:', response.status);
+            });
+    }
+
 
     var drawGraph = function(data) {
         var nodes = data['nodes'];

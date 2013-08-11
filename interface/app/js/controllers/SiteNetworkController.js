@@ -7,11 +7,6 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
     $scope.code = $routeParams.code;
 
     $scope.init = function() {
-        $scope.node_data = {
-            'id': '',
-            'type': '',
-            'source':''
-        }
         $scope.progress = false;
         $scope.dataset_error = false;
 
@@ -22,6 +17,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         var site_url = base_url + '/site/' + $scope.code + '?callback=JSON_CALLBACK';
         $http.jsonp(site_url)
             .then(function(response) {
+                $scope.site_name = response.data.site_name;
                 drawGraph($scope.$eval(response.data.graph));
             },
             function(response) {
@@ -47,13 +43,8 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
     }
 
     $scope.getNodeData = function(id) {
-        var config = {};
-        config.params = {
-            'id': id,
-            'site': $scope.code
-        };
-        var url = base_url + '/data?callback=JSON_CALLBACK';
-        $http.jsonp(url, config)
+        var url = base_url + '/data/' + $scope.code + '/' + id + '?callback=JSON_CALLBACK';
+        $http.jsonp(url)
             .then(function(response) {
                 data = response.data.data;
                 $scope.node_data.name = data['name'];
@@ -89,7 +80,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             .attr("viewBox", "0 0 " + width + " " + height )
             .attr("preserveAspectRatio", "xMidYMid meet")
             .attr("pointer-events", "all")
-            .call(d3.behavior.zoom().scaleExtent([0.2, 8]).on("zoom", redraw))
+            .call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", redraw))
             .append('svg:g');
 
         force
@@ -114,6 +105,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             //.call(force.drag);
 
         node.on("click", function(d) {
+            $scope.node_data = {};
             $scope.node_data.id = d.id;
             $scope.node_data.source = d.source;
             $scope.node_data.type = d.type;
