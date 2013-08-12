@@ -14,3 +14,4 @@ AWAP: /srv/ha/web/AWAP/OAInew
 GOLD: /srv/ha/web/GOLD/LIVE/eac
 WALL: /srv/ha/web/WALL/LIVE/compendium/eac
 SAUL: /srv/ha/web/SAUL/LIVE/eac
+EOAS: /srv/ha/web/EOAS/OAI

@@ -168,6 +168,9 @@ def site_graph(request):
                     except (IOError, TypeError, etree.XMLSyntaxError):
                         continue
                     neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
+                    if len(neighbour_id) == 0:
+                        # we've probably read an eac file - try the eac xpath
+                        neighbour_id = get(tree, '/eac/control/id')
                     graph.add_edge(node_id, neighbour_id)
                 except KeyError:
                     pass
@@ -199,15 +202,24 @@ def entity_graph(request):
         log.error("Invalid XML file: %s. Likely not well formed." % datafile)
 
     graph = nx.DiGraph()
-    start = get(tree, '/e:eac-cpf', element=True)
+    start = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations', element=True)
 
     start_uid = str(tree.getpath(start))
     graph.add_node(start_uid, { 'tag': bare_tag(start.tag), 'data': start.text })
 
     for c in start.iterdescendants():
+        if bare_tag(c.tag) == 'cpfRelation':
+            rel_type = 'complex'
+        elif bare_tag(c.tag) == 'resourceRelation':
+            rel_type = 'simple'
+        else:
+            rel_type = ''
         parent_uid = str(tree.getpath(c.getparent()))
         child_uid = str(tree.getpath(c))
-        node_data = dict({ 'tag': bare_tag(c.tag), 'data': c.text }.items() + c.attrib.items())
+        node_data = c.attrib
+        node_data['tag'] = bare_tag(c.tag)
+        node_data['data'] = c.text if c.text is not None else ""
+        node_data['type'] = rel_type;
         node_data = { bare_tag(k): v for k,v in node_data.items() }
 
         graph.add_node(child_uid, node_data)
@@ -215,7 +227,8 @@ def entity_graph(request):
 
     t2 = time.time()
     log.debug("Time taken to prepare data '/entity': %s" % (t2 - t1))
-    return { 'graph': json_graph.dumps(graph) }
+
+    return { 'graph': json_graph.dumps(graph), 'nnodes': graph.number_of_nodes() }
 
 def bare_tag(tag):
     return tag.rsplit("}", 1)[-1]
