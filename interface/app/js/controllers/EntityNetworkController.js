@@ -17,6 +17,7 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
         var site_url = base_url + '/entity/' + $scope.code + '/' + $scope.entity_id + '?callback=JSON_CALLBACK';
         $http.jsonp(site_url)
             .then(function(response) {
+                $scope.nnodes = response.data.nnodes;
                 drawGraph($scope.$eval(response.data.graph));
             },
             function(response) {
@@ -38,7 +39,6 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
             });
     }
 
-
     var drawGraph = function(data) {
         var nodes = data['nodes'];
         var links = data['links'];
@@ -49,8 +49,6 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
         var color = d3.scale.category20();
 
         var force = d3.layout.force()
-            .charge(-1000)
-            .linkDistance(100)
             .linkStrength(1)
             .size([width, height]);
 
@@ -63,12 +61,47 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
             .attr("viewBox", "0 0 " + width + " " + height )
             .attr("preserveAspectRatio", "xMidYMid meet")
             .attr("pointer-events", "all")
-            .call(d3.behavior.zoom().scaleExtent([0.2, 8]).on("zoom", redraw))
+            .call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", redraw))
             .append('svg:g');
 
         force
             .nodes(nodes)
             .links(links)
+            .charge(function(nodes) {
+                console.log(nodes);
+                if (nodes.type === 'complex') {
+                    if ($scope.nnodes > 500) {
+                        return -100;
+                    } else {
+                        return -1000;
+                    }
+                } else if (nodes.type === 'simple') {
+                    if ($scope.nnodes > 500) {
+                        return -200;
+                    } else {
+                        return -2000;
+                    }
+                } else {
+                    if ($scope.nnodes > 500) {
+                        return -400;
+                    } else {
+                        return -4000
+                    }
+                }
+            })
+            .linkDistance(function(nodes) {
+                if (nodes.source.type === 'complex') {
+                    return 60;
+                } else if (nodes.target.type === 'complex') {
+                    return 60;
+                } else if (nodes.source.type === 'simple') {
+                    return 400;
+                } else if (nodes.target.type === 'simple') {
+                    return 400;
+                } else {
+                    return 10;
+                }
+            })
             .start();
 
         var link = svg.selectAll(".link")
@@ -84,29 +117,24 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
             .enter()
             .append("circle")
             .attr("r", function(d) {
-                if (d.tag === 'eac-cpf') { 
-                    return 40;
-                } else if (['control', 'cpfDescription', 'identity', 'description', 'relations'].indexOf(d.tag) >= 0) {
+                if (d.tag === 'relations') { 
                     return 30;
+                //} else if (['control', 'cpfDescription', 'identity', 'description', 'relations'].indexOf(d.tag) >= 0) {
+                } else if (d.tag === 'cpfRelation') {
+                    return 20;
+                } else if (d.tag === 'resourceRelation') {
+                    return 20;
                 } else {
                     return 10;
                 }
             })
             .style("fill", function(d) { 
-                if (d.tag === 'eac-cpf') {
+                if (d.type === 'complex') {
                     return color(1); 
-                } else if ( d.tag === 'control' ) {
+                } else if ( d.type === 'simple' ) {
                     return color(2);
-                } else if ( d.tag === 'cpfDescription' ) {
-                    return color(3);
-                } else if ( d.tag.match(/relation/gi)) {
-                    return color(7);
-                } else if (d.tag === 'identity') {
-                    return color(8);
-                } else if  (d.tag === 'description') {
-                    return color(9);
                 } else {
-                    return color(6);
+                    return color(3);
                 }
             });
             //.call(force.drag);
@@ -152,7 +180,7 @@ function EntityNetworkController($scope, $routeParams, $http, $timeout) {
                 "translate(" + d3.event.translate + ")"
                 + " scale(" + d3.event.scale + ")");
         }
-        var transform = function(d) {
+        function transform(d) {
             return "translate(" + d.x + "," + d.y + ")";
         }
 

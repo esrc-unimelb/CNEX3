@@ -60,8 +60,8 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
         var nodes = data['nodes'];
         var links = data['links'];
 
-        var width = window.innerWidth - 50,
-            height = window.innerHeight - 50;
+        var width = window.innerWidth - 50; 
+            height = window.innerHeight - 100;
 
         var color = d3.scale.category20();
 
