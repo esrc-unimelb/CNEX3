@@ -95,16 +95,23 @@ def get_xml(href):
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
     conf = Config(request)
-    sites = [ site for site in conf.sites.split('\n') if site != '' ]
 
     graph = nx.Graph()
     graph.add_node('ESRC', { 'name': 'eScholarship Research Centre' })
-    for s in sites:
-        if s is not None:
-            (node_id, name) = (s.split(':')[0], s.split(':')[1])
-            graph.add_node(node_id, { 'name': name })
+    for node_id, name in conf.sites.items():
+
+        if node_id == 'FACP':
+            for k, v in name.items():
+                graph.add_node(k, { 'name': v })
+                graph.add_edge(k, 'FACP')
+
+        else:
+            graph.add_node(node_id, { 'name': name  })
             graph.add_edge(node_id, 'ESRC')
             
+    graph.add_node('FACP', { 'name': 'Find & Connect' })
+    graph.add_edge('FACP', 'ESRC')
+
     request.response.headers['Access-Control-Allow-Origin'] = '*'
     return { 'graph': json_graph.dumps(graph) }
 
@@ -123,7 +130,7 @@ def site_graph(request):
     # read the site config and bork if bad site requested
     conf = Config(request)
     try:
-        eac_path = getattr(conf, site.lower())
+        eac_path = getattr(conf, site)
     except AttributeError:
         raise HTTPNotFound
 
@@ -235,7 +242,7 @@ def entity_graph(request):
     conf = Config(request)
     site = request.matchdict['code']
     entity_id = request.matchdict['id']
-    eac_path = getattr(conf, site.lower())
+    eac_path = getattr(conf, site)
 
     datafile = "%s/%s.xml" % (eac_path, entity_id)
     try:

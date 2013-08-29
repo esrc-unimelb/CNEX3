@@ -1,4 +1,21 @@
-[General]
+---
+sites: 
+ EMEL: eMelbourne, The Encylopedia of Melbourne Online
+ #AWAP: The Australian Womens Register
+ GOLD: Electronic Encyclopedia of Gold in Australia
+ WALL: The Wallaby Club
+ SAUL: Saulwick Polls & Social Research
+ #EOAS: Encyclopedia of Australian Science
+ FACP: 
+  FCAC: Find & Connect Australian Capital Territory
+  FCNA: Find & Connect Australia
+  FCNS: Find & Connect New South Wales
+  FCNT: Find & Connect Northern Territory
+  FCQD: Find & Connect Queensland
+  FCSA: Find & Connect South Australia
+  FCTS: Find & Connect Tasmania
+  FCVC: Find & Connect Victoria
+  FCWA: Find & Connect Western Australia
 
 FCAC: /srv/ha/web/FACP/LIVE/act/eac
 FCNA: /srv/ha/web/FACP/LIVE/australia/eac

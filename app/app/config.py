@@ -1,5 +1,5 @@
 
-import ConfigParser
+import yaml
 import os
 
 from pyramid.httpexceptions import HTTPBadRequest
@@ -26,10 +26,9 @@ class Config:
         self._ingest(site_config_file)
 
     def _ingest(self, config_file):
-        config = ConfigParser.RawConfigParser()
-        config.read(config_file)
+        f = open(config_file, 'r')
+        config = yaml.load(f)
+        f.close()
 
-        for section in config.sections():
-            data = config.items(section)
-            for param, value in data:
-                setattr(self, param, value)
+        for c in config:
+            setattr(self, c, config[c])
