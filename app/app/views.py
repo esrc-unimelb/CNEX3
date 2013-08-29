@@ -92,6 +92,22 @@ def get_xml(href):
     except IOError:
         return ""
 
+@view_config(route_name='home', request_method='GET', renderer='json')
+def home_page(request):
+    conf = Config(request)
+    sites = [ site for site in conf.sites.split('\n') if site != '' ]
+
+    graph = nx.Graph()
+    graph.add_node('ESRC', { 'name': 'eScholarship Research Centre' })
+    for s in sites:
+        if s is not None:
+            (node_id, name) = (s.split(':')[0], s.split(':')[1])
+            graph.add_node(node_id, { 'name': name })
+            graph.add_edge(node_id, 'ESRC')
+            
+    request.response.headers['Access-Control-Allow-Origin'] = '*'
+    return { 'graph': json_graph.dumps(graph) }
+
 @view_config(route_name='build_graph', request_method='GET', renderer='jsonp')
 def site_graph(request):
     """For a given site - assemble the entity graph
