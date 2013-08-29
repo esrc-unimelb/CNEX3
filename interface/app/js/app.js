@@ -4,7 +4,7 @@
 // Declare app level module which depends on filters, and services
 angular.module('eac-viewer', [ 'ui.bootstrap', 'eac-viewer.filters', 'eac-viewer.services', 'eac-viewer.directives']).
   config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/site/:code', {
+    $routeProvider.when('/site/:code/:vistype', {
         templateUrl: 'partials/site-network.html', 
         controller: 'SiteNetworkController'
     });
