@@ -508,7 +508,7 @@ function HomeController($scope, $routeParams, $http, $timeout, $location) {
             $scope.hover_node = false;
             $scope.$apply();
         });
-        node.on("click", function (d) {
+        node.on("dblclick", function (d) {
             if (d.id === 'ESRC' || d.id === 'FACP') {
                 return;
             }
