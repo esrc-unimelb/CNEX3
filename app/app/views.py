@@ -99,18 +99,20 @@ def home_page(request):
     graph = nx.Graph()
     graph.add_node('ESRC', { 'name': 'eScholarship Research Centre' })
     for node_id, name in conf.sites.items():
+        graph.add_node(node_id, { 'name': name  })
+        graph.add_edge(node_id, 'ESRC')
 
-        if node_id == 'FACP':
-            for k, v in name.items():
-                graph.add_node(k, { 'name': v })
-                graph.add_edge(k, 'FACP')
-
-        else:
-            graph.add_node(node_id, { 'name': name  })
-            graph.add_edge(node_id, 'ESRC')
-            
-    graph.add_node('FACP', { 'name': 'Find & Connect' })
-    graph.add_edge('FACP', 'ESRC')
+#        if node_id == 'FACP':
+#            for k, v in name.items():
+#                graph.add_node(k, { 'name': v })
+#                graph.add_edge(k, 'FACP')
+#
+#        else:
+#            graph.add_node(node_id, { 'name': name  })
+#            graph.add_edge(node_id, 'ESRC')
+#            
+#    graph.add_node('FACP', { 'name': 'Find & Connect' })
+#    graph.add_edge('FACP', 'ESRC')
 
     request.response.headers['Access-Control-Allow-Origin'] = '*'
     return { 'graph': json_graph.dumps(graph) }
