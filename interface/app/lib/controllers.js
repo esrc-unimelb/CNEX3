@@ -2,12 +2,12 @@
 'use strict';
 
 base_url = 'http://cnex.esrc.info/app';
+//base_url = 'http://dev01:3000/app';
 /* 
  *   EntityNetworkController 
 */
 function EntityNetworkController($scope, $routeParams, $http, $timeout) {
 
-    //var base_url = 'http://dev01:3000';
     $scope.code = $routeParams.code;
     $scope.entity_id = $routeParams.id;
 
@@ -197,8 +197,6 @@ EntityNetworkController.$inject = ['$scope', '$routeParams', '$http', '$timeout'
 */
 function HomeController($scope, $routeParams, $http, $timeout, $location) {
 
-    //var base_url = 'http://dev01:3000';
-
     $scope.init = function () {
         $scope.progress = false;
         $scope.dataset_error = false;
@@ -213,8 +211,6 @@ function HomeController($scope, $routeParams, $http, $timeout, $location) {
             function (response) {
                 console.log('Error', response);
             });
-
-
     }
 
     $scope.drawGraph = function (data) {
@@ -224,8 +220,8 @@ function HomeController($scope, $routeParams, $http, $timeout, $location) {
         color = d3.scale.category20();
 
         force = d3.layout.force()
-            .charge(-2000)
-            .linkDistance(200)
+            //.charge(-2000)
+            //.linkDistance(200)
             .linkStrength(1)
             .size([width, height]);
 
@@ -239,7 +235,7 @@ function HomeController($scope, $routeParams, $http, $timeout, $location) {
             .attr("viewBox", "0 0 " + width + " " + height )
             .attr("preserveAspectRatio", "xMidYMid meet")
             .attr("pointer-events", "all")
-            //.call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", redraw))
+            .call(d3.behavior.zoom().scaleExtent([0, 8]).on("zoom", redraw))
             .append('svg:g');
 
         var nodes = data['nodes'];
@@ -248,6 +244,8 @@ function HomeController($scope, $routeParams, $http, $timeout, $location) {
         force
             .nodes(nodes)
             .links(links)
+            .charge(-2000)
+            .linkDistance(300)
             .start();
 
         var link = svg.selectAll(".link")
@@ -366,7 +364,6 @@ HomeController.$inject = ['$scope', '$routeParams', '$http', '$timeout', '$locat
 */
 function SiteNetworkController($scope, $routeParams, $http, $timeout) {
 
-    //var base_url = 'http://dev01:3000';
     $scope.code = $routeParams.code;
     $scope.vistype = $routeParams.vistype;
 
