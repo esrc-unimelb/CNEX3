@@ -12,5 +12,9 @@ angular.module('eac-viewer', [ 'ui.bootstrap', 'eac-viewer.filters', 'eac-viewer
         templateUrl: 'partials/entity-network.html', 
         controller: 'EntityNetworkController'
     });
+    $routeProvider.when('/site', {
+        templateUrl: 'partials/home.html',
+        controller: 'HomeController'
+    });
     $routeProvider.otherwise({redirectTo: '/site'});
   }]);

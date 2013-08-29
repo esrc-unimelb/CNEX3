@@ -4,11 +4,11 @@ APPBASE='/home/mlarosa/src/eac-viewer/interface/app'
 
 # build the angular js files
 for TGT in controllers services directives filters; do
-        rm "../lib/${TGT}.js" && touch "../lib/${TGT}.js"
-            for n in $(ls $TGT); do
-                        cat $TGT/$n >> "../lib/${TGT}.js"
-                            done
-                            done
+    rm "../lib/${TGT}.js" && touch "../lib/${TGT}.js"
+    for n in $(ls $TGT); do
+        cat $TGT/$n >> "../lib/${TGT}.js"
+    done
+done
 
 # build the js file
 #JS="jquery-1.9.1.min.js bootstrap.min.js angular-1.1.5/angular.min.js spin.min.js \

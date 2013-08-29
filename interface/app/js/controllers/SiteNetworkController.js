@@ -120,7 +120,7 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
                 return "translate(" + d.x + "," + d.y + ")";
             });
             //text.attr("transform", transform);
-          });
+        });
 
         function redraw() {
             svg.attr("transform",
