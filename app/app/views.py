@@ -10,8 +10,9 @@ import logging
 log = logging.getLogger('app')
 
 import os
-import uuid
+import sys
 import time
+import datetime
 from lxml import etree
 import sqlalchemy as sq
 
@@ -22,7 +23,8 @@ from config import Config
 
 from .models import (
     DBSession,
-    Progress
+    Progress,
+    Graph
     )
 
 def get(tree, path, attrib=None, element=None):
@@ -90,7 +92,7 @@ def get_xml(href):
     except IOError:
         return ""
 
-@view_config(route_name='site_graph', request_method='GET', renderer='jsonp')
+@view_config(route_name='build_graph', request_method='GET', renderer='jsonp')
 def site_graph(request):
     """For a given site - assemble the entity graph
     
@@ -100,64 +102,76 @@ def site_graph(request):
     t1 = time.time()
     dbs = DBSession()
 
-    # get the session key used for status updates
-    try:
-        uniqueid = request.session['uuid']
-    except KeyError:
-        request.session['uuid'] = uuid.uuid4()
-        uniqueid = request.session['uuid']
-
-    # wipe any existing status
-    try:
-        p = dbs.query(Progress).filter(Progress.uuid == str(uniqueid)).delete()
-        transaction.commit()
-        dbs.flush()
-    except sq.orm.exc.NoResultFound:
-        pass
-
+    site = request.matchdict['code']
 
     # read the site config and bork if bad site requested
     conf = Config(request)
-    site = request.matchdict['code']
     try:
         eac_path = getattr(conf, site.lower())
     except AttributeError:
         raise HTTPNotFound
 
+    # ensure no previous progress stamps exist
+    try:
+        session_id = request.session['session_id']
+    except KeyError:
+        session_id = request.session.id
+        request.session['session_id'] = session_id
+
+    # ensure we start with a clean slate
+    cleanup(site, session_id, graph=True)
+
+    # generate the list of datafiles
+    #  store a trace that indicates we're counting
+    p = Progress(
+        processed = -1, 
+        total = 0,
+        site = site, 
+        session_id = session_id
+    )
+    dbs.add(p)
+    transaction.commit()
     for (dirpath, dirnames, filenames) in os.walk(eac_path):
         datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
 
-
-    graph = nx.DiGraph()
+    graph = nx.Graph()
     count = 0
     total = len(datafiles.items())
-
-    # create the first entry with 0 of 'total' processed
-    p = Progress(total = total, processed = count, uuid = str(uniqueid))
-    dbs.add(p)
-    transaction.commit()
 
     log.debug("Total entities in dataset: %s" % total)
     for fpath, fname in datafiles.items():
         count += 1
 
-        p = dbs.query(Progress).filter(Progress.uuid == str(uniqueid)).one()
+        p = dbs.query(Progress) \
+            .filter(Progress.site == site) \
+            .filter(Progress.session_id == session_id) \
+            .one()
         p.processed = count
+        p.total = total
+        p.msg = "Constructing the graph: %s of %s total entities processed." % (count, total)
         transaction.commit()
 
         try:
             tree = etree.parse(fname)
         except (TypeError, etree.XMLSyntaxError):
-            log.error("Invalid XML file: %s. Likely not well formed." % fname)
+            log.error("Invalid XML file: %s. %s." % (fname, sys.exc_info()[1]))
             continue
 
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         if type(node_id) == str:
-            node_source = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityId')
-            node_type = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityType')
-            node_name = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry[0]/e:part')
+            source = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityId')
+            ntype = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityType')
+            name = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part')
+            if type(name) == list:
+                name = ', '.join([x for x in name if x is not None])
+            nfrom = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate')
+            if len(nfrom) == 0:
+                nfrom = ''
+            nto = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate')
+            if len(nto) == 0:
+                nto = ''
 
-            graph.add_node(node_id, { 'source': node_source, 'name': node_name, 'type': node_type })
+            graph.add_node(node_id, { 'source': source, 'type': ntype, 'name': name, 'from': nfrom, 'to': nto })
 
             neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
             for node in neighbours:
@@ -176,10 +190,22 @@ def site_graph(request):
                     pass
             #print node_id, node_source, node_type
 
+    for n in graph:
+        graph.node[n]['connections'] = len(graph.neighbors(n))
+
+    site_name = get(tree, '/e:eac-cpf/e:control/e:maintenanceAgency/e:agencyName')
+
+    # cleanup progress counters and graphs
+    cleanup(site, session_id)
+
+    # save the graph
+    #g = Graph(site = site, graph = json_graph.dumps(graph), site_name = site_name)
+    #dbs.add(g)
+
     # get the site name out of the last file
     t2 = time.time()
     log.debug("Time taken to prepare data '/site': %s" % (t2 - t1))
-    return { 'graph': json_graph.dumps(graph), 'site_name': get(tree, '/e:eac-cpf/e:control/e:maintenanceAgency/e:agencyName') }
+    return { 'graph': json_graph.dumps(graph), 'site_name': site_name }
 
 @view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
 def entity_graph(request):
@@ -201,7 +227,7 @@ def entity_graph(request):
     except (TypeError, etree.XMLSyntaxError):
         log.error("Invalid XML file: %s. Likely not well formed." % datafile)
 
-    graph = nx.DiGraph()
+    graph = nx.Graph()
     start = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations', element=True)
 
     start_uid = str(tree.getpath(start))
@@ -236,54 +262,96 @@ def bare_tag(tag):
 @view_config(route_name='status', request_method='GET', renderer='jsonp')
 def status(request):
     dbs = DBSession()
-    try:
-        uniqueid = request.session['uuid']
-    except KeyError:
-        return { 'total': '', 'processed': '' }
-        
-    try:
-        p = dbs.query(Progress).filter(Progress.uuid == str(uniqueid)).one()
-        return { 'total': p.total , 'processed': p.processed }
-    except sq.orm.exc.NoResultFound:
-        return { 'total': '', 'processed': '' }
-
-@view_config(route_name='node_data', request_method="GET", renderer="jsonp")
-def node_data(request):
-    """More info - specific entity
-    
-    @params:
-    id: request.params['id']
-    site: request.params['site']
-    """
-    entity_id = request.matchdict['id']
     site = request.matchdict['code']
-
-    # read the site config and bork if bad site requested
-    conf = Config(request)
     try:
-        eac_path = getattr(conf, site.lower())
-    except AttributeError:
-        raise HTTPNotFound
+        session_id = request.session['session_id']
+    except:
+        return { 'total': 0, 'processed': -1 }
 
-    tree = etree.parse("%s/%s.xml" % (eac_path, entity_id))
-    name = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part')
-    if type(name) == list:
-        name = ', '.join(name)
+    try:
+        p = dbs.query(Progress) \
+        .filter(Progress.site == site) \
+        .filter(Progress.session_id == session_id) \
+        .one()
+        return { 'total': p.total , 'processed': p.processed }
 
-    efrom = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate')
-    if len(efrom) == 0:
-        efrom = ''
+    except sq.orm.exc.NoResultFound:
+        # the run is complete and the trace has been purged
+        pass
+
+def cleanup(site, session_id, graph=None):
+    dbs = DBSession()
+
+    if graph is not None:
+        # delete any graph we already have stored for this site and session_id
+        dbs.query(Graph) \
+            .filter(Graph.site == site) \
+            .filter(Graph.session_id == session_id) \
+            .delete()
+        transaction.commit()
+        
+    # delete any existing progress counters
+    dbs.query(Progress) \
+        .filter(Progress.site == site) \
+        .filter(Progress.session_id == session_id) \
+        .delete()
+    transaction.commit()
+
+    dbs.flush()
     
-    eto = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate')
-    if len(eto) == 0:
-        eto = ''
+#@view_config(route_name='site_dendrogram', request_method='GET', renderer='jsonp')
+#def site_dendrogram(request):
+#    t1 = time.time()
+#    import json
+#    site = request.matchdict['code']
+#
+#    # read the site config and bork if bad site requested
+#    conf = Config(request)
+#    try:
+#        eac_path = getattr(conf, site.lower())
+#    except AttributeError:
+#        raise HTTPNotFound
+#
+#    for (dirpath, dirnames, filenames) in os.walk(eac_path):
+#        datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
+#
+#    total = len(datafiles.items())
+#
+#    dendrogram = {}
+#    dendrogram['name'] = site
+#    dendrogram['children'] = []
+#
+#    log.debug("Total entities in dataset: %s" % total)
+#    children = {}
+#    for fpath, fname in datafiles.items():
+#        try:
+#            tree = etree.parse(fname)
+#        except (TypeError, etree.XMLSyntaxError):
+#            log.error("Invalid XML file: %s. Likely not well formed." % fname)
+#            continue
+#
+#        # second level: entity type
+#        entity_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
+#        entity_type = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityType')
+#        entity_function = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term')
+#        #print entity_id, entity_function
+#        #if type(entity_name) == list:
+#        #    entity_name = (', ').join(entity_name)
+#        #print entity_id, entity_name, entity_type
+#
+#        try:
+#            if not entity_type in children:
+#                children[entity_type] = []
+#            children[entity_type].append({ 'name': entity_id, 'colour': '#efd580'})
+#        except:
+#            pass
+#        
+#    for k,v in children.items():
+#        dendrogram['children'].append({ 'name': k, 'children': v })
+#
+#    request.response.headers['Access-Control-Allow-Origin'] = '*'
+#    t2 = time.time()
+#    log.debug("Time taken to prepare data '/dendrogram': %s" % (t2 - t1))
+#    return dendrogram
 
-    entity_data = {
-        'name': name,
-        'from': efrom,
-        'to': eto
-    }
 
-    return { 'data': entity_data }
-
-    
