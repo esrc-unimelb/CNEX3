@@ -3,23 +3,19 @@
 */
 function HomeController($scope, $routeParams, $http, $timeout, $location) {
 
-    var base_url = 'http://dev01:3000';
-
     $scope.init = function () {
         $scope.progress = false;
         $scope.dataset_error = false;
 
         // get the data
         var site_url = base_url + '/';
+        console.log(site_url);
         $http.get(site_url)
             .then(function (response) {
-                console.log(response);
                 $scope.drawGraph($scope.$eval(response.data.graph));
             },
             function (response) {
-                console.log('error');
-                console.log(response);
-                $scope.dataset_error = true;
+                console.log('Error', response);
             });
 
 

@@ -3,7 +3,6 @@
 */
 function SiteNetworkController($scope, $routeParams, $http, $timeout) {
 
-    var base_url = 'http://dev01:3000';
     $scope.code = $routeParams.code;
     $scope.vistype = $routeParams.vistype;
 

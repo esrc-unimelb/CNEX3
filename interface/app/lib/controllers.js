@@ -1,21 +1,13 @@
 /* Controllers */
 'use strict';
-'use strict';
 
-/* Controllers */
-
-angular.module('eac-viewer.controllers', []).
-  controller('MyCtrl1', [function() {
-
-  }])
-  .controller('MyCtrl2', [function() {
-
-  }]);/* 
+base_url = 'http://cnex.esrc.info/app';
+/* 
  *   EntityNetworkController 
 */
 function EntityNetworkController($scope, $routeParams, $http, $timeout) {
 
-    var base_url = 'http://dev01:3000';
+    //var base_url = 'http://dev01:3000';
     $scope.code = $routeParams.code;
     $scope.entity_id = $routeParams.id;
 
@@ -205,7 +197,7 @@ EntityNetworkController.$inject = ['$scope', '$routeParams', '$http', '$timeout'
 */
 function HomeController($scope, $routeParams, $http, $timeout, $location) {
 
-    var base_url = 'http://dev01:3000';
+    //var base_url = 'http://dev01:3000';
 
     $scope.init = function () {
         $scope.progress = false;
@@ -213,15 +205,13 @@ function HomeController($scope, $routeParams, $http, $timeout, $location) {
 
         // get the data
         var site_url = base_url + '/';
+        console.log(site_url);
         $http.get(site_url)
             .then(function (response) {
-                console.log(response);
                 $scope.drawGraph($scope.$eval(response.data.graph));
             },
             function (response) {
-                console.log('error');
-                console.log(response);
-                $scope.dataset_error = true;
+                console.log('Error', response);
             });
 
 
@@ -376,7 +366,7 @@ HomeController.$inject = ['$scope', '$routeParams', '$http', '$timeout', '$locat
 */
 function SiteNetworkController($scope, $routeParams, $http, $timeout) {
 
-    var base_url = 'http://dev01:3000';
+    //var base_url = 'http://dev01:3000';
     $scope.code = $routeParams.code;
     $scope.vistype = $routeParams.vistype;
 
