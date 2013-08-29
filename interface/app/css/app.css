@@ -28,3 +28,27 @@
   content: "";
   padding: 0;
 }
+
+.overlay {
+    position: fixed;
+    top: 70px;
+    left: 50px;
+    z-index: 10000;
+    filter:alpha(opacity=50);
+    overflow: auto;
+}
+
+.underlay {
+    position: fixed;
+    top: 70px;
+    left: 50px;
+    z-index: 5000;
+    background-color: #ffffff;
+    border-style: solid;
+    border-color: #a8a8a8;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    opacity: 1;
+    padding-right: 30px;
+}
