@@ -128,6 +128,7 @@ def site_graph(request):
     dbs = DBSession()
 
     site = request.matchdict['code']
+    session_id = request.matchdict['session_id']
 
     # read the site config and bork if bad site requested
     conf = Config(request)
@@ -135,13 +136,6 @@ def site_graph(request):
         eac_path = getattr(conf, site)
     except AttributeError:
         raise HTTPNotFound
-
-    # ensure no previous progress stamps exist
-    try:
-        session_id = request.session['session_id']
-    except KeyError:
-        session_id = request.session.id
-        request.session['session_id'] = session_id
 
     # ensure we start with a clean slate
     cleanup(site, session_id, graph=True)
@@ -173,7 +167,6 @@ def site_graph(request):
             .one()
         p.processed = count
         p.total = total
-        p.msg = "Constructing the graph: %s of %s total entities processed." % (count, total)
         transaction.commit()
 
         try:
@@ -288,10 +281,7 @@ def bare_tag(tag):
 def status(request):
     dbs = DBSession()
     site = request.matchdict['code']
-    try:
-        session_id = request.session['session_id']
-    except:
-        return { 'total': 0, 'processed': -1 }
+    session_id = request.matchdict['session_id']
 
     try:
         p = dbs.query(Progress) \
