@@ -1,8 +1,8 @@
 /* Controllers */
 'use strict';
 
-//base_url = 'http://cnex.esrc.info/app';
-base_url = 'http://dev01:3000/app';
+base_url = 'http://cnex.esrc.info/app';
+//base_url = 'http://dev01:3000/app';
 /* 
  *   EntityNetworkController 
 */
@@ -412,6 +412,11 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             function (response) {
                 $scope.progress = false;
             });
+    }
+
+    // close dialog
+    $scope.close_dialog = function() {
+        $scope.node_data = false;
     }
 
     $scope.drawGraph = function (data) {

@@ -36,6 +36,7 @@
     </div>
     <div class="row-fluid" class="span12">
         <span class="overlay underlay" ng-if="node_data">
+            <a class="boxclose" id="boxclose" ng-click="close_dialog()"></a>
             <dl class="dl-horizontal">
                 <dt>Entity Id:</dt>
                 <dd>{{node_data.id}}</dd>

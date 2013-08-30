@@ -53,3 +53,22 @@
     padding-right: 30px;
 }
 
+
+a.boxclose{
+    position: fixed;
+    top: 60px;
+    left: 40px;
+    z-index: 15000;
+    cursor:pointer;
+    color: #000;
+    background: #fff;
+    font-size: 31px;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 0px;
+    padding: 11px 3px;       
+}
+
+.boxclose:before {
+    content: "×";
+}

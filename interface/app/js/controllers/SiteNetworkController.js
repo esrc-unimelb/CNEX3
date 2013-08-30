@@ -53,6 +53,11 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
             });
     }
 
+    // close dialog
+    $scope.close_dialog = function() {
+        $scope.node_data = false;
+    }
+
     $scope.drawGraph = function (data) {
         var width = window.innerWidth; 
             height = window.innerHeight;
