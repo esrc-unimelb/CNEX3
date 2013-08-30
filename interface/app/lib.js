@@ -188,8 +188,8 @@ var services = angular.module('eac-viewer.services', []);
 /* Controllers */
 'use strict';
 
-base_url = 'http://cnex.esrc.info/app';
-//base_url = 'http://dev01:3000/app';
+//base_url = 'http://cnex.esrc.info/app';
+base_url = 'http://dev01:3000/app';
 /* 
  *   EntityNetworkController 
 */
@@ -555,15 +555,21 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
     $scope.vistype = $routeParams.vistype;
 
     $scope.init = function () {
+        $scope.session_id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0,v=c=='x'?r:r&0x3|0x8;return v.toString(16);
+        });
+
         $scope.progress = false;
+        $scope.processed = -1;
+        $scope.total = 0;
         $scope.dataset_error = false;
 
-        // kick off the progress update in a second - needs time to get going 
+        // kick off the progress update in a moment - needs time to get going 
         $timeout(function () { $scope.update(); }, 100);
 
         // get the data
         if ($scope.vistype == 'graph') {
-            var site_url = base_url + '/graph/' + $scope.code + '?callback=JSON_CALLBACK';
+            var site_url = base_url + '/graph/' + $scope.code + '/' + $scope.session_id + '?callback=JSON_CALLBACK';
             $http.jsonp(site_url)
                 .then(function (response) {
                     $scope.site_name = response.data.site_name;
@@ -582,12 +588,12 @@ function SiteNetworkController($scope, $routeParams, $http, $timeout) {
 
     // method to handle status updates
     $scope.update = function () {
-        var url = base_url + '/status/' + $scope.code + '?callback=JSON_CALLBACK';
+        var url = base_url + '/status/' + $scope.code + '/' + $scope.session_id + '?callback=JSON_CALLBACK';
         $http.jsonp(url)
             .then(function (response) {
+                $scope.progress = true;
                 $scope.processed = response.data['processed'];
                 $scope.total = response.data['total'];
-                $scope.progress = true;
                 var $t = $timeout(function() { $scope.update(); }, 100);
             },
             function (response) {
