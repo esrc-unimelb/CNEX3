@@ -189,8 +189,11 @@ def site_graph(request):
                     neighbour_ref_local = neighbour_ref.replace(source_map[0], source_map[1])
                     try:
                         xml_datafile = get_xml(href=neighbour_ref_local)
-                        xml_datafile_local = xml_datafile.replace(source_map[0], source_map[1])
-                        tree = etree.parse(xml_datafile_local)
+                        if xml_datafile is not None:
+                            xml_datafile_local = xml_datafile.replace(source_map[0], source_map[1])
+                            tree = etree.parse(xml_datafile_local)
+                        else:
+                            raise IOError
                     except (IOError, TypeError, etree.XMLSyntaxError):
                         continue
                     neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
