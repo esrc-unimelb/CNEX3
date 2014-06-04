@@ -1,6 +1,7 @@
 
-import yaml
 import os
+import os.path
+import ConfigParser
 
 from pyramid.httpexceptions import HTTPBadRequest
 
@@ -20,15 +21,17 @@ class Config:
         request: a pyramid request object
         """
         settings = request.registry.settings
-        site_config_file = settings['app.config']
+        app_config = settings['app.config']
 
-        # read the site config
-        self._ingest(site_config_file)
+        self.sites = {}
+        for s in os.listdir(app_config):
+            cfg = ConfigParser.SafeConfigParser()
+            cfg.read(os.path.join(app_config, s))
 
-    def _ingest(self, config_file):
-        f = open(config_file, 'r')
-        config = yaml.load(f)
-        f.close()
+            site_data = {}
+            site_data['slug'] = cfg.get('GENERAL', 'slug') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'slug')) else None
+            site_data['eac']  = cfg.get('GENERAL', 'eac') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'eac')) else None
+            source_map = cfg.get('GENERAL', 'map') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'map')) else None
+            site_data['map']  = source_map.split(', ')
+            self.sites[s] = site_data
 
-        for c in config:
-            setattr(self, c, config[c])

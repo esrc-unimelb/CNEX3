@@ -13,7 +13,7 @@ import os
 import sys
 import time
 import datetime
-from lxml import etree
+from lxml import etree, html
 import sqlalchemy as sq
 
 import networkx as nx
@@ -83,14 +83,14 @@ def get_xml(href):
     a URL to the XML file for that resource
     """
     try:
-        tree = etree.parse(href, etree.HTMLParser())
+        tree = html.parse(href)
         try:
             resource = tree.xpath('//meta[@name="EAC"]')[0].attrib['content']
+            return resource
         except IndexError:
-            return ''
-        return resource
+            return None
     except IOError:
-        return ""
+        return None
 
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
@@ -98,21 +98,9 @@ def home_page(request):
 
     graph = nx.Graph()
     graph.add_node('ESRC', { 'name': 'eScholarship Research Centre' })
-    for node_id, name in conf.sites.items():
-        graph.add_node(node_id, { 'name': name  })
+    for node_id, data in conf.sites.items():
+        graph.add_node(node_id, { 'name': data['slug'] })
         graph.add_edge(node_id, 'ESRC')
-
-#        if node_id == 'FACP':
-#            for k, v in name.items():
-#                graph.add_node(k, { 'name': v })
-#                graph.add_edge(k, 'FACP')
-#
-#        else:
-#            graph.add_node(node_id, { 'name': name  })
-#            graph.add_edge(node_id, 'ESRC')
-#            
-#    graph.add_node('FACP', { 'name': 'Find & Connect' })
-#    graph.add_edge('FACP', 'ESRC')
 
     request.response.headers['Access-Control-Allow-Origin'] = '*'
     return { 'graph': json_graph.dumps(graph) }
@@ -132,10 +120,9 @@ def site_graph(request):
 
     # read the site config and bork if bad site requested
     conf = Config(request)
-    try:
-        eac_path = getattr(conf, site)
-    except AttributeError:
-        raise HTTPNotFound
+    eac_path = conf.sites[site]['eac']
+    source_map = conf.sites[site]['map']
+    log.debug("Processing site: %s, data path: %s" % (site, eac_path))
 
     # ensure we start with a clean slate
     cleanup(site, session_id, graph=True)
@@ -150,15 +137,18 @@ def site_graph(request):
     )
     dbs.add(p)
     transaction.commit()
+    log.debug(eac_path)
     for (dirpath, dirnames, filenames) in os.walk(eac_path):
         datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
 
     graph = nx.Graph()
     count = 0
     total = len(datafiles.items())
+    log.debug("Total number of entities in dataset: %s" % total)
 
     log.debug("Total entities in dataset: %s" % total)
     for fpath, fname in datafiles.items():
+        log.debug("Processing: %s" % os.path.join(fpath, fname))
         count += 1
 
         p = dbs.query(Progress) \
@@ -178,7 +168,7 @@ def site_graph(request):
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         if type(node_id) == str:
             source = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityId')
-            ntype = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityType')
+            ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
             name = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part')
             if type(name) == list:
                 name = ', '.join([x for x in name if x is not None])
@@ -191,12 +181,16 @@ def site_graph(request):
 
             graph.add_node(node_id, { 'source': source, 'type': ntype, 'name': name, 'from': nfrom, 'to': nto })
 
+
             neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
             for node in neighbours:
                 try:
-                    neighbour_data = node.attrib['{http://www.w3.org/1999/xlink}href']
+                    neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
+                    neighbour_ref_local = neighbour_ref.replace(source_map[0], source_map[1])
                     try:
-                        tree = etree.parse(get_xml(href=neighbour_data))
+                        xml_datafile = get_xml(href=neighbour_ref_local)
+                        xml_datafile_local = xml_datafile.replace(source_map[0], source_map[1])
+                        tree = etree.parse(xml_datafile_local)
                     except (IOError, TypeError, etree.XMLSyntaxError):
                         continue
                     neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
