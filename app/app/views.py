@@ -139,7 +139,8 @@ def site_graph(request):
     transaction.commit()
     log.debug(eac_path)
     for (dirpath, dirnames, filenames) in os.walk(eac_path):
-        datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
+        if dirpath == eac_path:
+            datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
 
     graph = nx.Graph()
     count = 0
