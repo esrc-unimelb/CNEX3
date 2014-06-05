@@ -27,70 +27,8 @@ from .models import (
     Graph
     )
 
-def get(tree, path, attrib=None, element=None):
-    """Extract data from an etree tree
-
-    Helper to run an xpath against an etree tree. Can extract
-    node (element) text, attribute data or just return an etree
-    element for further processing.
-
-    @params:
-    tree: an etree tree
-    path: an xpath expression to run against the tree
-    attrib: if defined, the attribute date to extract from the element found
-        via the xpath expression
-    element: if set to True, return the etree element rather than the textual
-        content of the node. Useful for performing further operations against.
-
-    @returns:
-    Either a single value or a list
-    """
-    result = tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })
-    if len(result) == 0:
-        return []
-
-    # return the etree element reference
-    if element is not None:
-        if len(result) == 1:
-            return result[0]
-        else:
-            return result
-
-    # return the requested attribute
-    elif attrib is not None:
-        return result[0].attrib[attrib]
-        #return tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })[0].attrib[attrib]
-
-    # otherwise - return the text content of the node
-    else:
-        try:
-            #print "**", result, len(result)
-            if len(result) == 1:
-                return result[0].text
-            else:
-                return [ e.text for e in result ]
-        except IndexError:
-            print path
-            print tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })
-
-def get_xml(href):
-    """Given a href, find the corresponding XML data file.
-
-    @params:
-    href: a URL to a resource.o
-
-    @returns:
-    a URL to the XML file for that resource
-    """
-    try:
-        tree = html.parse(href)
-        try:
-            resource = tree.xpath('//meta[@name="EAC"]')[0].attrib['content']
-            return resource
-        except IndexError:
-            return None
-    except IOError:
-        return None
+from Helpers import *
+from Graph import Graph
 
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
@@ -112,115 +50,10 @@ def site_graph(request):
     @params:
     request.matchdict: code, the site of interest
     """
-    t1 = time.time()
-    dbs = DBSession()
+    graph_type = 'functions-as-nodes'
+    g = Graph(request)
+    (site_name, graph) = g.build(graph_type)
 
-    site = request.matchdict['code']
-    session_id = request.matchdict['session_id']
-
-    # read the site config and bork if bad site requested
-    conf = Config(request)
-    eac_path = conf.sites[site]['eac']
-    source_map = conf.sites[site]['map']
-    log.debug("Processing site: %s, data path: %s" % (site, eac_path))
-
-    # ensure we start with a clean slate
-    cleanup(site, session_id, graph=True)
-
-    # generate the list of datafiles
-    #  store a trace that indicates we're counting
-    p = Progress(
-        processed = -1, 
-        total = 0,
-        site = site, 
-        session_id = session_id
-    )
-    dbs.add(p)
-    transaction.commit()
-    log.debug(eac_path)
-    for (dirpath, dirnames, filenames) in os.walk(eac_path):
-        if dirpath == eac_path:
-            datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
-
-    graph = nx.Graph()
-    count = 0
-    total = len(datafiles.items())
-    log.debug("Total number of entities in dataset: %s" % total)
-
-    log.debug("Total entities in dataset: %s" % total)
-    for fpath, fname in datafiles.items():
-        log.debug("Processing: %s" % os.path.join(fpath, fname))
-        count += 1
-
-        p = dbs.query(Progress) \
-            .filter(Progress.site == site) \
-            .filter(Progress.session_id == session_id) \
-            .one()
-        p.processed = count
-        p.total = total
-        transaction.commit()
-
-        try:
-            tree = etree.parse(fname)
-        except (TypeError, etree.XMLSyntaxError):
-            log.error("Invalid XML file: %s. %s." % (fname, sys.exc_info()[1]))
-            continue
-
-        node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
-        if type(node_id) == str:
-            source = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityId')
-            ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
-            name = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part')
-            if type(name) == list:
-                name = ', '.join([x for x in name if x is not None])
-            nfrom = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate')
-            if len(nfrom) == 0:
-                nfrom = ''
-            nto = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate')
-            if len(nto) == 0:
-                nto = ''
-
-            graph.add_node(node_id, { 'source': source, 'type': ntype, 'name': name, 'from': nfrom, 'to': nto })
-
-
-            neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
-            for node in neighbours:
-                try:
-                    neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
-                    neighbour_ref_local = neighbour_ref.replace(source_map[0], source_map[1])
-                    try:
-                        xml_datafile = get_xml(href=neighbour_ref_local)
-                        if xml_datafile is not None:
-                            xml_datafile_local = xml_datafile.replace(source_map[0], source_map[1])
-                            tree = etree.parse(xml_datafile_local)
-                        else:
-                            raise IOError
-                    except (IOError, TypeError, etree.XMLSyntaxError):
-                        continue
-                    neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
-                    if len(neighbour_id) == 0:
-                        # we've probably read an eac file - try the eac xpath
-                        neighbour_id = get(tree, '/eac/control/id')
-                    graph.add_edge(node_id, neighbour_id)
-                except KeyError:
-                    pass
-            #print node_id, node_source, node_type
-
-    for n in graph:
-        graph.node[n]['connections'] = len(graph.neighbors(n))
-
-    site_name = get(tree, '/e:eac-cpf/e:control/e:maintenanceAgency/e:agencyName')
-
-    # cleanup progress counters and graphs
-    cleanup(site, session_id)
-
-    # save the graph
-    #g = Graph(site = site, graph = json_graph.dumps(graph), site_name = site_name)
-    #dbs.add(g)
-
-    # get the site name out of the last file
-    t2 = time.time()
-    log.debug("Time taken to prepare data '/site': %s" % (t2 - t1))
     return { 'graph': json_graph.dumps(graph), 'site_name': site_name }
 
 @view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
@@ -292,26 +125,6 @@ def status(request):
         # the run is complete and the trace has been purged
         pass
 
-def cleanup(site, session_id, graph=None):
-    dbs = DBSession()
-
-    if graph is not None:
-        # delete any graph we already have stored for this site and session_id
-        dbs.query(Graph) \
-            .filter(Graph.site == site) \
-            .filter(Graph.session_id == session_id) \
-            .delete()
-        transaction.commit()
-        
-    # delete any existing progress counters
-    dbs.query(Progress) \
-        .filter(Progress.site == site) \
-        .filter(Progress.session_id == session_id) \
-        .delete()
-    transaction.commit()
-
-    dbs.flush()
-    
 #@view_config(route_name='site_dendrogram', request_method='GET', renderer='jsonp')
 #def site_dendrogram(request):
 #    t1 = time.time()
