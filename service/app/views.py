@@ -48,17 +48,15 @@ def site_graph(request):
     """For a given site - assemble the entity graph
     
     @params:
-    request.matchdict: code: the site of interest
-    request.matchdict: session_id: used as the tag for progress storage
-        in the db
+    request.matchdict: code, the site of interest
     """
-    graph_type = request.matchdict[graph_type]
+    graph_type = 'functions-as-nodes'
     g = Graph(request)
     (site_name, graph) = g.build(graph_type)
 
     return { 'graph': json_graph.dumps(graph), 'site_name': site_name }
 
-#@view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
+@view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
 def entity_graph(request):
     """For a given entity - assemble the graph of its XML structure
     

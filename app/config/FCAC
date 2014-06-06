@@ -1,9 +1,0 @@
-[GENERAL]:
-# Site descriptive name
-slug: Find & Connect Australian Capital Territory 
-
-# Location of the EAC data files
-eac: /srv/ha/web/FCAC/testing/eac
-
-## For file loads, map the URL back in the to filesystem
-map: http://www.findandconnect.gov.au/ref/act, /srv/ha/web/FCAC/testing

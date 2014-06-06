@@ -1,9 +1,0 @@
-[GENERAL]:
-# Site descriptive name
-slug: Arrowsmith's Australian Maps
-
-# Location of the EAC data files
-eac: /srv/ha/web/ASMP//testing/eac
-
-## For file loads, map the URL back in the to filesystem
-map: http://www.asmp.esrc.unimelb.edu.au, /srv/ha/web/ASMP//testing

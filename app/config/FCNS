@@ -1,9 +1,0 @@
-[GENERAL]:
-# Site descriptive name
-slug: Find & Connect New South Wales
-
-# Location of the EAC data files
-eac: /srv/ha/web/FCNS//testing/eac
-
-## For file loads, map the URL back in the to filesystem
-map: http://www.findandconnect.gov.au/ref/nsw, /srv/ha/web/FCNS//testing
