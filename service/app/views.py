@@ -30,18 +30,15 @@ from .models import (
 from Helpers import *
 from Graph import Graph
 
-@view_config(route_name='home', request_method='GET', renderer='json')
+@view_config(route_name='home', request_method='GET', renderer='jsonp')
 def home_page(request):
     conf = Config(request)
 
-    graph = nx.Graph()
-    graph.add_node('ESRC', { 'name': 'eScholarship Research Centre' })
-    for node_id, data in conf.sites.items():
-        graph.add_node(node_id, { 'name': data['slug'] })
-        graph.add_edge(node_id, 'ESRC')
-
+    sites = {}
+    for name, data in conf.sites.items():
+        sites[name] = data['slug']
     request.response.headers['Access-Control-Allow-Origin'] = '*'
-    return { 'graph': json_graph.dumps(graph) }
+    return { 'sites': sites }
 
 @view_config(route_name='build_graph', request_method='GET', renderer='jsonp')
 def site_graph(request):
