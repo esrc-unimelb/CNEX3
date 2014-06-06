@@ -1,4 +1,10 @@
 <div class="row" ng-init="init()">
     <div class="col-sm-12 col-md-12 col-lg-12">
+        <h3 class="text-center">{{site_name}}</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 col-md-12 col-lg-12" ng-if="progress">
+        <progress-meter processed="{{processed}}" total="{{total}}"></progress-meter>
     </div>
 </div>
