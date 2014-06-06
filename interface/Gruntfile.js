@@ -18,7 +18,7 @@ module.exports = function (grunt) {
   // Define the configuration for all the tasks
   grunt.initConfig({
 
-    ngdocs: {
+      ngdocs: {
         all: ['app/scripts/*/*.js'],
       },
 
