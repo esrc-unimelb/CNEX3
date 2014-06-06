@@ -1,0 +1,9 @@
+[GENERAL]:
+# Site descriptive name
+slug: eMelbourne, The Encylopedia of Melbourne Online
+
+# Location of the EAC data files
+eac: /srv/ha/web/EMEL//LIVE/eac
+
+## For file loads, map the URL back in the to filesystem
+map: http://www.emelbourne.net.au, /srv/ha/web/EMEL//LIVE
