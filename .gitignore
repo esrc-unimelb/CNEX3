@@ -6,3 +6,8 @@
 *.cover
 app/app.egg-info/
 app/app.sqlite
+node_modules
+dist
+.tmp
+.sass-cache
+app/bower_components
