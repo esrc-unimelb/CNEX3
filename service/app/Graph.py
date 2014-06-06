@@ -162,10 +162,10 @@ class Graph:
                             log.error("No EAC reference to XML source in: %s" % neighbour_ref_local)
                             continue
                         except etree.XMLSyntaxError:
-                            log.error("Invalid XML file: %s" % xml_data_file)
+                            log.error("Invalid XML file: %s" % xml_datafile)
                             continue
                         except TypeError:
-                            log.error("Some kind of error with: %s" % xml_data_file)
+                            log.error("Some kind of error with: %s" % xml_datafile)
                             continue
                         neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
                         if len(neighbour_id) == 0:
