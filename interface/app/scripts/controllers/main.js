@@ -6,11 +6,10 @@ angular.module('interfaceApp')
       var q = configuration[configuration.service] + '?callback=JSON_CALLBACK';
       console.log(q);
       $http.jsonp(q).then(function(d) {
-          console.log(d.data.sites);
-          $scope.sites = [];
+          var sites = [];
           angular.forEach(d.data.sites, function(v, k) {
-              $scope.sites.push([k, v]);
+              sites.push([k, v]);
           });
-          console.log($scope.sites);
+          $scope.sites = sites.sort();
       });
   }]);
