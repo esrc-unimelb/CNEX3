@@ -47,7 +47,8 @@ def site_graph(request):
     @params:
     request.matchdict: code, the site of interest
     """
-    graph_type = 'functions-as-nodes'
+    #graph_type = 'functions-as-nodes'
+    graph_type = request.matchdict['explore']
     g = Graph(request)
     (site_name, graph) = g.build(graph_type)
 

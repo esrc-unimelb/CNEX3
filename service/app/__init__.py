@@ -18,7 +18,7 @@ def main(global_config, **settings):
     config.add_renderer('jsonp', JSONP(param_name='callback'))
     config.add_static_view('static',    'static', cache_max_age=3600)
     config.add_route('home',            '/')
-    config.add_route('build_graph',     '/graph/{code}/{session_id}')
+    config.add_route('build_graph',     '/graph/{code}/{explore}/{session_id}')
     #config.add_route('site_dendrogram', '/dendrogram/{code}')
     config.add_route('entity_graph',    '/entity/{code}/{id}')
 

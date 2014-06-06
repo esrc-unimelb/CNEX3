@@ -89,9 +89,9 @@ class Graph:
                 log.error("Invalid XML file: %s. %s." % (fname, sys.exc_info()[1]))
                 continue
 
-            if graph_type == 'entities-as-nodes':
+            if graph_type == 'byEntity':
                 self.entities_as_nodes(graph, tree);
-            elif graph_type == 'functions-as-nodes':
+            elif graph_type == 'byFunction':
                 self.functions_as_nodes(graph, tree)
  
         for n in graph:
