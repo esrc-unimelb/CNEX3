@@ -4,8 +4,8 @@
 *.swp
 *.coverage
 *.cover
-app/app.egg-info/
-app/app.sqlite
+service/app.egg-info/
+service/app.sqlite
 interface/node_modules
 interface/dist
 interface/.tmp
