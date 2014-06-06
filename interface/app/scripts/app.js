@@ -12,6 +12,10 @@ angular.module('interfaceApp', [
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
+      .when('/site/:code/:explore', {
+          templateUrl: 'views/graph.html',
+          controller: 'GraphCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
