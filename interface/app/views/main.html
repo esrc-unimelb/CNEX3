@@ -9,8 +9,11 @@
 <div class="row">
     <div class="col-sm-12 col-md-12 col-lg-12">
         <ul ng-repeat="site in sites">
-            <li>{{site.name}} - explore by Context Entity</li>
-            <li>{{site.name}} - explore by Function Entity</li>
+            <li>{{site[1]}}</li>
+            <ul>
+                <li><a href="/#/site/{{site[0]}}/graph/byEntity">Explore by Context Entity</a></li>
+                <li><a href="/#/site/{{site[0]}}/graph/byFunction">Explore by Function</a></li>
+            </ul>
         </ul>
     </div>
 </div>
