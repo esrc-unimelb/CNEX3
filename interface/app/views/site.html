@@ -1,17 +1,5 @@
-<div class="row" ng-init="init()">
-    <div class="col-sm-12 col-md-12 col-lg-12">
-        <h3 class="text-center">{{site_name}}</h3>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-sm-6 col-md-6 col-lg-6" ng-if="progress">
-        <progress-meter processed="{{processed}}" total="{{total}}"></progress-meter>
-    </div>
-    <div ng-if="dataset_error"><h4 class="text-center">Requested dataset unavailable...</h4></div>
-</div>
-
 <div class="row">
     <div class="col-sm-12 col-md-12 col-lg-12" ng-if="!progress">
-        <force-network-graph graph="{{graph}}"></force-network-graph>
+        <force-network-graph site="{{site}}" graph="{{graph}}"></force-network-graph>
     </div>
 </div>

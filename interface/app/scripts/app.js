@@ -13,8 +13,12 @@ angular.module('interfaceApp', [
         controller: 'MainCtrl'
       })
       .when('/site/:code/:explore', {
-          templateUrl: 'views/graph.html',
-          controller: 'GraphCtrl'
+          templateUrl: 'views/site.html',
+          controller: 'SiteCtrl'
+      })
+      .when('/play/:code/:explore', {
+          templateUrl: 'views/play.html',
+          controler: 'PlayCtrl',
       })
       .otherwise({
         redirectTo: '/'

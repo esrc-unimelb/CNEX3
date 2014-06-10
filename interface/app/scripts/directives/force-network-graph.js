@@ -1,20 +1,65 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('forceNetworkGraph', [ '$window', function ($window) {
+  .directive('forceNetworkGraph', [ '$window', '$http', '$timeout', 'configuration',  function ($window, $http, $timeout, configuration) {
     return {
       templateUrl: 'views/force-network-graph.html',
       restrict: 'E',
       scope: {
+          site: '@',
           graph: '@'
       },
       link: function postLink(scope, element, attrs) {
-          scope.$watch('graph', function(graph) {
-              if (graph) { scope.drawGraph(); }
-          });
+          //scope.$watch('graph', function(graph) {
+          //    if (graph) { scope.drawGraph(); }
+          //});
+
+          var init = function() {
+              scope.service = configuration[configuration.service];
+              scope.progress = true;
+              scope.datasetError = false;
+              scope.total = 0;
+              scope.processed = 0;
+
+              // kick off the progress update in a moment; needs time to get going..
+              $timeout(function() { scope.update(); }, 100);
+
+              var url;
+              if (scope.graph == 'byEntity') {
+                  url = scope.service + '/graph/' + scope.site + '/byEntity';
+              } else if ($routeParams.explore == 'byFunction') {
+                  url = scope.service + '/graph/' + scope.site + '/byFunction';
+              }
+              url += '?callback=JSON_CALLBACK';
+              console.log(url);
+              $http.jsonp(url).then(function(response) {
+                  scope.site_name = response.data.site_name;
+                  scope.graph = response.data.graph;
+                  scope.drawGraph();
+                  scope.progress = false;
+              },
+              function(response) {
+                  scope.datasetError = true;
+                  scope.progress = false;
+              })
+          }
+          init();
+
+
+          scope.update = function() {
+              var url = scope.service + '/status/' + scope.site + '?callback=JSON_CALLBACK';
+              $http.jsonp(url).then(function(response) {
+                  scope.progress = true;
+                  scope.processed = response.data['processed'];
+                  scope.total = response.data['total'];
+                  $timeout(function() { scope.update(); }, 100);
+              },
+              function(response){
+                  scope.progress = false;
+              })
+          }
 
           scope.drawGraph = function() {
-
               var width =  $window.innerWidth;
               var height = $window.innerHeight;
 
