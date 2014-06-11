@@ -77,3 +77,9 @@ body {
     border-bottom: 0;
   }
 }
+
+.controls {
+    position: fixed;
+    z-index: 1000;
+    opacity: 1;
+}
