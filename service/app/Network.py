@@ -86,7 +86,7 @@ class Network:
             self.dbs.add(p)
             transaction.commit()
 
-        graph = nx.Graph()
+        graph = nx.DiGraph()
         count = 0
         nodes = {}
         for fpath, fname in datafiles.items():
@@ -154,13 +154,13 @@ class Network:
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
                     #graph.add_node(function.text, { 'source': '', 'type': 'function', 'name': function.text, 'from': '', 'to': '' })
                     graph.add_node(function.text, { 'type': function.text })
-                    graph.add_edge(node_id, function.text)
+                    graph.add_edge(node_id, function.text, source_name=node_id, target_name=function.text)
 
             else:
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
                     #graph.add_node(function.text, { 'source': '', 'type': 'function', 'name': function.text, 'from': '', 'to': '' })
                     graph.add_node(function.text)
-                    graph.add_edge(node_id, function.text)
+                    graph.add_edge(node_id, function.text, source_name=node_id, target_name=function.text)
         
     def entities_as_nodes(self, graph, tree):
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
@@ -192,7 +192,7 @@ class Network:
                     if len(neighbour_id) == 0:
                         # we've probably read an eac file - try the eac xpath
                         neighbour_id = get(tree, '/eac/control/id')
-                    graph.add_edge(node_id, neighbour_id)
+                    graph.add_edge(node_id, neighbour_id, source_name=node_id, target_name=neighbour_id)
                 except KeyError:
                     pass
             #print node_id, node_source, node_type
