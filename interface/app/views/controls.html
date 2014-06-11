@@ -1,0 +1,17 @@
+<div class="controls" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;">
+    <div style="padding: 5px;">
+        need a hide button here
+        <h3>{{site}}</h3>
+        <hr/>
+        some guff about the site; maybe some statistics
+        <span ng-if="entity">
+            <br/>
+            <h4>{{entity}}</h4>
+            <hr/>
+            stats about the selected entity: id, name || title
+            number of connections
+            number of connections out to degree
+            link to entity specific graph
+        </span>
+    </div>
+</div>
