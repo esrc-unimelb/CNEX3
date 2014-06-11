@@ -1,10 +1,12 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import (
+    HTTPNotFound,
+    HTTPInternalServerError
+)
 
 from sqlalchemy.exc import DBAPIError
 import transaction
-
 
 import logging
 log = logging.getLogger('app')
@@ -12,27 +14,43 @@ log = logging.getLogger('app')
 import os
 import sys
 import time
-import datetime
+from datetime import datetime
 from lxml import etree, html
-import sqlalchemy as sq
-
-import networkx as nx
-from networkx.readwrite import json_graph
 
 from config import Config
 
+import sqlalchemy as sq
+from sqlalchemy import create_engine
 from .models import (
+    Base,
     DBSession,
     Progress,
-    Graph
+    NetworkModel
     )
 
 from Helpers import *
-from Graph import Graph
+from Network import Network
+
+@view_config(route_name='health-check', request_method='GET', renderer='string')
+def health_check(request):
+    """
+    Show the health check view.
+    """
+    # find and purge expired tokens
+    _expunge_expired_data()
+    log.info("GET {0} - {1} - {2}".format(request.path, request.remote_addr, request.user_agent))
+    return 'OK'
 
 @view_config(route_name='home', request_method='GET', renderer='jsonp')
 def home_page(request):
     conf = Config(request)
+
+    # init the DB if it doesn't already exist
+    engine = create_engine(request.registry.settings['sqlalchemy.url'])
+    _init_table_if_not_exists(engine)
+
+    # find and purge expired tokens
+    _expunge_expired_data()
 
     sites = {}
     for name, data in conf.sites.items():
@@ -40,19 +58,77 @@ def home_page(request):
     request.response.headers['Access-Control-Allow-Origin'] = '*'
     return { 'sites': sites }
 
-@view_config(route_name='build_graph', request_method='GET', renderer='jsonp')
+@view_config(route_name='network-build', request_method='GET', renderer='jsonp')
 def site_graph(request):
     """For a given site - assemble the entity graph
     
     @params:
     request.matchdict: code, the site of interest
     """
-    #graph_type = 'functions-as-nodes'
     graph_type = request.matchdict['explore']
-    g = Graph(request)
-    (site_name, graph) = g.build(graph_type)
+    n = Network(request)
+    graph = n.build(graph_type)
 
-    return { 'graph': json_graph.dumps(graph), 'site_name': site_name }
+    return { }
+
+@view_config(route_name='network-status', request_method='GET', renderer='jsonp')
+def status(request):
+    dbs = DBSession()
+    site = request.matchdict['code']
+    graph_type = request.matchdict['explore']
+
+    try:
+        n = dbs.query(NetworkModel.graph_data) \
+            .filter(NetworkModel.site == site) \
+            .filter(NetworkModel.graph_type == graph_type) \
+            .one()
+
+    except sq.orm.exc.NoResultFound:
+        n = ''
+
+    try:
+        p = dbs.query(Progress) \
+            .filter(Progress.site == site) \
+            .one()
+
+        return { 'total': p.total, 'processed': p.processed, 'graph': n }
+
+    except sq.orm.exc.NoResultFound:
+        # the run is complete and the trace has been purged
+        return { 'total': None, 'processed': None, 'graph': n }
+
+def _get_db_connection(engine):
+    """Return a handle to the database"""
+    DBSession.configure(bind=engine)
+    return DBSession()
+
+def _init_table_if_not_exists(engine):
+    meta = sq.schema.MetaData(bind=engine)
+    meta.reflect()
+
+    # create the table if it doesn't already exist
+    if not meta.tables:
+        Base.metadata.create_all(engine)
+
+def _expunge_expired_data():
+    """Look for expired tokens and delete them
+
+    @params:
+    - request: the request object; required to get the sqlalchemy url
+    """
+    dbs = DBSession()
+    now = datetime.now()
+#    progress = dbs.query(Progress).filter(Progress.valid_to < now)
+#    if progress.count() > 0:
+#        progress.delete()
+    dbs.query(Progress).delete()
+
+#    nm = dbs.query(NetworkModel).filter(NetworkModel.valid_to < now)
+#    if nm.count() > 0:
+#        nm.delete()
+    dbs.query(NetworkModel).delete()
+
+    dbs.flush()
 
 @view_config(route_name='entity_graph', request_method='GET', renderer='jsonp')
 def entity_graph(request):
@@ -105,77 +181,5 @@ def entity_graph(request):
 
 def bare_tag(tag):
     return tag.rsplit("}", 1)[-1]
-
-@view_config(route_name='status', request_method='GET', renderer='jsonp')
-def status(request):
-    dbs = DBSession()
-    site = request.matchdict['code']
-    session_id = request.matchdict['session_id']
-
-    try:
-        p = dbs.query(Progress) \
-        .filter(Progress.site == site) \
-        .filter(Progress.session_id == session_id) \
-        .one()
-        return { 'total': p.total , 'processed': p.processed }
-
-    except sq.orm.exc.NoResultFound:
-        # the run is complete and the trace has been purged
-        pass
-
-#@view_config(route_name='site_dendrogram', request_method='GET', renderer='jsonp')
-#def site_dendrogram(request):
-#    t1 = time.time()
-#    import json
-#    site = request.matchdict['code']
-#
-#    # read the site config and bork if bad site requested
-#    conf = Config(request)
-#    try:
-#        eac_path = getattr(conf, site.lower())
-#    except AttributeError:
-#        raise HTTPNotFound
-#
-#    for (dirpath, dirnames, filenames) in os.walk(eac_path):
-#        datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
-#
-#    total = len(datafiles.items())
-#
-#    dendrogram = {}
-#    dendrogram['name'] = site
-#    dendrogram['children'] = []
-#
-#    log.debug("Total entities in dataset: %s" % total)
-#    children = {}
-#    for fpath, fname in datafiles.items():
-#        try:
-#            tree = etree.parse(fname)
-#        except (TypeError, etree.XMLSyntaxError):
-#            log.error("Invalid XML file: %s. Likely not well formed." % fname)
-#            continue
-#
-#        # second level: entity type
-#        entity_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
-#        entity_type = get(tree, '/e:eac-cpf/e:cpfDescription/e:identity/e:entityType')
-#        entity_function = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term')
-#        #print entity_id, entity_function
-#        #if type(entity_name) == list:
-#        #    entity_name = (', ').join(entity_name)
-#        #print entity_id, entity_name, entity_type
-#
-#        try:
-#            if not entity_type in children:
-#                children[entity_type] = []
-#            children[entity_type].append({ 'name': entity_id, 'colour': '#efd580'})
-#        except:
-#            pass
-#        
-#    for k,v in children.items():
-#        dendrogram['children'].append({ 'name': k, 'children': v })
-#
-#    request.response.headers['Access-Control-Allow-Origin'] = '*'
-#    t2 = time.time()
-#    log.debug("Time taken to prepare data '/dendrogram': %s" % (t2 - t1))
-#    return dendrogram
 
 

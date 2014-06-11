@@ -1,30 +1,11 @@
-from pyramid.response import Response
-from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPNotFound
-
-from sqlalchemy.exc import DBAPIError
-import transaction
-
-
-import logging
-log = logging.getLogger('app')
-
 import os
 import sys
 import time
-import datetime
 from lxml import etree, html
-import sqlalchemy as sq
-
-import networkx as nx
-from networkx.readwrite import json_graph
-
-from config import Config
-
 from .models import (
     DBSession,
     Progress,
-    Graph
+    NetworkModel
     )
 
 def get(tree, path, attrib=None, element=None):
@@ -92,22 +73,12 @@ def get_xml(href):
     except IOError:
         return None
 
-
-def cleanup(site, session_id, graph=None):
+def cleanup(site, graph=None):
     dbs = DBSession()
-
-    if graph is not None:
-        # delete any graph we already have stored for this site and session_id
-        dbs.query(Graph) \
-            .filter(Graph.site == site) \
-            .filter(Graph.session_id == session_id) \
-            .delete()
-        transaction.commit()
 
     # delete any existing progress counters
     dbs.query(Progress) \
         .filter(Progress.site == site) \
-        .filter(Progress.session_id == session_id) \
         .delete()
     transaction.commit()
 

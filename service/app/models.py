@@ -4,7 +4,7 @@ from sqlalchemy import (
     String,
     Text,
     Index,
-    Date
+    DateTime
     )
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -23,16 +23,16 @@ class Progress(Base):
     __tablename__ = 'progress'
     id = Column(Integer, primary_key=True)
     site = Column(String, index=True)
-    session_id = Column(String, index=True)
     processed = Column(Integer)
     total = Column(Integer)
+    valid_to = Column(DateTime, index=True)
 
-class Graph(Base):
-    __tablename__ = 'graph'
+class NetworkModel(Base):
+    __tablename__ = 'network'
     id = Column(Integer, primary_key=True)
     site = Column(String, index=True)
-    session_id = Column(String, index=True)
-    graph = Column(Text)
-    site_name = Column(String)
+    graph_data = Column(Text)
+    graph_type = Column(String)
+    valid_to = Column(DateTime, index=True)
 
  

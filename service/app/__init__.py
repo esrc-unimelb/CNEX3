@@ -16,12 +16,12 @@ def main(global_config, **settings):
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
     config.add_renderer('jsonp', JSONP(param_name='callback'))
-    config.add_static_view('static',    'static', cache_max_age=3600)
-    config.add_route('home',            '/')
-    config.add_route('build_graph',     '/graph/{code}/{explore}/{session_id}')
-    #config.add_route('site_dendrogram', '/dendrogram/{code}')
-    config.add_route('entity_graph',    '/entity/{code}/{id}')
+    config.add_static_view('static', 'static', cache_max_age=3600)
+    config.add_route('home',           '/')
+    config.add_route('health-check',   '/health-check')
+    config.add_route('network-build',  '/network/{code}/{explore}')
+    config.add_route('network-status', '/network/{code}/{explore}/status')
+    config.add_route('entity_graph',   '/entity/{code}/{id}')
 
-    config.add_route('status',          '/status/{code}/{session_id}')
     config.scan()
     return config.make_wsgi_app()
