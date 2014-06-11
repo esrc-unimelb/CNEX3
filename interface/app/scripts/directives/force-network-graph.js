@@ -10,136 +10,141 @@ angular.module('interfaceApp')
           graph: '@'
       },
       link: function postLink(scope, element, attrs) {
-          //scope.$watch('graph', function(graph) {
-          //    if (graph) { scope.drawGraph(); }
-          //});
+
+          var w = $window.innerWidth;
+          var h = $window.innerHeight;
+
+          d3.select('svg').remove();
+          var color = d3.scale.category20();
+          var nodes = [];
+          var links = [];
+
+          var redraw = function() {
+              var svg = d3.select('svg').select('g');
+              svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
+          }
+
+          var tick = function() {
+              var node = d3.selectAll(".node");
+              var link = d3.selectAll(".link");
+              link.attr('x1', function(d) { return d.source.x; })
+                  .attr('y1', function(d) { return d.source.y; })
+                  .attr('x2', function(d) { return d.target.x; })
+                  .attr('y2', function(d) { return d.target.y; });
+
+              node.attr('transform', function(d) {
+                return 'translate(' + d.x + ',' + d.y + ')';
+              });
+          }
+
+          var svg = d3.select('#graph')
+                .append('svg')
+                .attr('width', w)
+                .attr('height', h)
+                .attr('viewBox', '0 0 ' + w + ' ' + h)
+                .attr('preserveAspectRatio', 'xMidYMid meet')
+                .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
+                .append('g');
+
+          var force = d3.layout.force()
+                .nodes(nodes)
+                .links(links)
+                .charge(-1000)
+                .linkDistance(100)
+                .linkStrength(1)
+                .size([w, h])
+                .on('tick', tick);
+
+          scope.updateGraph = function(data) {
+              console.log('update graph');
+              console.log(data);
+
+              var nnodes = data.nodes.length;
+              var nstart = scope.nodesProcessed === undefined ? 0 : scope.nodesProcessed;
+
+              var nlinks = data.links.length;
+              var lstart = scope.linksProcessed === undefined ? 0 : scope.linksProcessed;
+
+              var i;
+              for (i=nstart; i < nnodes; i++) {
+                  nodes.push(data.nodes[i]);  
+              }
+              for (i=lstart; i < nlinks; i++) {
+                  links.push(data.links[i]);
+              }
+              scope.linksProcessed = nlinks;
+              scope.nodesProcessed = nnodes;
+
+              var svg = d3.select('svg').select('g');
+              var link = svg.selectAll('.link').data(links);
+              link.enter()
+                  .append('line')
+                  .attr('class', 'link')
+                  .attr('stroke', '#ccc')
+                  .attr('stroke-width', 2);
+              link.exit().remove();
+
+              var node = svg.selectAll('.node').data(nodes);
+              node.enter()
+                  .append('circle')
+                  .attr('class', 'node')
+                  .attr('r', 10)
+                  .attr('fill', function(d) { return color(Math.random()); })
+              node.on('click', function(d) {
+                      console.log(d.id);
+                  });
+              node.exit().remove();
+
+              force.start();
+          }
 
           var init = function() {
               scope.service = configuration[configuration.service];
-              scope.progress = true;
+              scope.progress = false;
               scope.datasetError = false;
+              scope.controls = false;
               scope.total = 0;
               scope.processed = 0;
 
               // kick off the progress update in a moment; needs time to get going..
-              $timeout(function() { scope.update(); }, 100);
+              $timeout(function() { scope.update(); }, 200);
 
               var url;
-              if (scope.graph == 'byEntity') {
-                  url = scope.service + '/graph/' + scope.site + '/byEntity';
-              } else if ($routeParams.explore == 'byFunction') {
-                  url = scope.service + '/graph/' + scope.site + '/byFunction';
-              }
-              url += '?callback=JSON_CALLBACK';
+              url = scope.service + '/network/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
               console.log(url);
-              $http.jsonp(url).then(function(response) {
-                  scope.site_name = response.data.site_name;
-                  scope.graph = response.data.graph;
-                  scope.drawGraph();
+              $http.jsonp(url).then(function() {
                   scope.progress = false;
               },
-              function(response) {
+              function() {
                   scope.datasetError = true;
                   scope.progress = false;
-              })
-          }
+              });
+
+          };
           init();
 
-
           scope.update = function() {
-              var url = scope.service + '/status/' + scope.site + '?callback=JSON_CALLBACK';
+              var url = scope.service + '/network/' + scope.site + '/' + scope.graph + '/status?callback=JSON_CALLBACK';
               $http.jsonp(url).then(function(response) {
-                  scope.progress = true;
-                  scope.processed = response.data['processed'];
-                  scope.total = response.data['total'];
-                  $timeout(function() { scope.update(); }, 100);
-              },
-              function(response){
-                  scope.progress = false;
-              })
-          }
-
-          scope.drawGraph = function() {
-              var width =  $window.innerWidth;
-              var height = $window.innerHeight;
-
-              var color = d3.scale.category20();
-              
-              var force = d3.layout.force()
-                    .charge(-1000)
-                    .linkDistance(100)
-                    .linkStrength(1)
-                    .size([width, height]);
-
-              d3.select('svg').remove();
-
-              var svg = d3.select('#vis')
-                    .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                    .attr('viewBox', '0 0 ' + width + ' ' + height)
-                    .attr('preserveAspectRatio', 'xMidYMid meet')
-                    .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
-                    .append('svg:g');
-
-              var graph = JSON.parse(scope.graph);
-              var nodes = graph.nodes;
-              var links = graph.links;
-
-              force.nodes(nodes).links(links).start();
-
-              var link = svg.selectAll('.link')
-                    .data(links)
-                    .enter()
-                    .append('line')
-                    .attr('class', 'link')
-                    .style('stroke-width', 1);
-
-              var node = svg.append('g')
-                    .selectAll('circle')
-                    .data(nodes)
-                    .enter()
-                    .append('circle')
-                    .attr('r', function(d) { return scale(d); })
-                    .style('fill', function(d) { return color(d.type); })
-                    .style('stroke', '#000');
-              
-              node.on('click', function(d) {
-                  scope.node_data = {};
-                  scope.node_data.id = d.id;
-                  scope.node_data.source = d.source;
-                  scope.node_data.name = d.name;
-                  scope.node_data.from = d.from;
-                  scope.node_data.to = d.to;
-                  scope.$apply();
-              })
-
-              force.on('tick', function() {
-                  link.attr('x1', function(d) { return d.source.x; })
-                      .attr('y1', function(d) { return d.source.y; })
-                      .attr('x2', function(d) { return d.target.x; })
-                      .attr('y2', function(d) { return d.target.y; });
-
-                  node.attr('transform', function(d) {
-                    return 'translate(' + d.x + ',' + d.y + ')';
-                  });
-              })
-
-              function redraw() {
-                  svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
-              }
-              function scale(d) {
-                  var log = d3.scale.log().range([10,30]);
-                  if (d.connections == 0) {
-                    return log(1);
+                  if (response.data.processed !== null) {
+                      scope.progress = true;
+                      scope.controls = false;
+                      scope.processed = response.data.processed;
+                      scope.total = response.data.total;
+                      var graph = JSON.parse(response.data.graph);
+                      scope.updateGraph(graph);
+                      $timeout(function() { scope.update(); }, 100);
                   } else {
-                      return log(d.connections);
+                      scope.progress = false;
+                      scope.controls = true;
+                      var graph = JSON.parse(response.data.graph);
+                      scope.updateGraph(graph);
                   }
-
-              }
-          }
-
-
+              },
+              function(){
+                  scope.progress = false;
+              });
+          };
 
       }
     };
