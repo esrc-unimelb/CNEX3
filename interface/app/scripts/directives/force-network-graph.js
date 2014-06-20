@@ -16,8 +16,8 @@ angular.module('interfaceApp')
 
           d3.select('svg').remove();
           var color = d3.scale.category20();
-          var nodes = [];
-          var links = [];
+          scope.nodes = [];
+          scope.links = [];
 
           var redraw = function() {
               var svg = d3.select('svg').select('g');
@@ -37,6 +37,15 @@ angular.module('interfaceApp')
               });
           }
 
+          var force = d3.layout.force()
+                .nodes(scope.nodes)
+                .links(scope.links)
+                .charge(-1000)
+                .linkDistance(100)
+                .linkStrength(1)
+                .size([w, h])
+                .on('tick', tick);
+
           var svg = d3.select('#graph')
                 .append('svg')
                 .attr('width', w)
@@ -46,37 +55,31 @@ angular.module('interfaceApp')
                 .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
                 .append('g');
 
-          var force = d3.layout.force()
-                .nodes(nodes)
-                .links(links)
-                .charge(-1000)
-                .linkDistance(100)
-                .linkStrength(1)
-                .size([w, h])
-                .on('tick', tick);
+
+          var node = svg.selectAll('.node');
+          var link = svg.selectAll('.link');
+          console.log(node, link);
 
           scope.updateGraph = function(data) {
               console.log('update graph');
-              console.log(data);
 
-              var nnodes = data.nodes.length;
-              var nstart = scope.nodesProcessed === undefined ? 0 : scope.nodesProcessed;
-
-              var nlinks = data.links.length;
-              var lstart = scope.linksProcessed === undefined ? 0 : scope.linksProcessed;
+              var nodes = JSON.parse(data.graph).nodes;
+              var links = JSON.parse(data.graph).links;
+              console.log(nodes);
+              console.log(links);
 
               var i;
-              for (i=nstart; i < nnodes; i++) {
-                  nodes.push(data.nodes[i]);  
+              for (i=0; i<nodes.length; i++) {
+                  scope.nodes.push(nodes[i]);  
               }
-              for (i=lstart; i < nlinks; i++) {
-                  links.push(data.links[i]);
+              for (i=0; i<links.length; i++) {
+                  scope.links.push(links[i]);
               }
-              scope.linksProcessed = nlinks;
-              scope.nodesProcessed = nnodes;
 
               var svg = d3.select('svg').select('g');
-              var link = svg.selectAll('.link').data(links);
+              var link = svg.selectAll('.link').data(scope.links);
+              var node = svg.selectAll('.node').data(scope.nodes);
+
               link.enter()
                   .append('line')
                   .attr('class', 'link')
@@ -84,14 +87,13 @@ angular.module('interfaceApp')
                   .attr('stroke-width', 2);
               link.exit().remove();
 
-              var node = svg.selectAll('.node').data(nodes);
               node.enter()
                   .append('circle')
                   .attr('class', 'node')
                   .attr('r', 10)
-                  .attr('fill', function(d) { return color(Math.random()); })
+                  .attr('fill', function(d) { return color(d.type); })
               node.on('click', function(d) {
-                      console.log(d.id);
+                      console.log(d.id, d.type);
                   });
               node.exit().remove();
 
@@ -131,14 +133,11 @@ angular.module('interfaceApp')
                       scope.controls = false;
                       scope.processed = response.data.processed;
                       scope.total = response.data.total;
-                      var graph = JSON.parse(response.data.graph);
-                      scope.updateGraph(graph);
                       $timeout(function() { scope.update(); }, 100);
                   } else {
                       scope.progress = false;
                       scope.controls = true;
-                      var graph = JSON.parse(response.data.graph);
-                      scope.updateGraph(graph);
+                      scope.updateGraph(response.data);
                   }
               },
               function(){

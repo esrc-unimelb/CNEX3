@@ -91,6 +91,7 @@ angular.module('interfaceApp')
           node.attr('transform', function(d) {
             return 'translate(' + d.x + ',' + d.y + ')';
           });
+
       }
 
       function redraw() {
