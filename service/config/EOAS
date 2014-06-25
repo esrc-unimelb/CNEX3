@@ -1,6 +1,7 @@
 [GENERAL]:
 # Site descriptive name
-slug: Encyclopedia of Australian Science
+name: Encyclopedia of Australian Science
+url: http://www.eoas.info
 
 # Location of the EAC data files
 eac: /srv/ha/web/EOAS//LIVE/eac
