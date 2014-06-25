@@ -1,17 +1,34 @@
-<div class="controls" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;">
-    <div style="padding: 5px;">
-        need a hide button here
-        <h3>{{site}}</h3>
-        <hr/>
-        some guff about the site; maybe some statistics
-        <span ng-if="entity">
-            <br/>
-            <h4>{{entity}}</h4>
+<div class="above" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: 50px; z-index: 2000000;">
+    <div class="row">
+        <div class="col-sm-11 col-md-11 col-lg-11">
+        </div>
+        <div class="col-sm-1 col-md-1 col-lg-1">
+            <span class="glyphicon glyphicon-cog" ng-click="visible = !visible"></span>
+        </div>
+    </div>
+</div>
+<div class="below" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
+</div>
+<div class="above" style="padding: 15px; top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <h3>{{site}}</h3>
+            <small><a href="{{url}}" target="_blank">{{name}}</a></small>
             <hr/>
-            stats about the selected entity: id, name || title
-            number of connections
-            number of connections out to degree
-            link to entity specific graph
-        </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <dl>
+                <dt>Total number of Context Entities</dt>
+                <dd>{{nodes.length}}</dd>
+                <dt>Total number of Associative relationships</dt>
+                <dd>{{links.length}}</dd>
+                <dt>% nodes unconnected (not shown)</dt>
+                <dd>{{percentUnConnected | number:0}}</dd>
+                <dt>Average network degree</dt>
+                <dd>{{degree | number:1}}</dd>
+            </dl>
+        </div>
     </div>
 </div>

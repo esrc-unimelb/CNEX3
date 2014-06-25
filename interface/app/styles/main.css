@@ -78,8 +78,13 @@ body {
   }
 }
 
-.controls {
+.below {
     position: fixed;
-    z-index: 1000;
-    opacity: 1;
+    z-index: 5000;
+    opacity: 0.5;
+    background-color: white;
+}
+.above {
+    position: fixed;
+    z-index: 100000;
 }

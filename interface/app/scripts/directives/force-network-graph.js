@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('forceNetworkGraph', [ '$window', '$http', '$timeout', 'configuration',  function ($window, $http, $timeout, configuration) {
+  .directive('forceNetworkGraph', [ '$window', '$http', '$timeout', '$rootScope', 'configuration', 'ForceData',
+        function ($window, $http, $timeout, $rootScope, configuration, ForceData) {
     return {
       templateUrl: 'views/force-network-graph.html',
       restrict: 'E',
@@ -15,26 +16,26 @@ angular.module('interfaceApp')
           var h = $window.innerHeight;
 
           d3.select('svg').remove();
-          var color = d3.scale.category20();
+          scope.color = d3.scale.category20();
+          scope.weight = d3.scale.linear().range([10, 80]);
           scope.nodes = [];
+          scope.unConnectedNodes = [];
           scope.links = [];
 
           var redraw = function() {
-              var svg = d3.select('svg').select('g');
-              svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
+              scope.svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
           }
 
           var tick = function() {
-              var node = d3.selectAll(".node");
-              var link = d3.selectAll(".link");
-              link.attr('x1', function(d) { return d.source.x; })
+              scope.link.attr('x1', function(d) { return d.source.x; })
                   .attr('y1', function(d) { return d.source.y; })
                   .attr('x2', function(d) { return d.target.x; })
                   .attr('y2', function(d) { return d.target.y; });
 
-              node.attr('transform', function(d) {
+              scope.node.attr('transform', function(d) {
                 return 'translate(' + d.x + ',' + d.y + ')';
               });
+
           }
 
           var force = d3.layout.force()
@@ -44,9 +45,10 @@ angular.module('interfaceApp')
                 .linkDistance(100)
                 .linkStrength(1)
                 .size([w, h])
-                .on('tick', tick);
+                .on('tick', tick)
+                .start();
 
-          var svg = d3.select('#graph')
+          scope.svg = d3.select('#graph')
                 .append('svg')
                 .attr('width', w)
                 .attr('height', h)
@@ -55,47 +57,99 @@ angular.module('interfaceApp')
                 .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
                 .append('g');
 
+          scope.node = scope.svg.selectAll('.node');
+          scope.link = scope.svg.selectAll('.link');
 
-          var node = svg.selectAll('.node');
-          var link = svg.selectAll('.link');
-          console.log(node, link);
-
-          scope.updateGraph = function(data) {
+          scope.processData = function(data) {
               console.log('update graph');
 
               var nodes = JSON.parse(data.graph).nodes;
               var links = JSON.parse(data.graph).links;
-              console.log(nodes);
-              console.log(links);
 
-              var i;
+              // given the graph, create an array with unconnected nodes
+              // 
+              // and
+              //
+              // nodes / links arrays 
+              var i, j = 0, nodesTmp = [], nodeData = {};
+              var connectedNodes = [], unConnectedNodes = [], processedLinks = [];
+              var weightBounds = [];
+
               for (i=0; i<nodes.length; i++) {
-                  scope.nodes.push(nodes[i]);  
+                  var n = nodes[i].id;
+                  var t = nodes[i].type;
+                  var c = nodes[i].connections;
+                  nodeData[n] = { 'type': t, 'connections': c };
+                  weightBounds.push(c);
               }
+              scope.weight.domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
+
+              // figure out the connectedNodes and associated links
               for (i=0; i<links.length; i++) {
-                  scope.links.push(links[i]);
+                  j++;
+                  var sn = links[i].source_name;
+                  var tn = links[i].target_name;
+
+                  if (nodesTmp.indexOf(sn) === -1) {
+                      nodesTmp.push(sn);
+                      scope.nodes.push({ 'name': sn, 'type': nodeData[sn].type, 'connections': nodeData[sn].connections });
+                  }
+                  if (nodesTmp.indexOf(tn) === -1) {
+                      nodesTmp.push(tn);
+                      scope.nodes.push({ 'name': tn, 'type': nodeData[tn].type, 'connections': nodeData[tn].connections });
+                  }
+
+                  scope.links.push({ 'source': nodesTmp.indexOf(sn), 'target': nodesTmp.indexOf(tn) });
+
+                  if ( j >= 50 ) {
+                      j = 0;
+                      scope.draw('links');
+                  }
               }
 
-              var svg = d3.select('svg').select('g');
-              var link = svg.selectAll('.link').data(scope.links);
-              var node = svg.selectAll('.node').data(scope.nodes);
+              // figure out the unConnected Nodes
+              for (i=0; i<nodes.length; i++) {
+                  var n = nodes[i].id;
+                  if (nodesTmp.indexOf(n) === -1) {
+                      scope.unConnectedNodes.push({ 'name': n});
+                  }
+              }
+              
+              console.log(scope.nodes);
 
-              link.enter()
-                  .append('line')
-                  .attr('class', 'link')
-                  .attr('stroke', '#ccc')
-                  .attr('stroke-width', 2);
-              link.exit().remove();
+              ForceData.nodes = scope.nodes;
+              ForceData.links = scope.links;
+              ForceData.unConnectedNodes = scope.unConnectedNodes;
+              
+              // now draw the nodes
+              scope.draw('nodes');
+          }
 
-              node.enter()
-                  .append('circle')
-                  .attr('class', 'node')
-                  .attr('r', 10)
-                  .attr('fill', function(d) { return color(d.type); })
-              node.on('click', function(d) {
-                      console.log(d.id, d.type);
-                  });
-              node.exit().remove();
+          scope.draw = function(update) {
+              scope.link = scope.svg.selectAll('.link').data(scope.links);
+              scope.node = scope.svg.selectAll('.node').data(scope.nodes);
+
+              if (update === 'links') {
+                  scope.link.enter()
+                      .append('line')
+                      .attr('class', 'link')
+                      .attr('stroke', '#ccc')
+                      .attr('stroke-width', 2);
+                  scope.link.exit().remove();
+              }
+
+              if (update === 'nodes') {
+                  scope.node.enter()
+                      .append('circle')
+                      .attr('class', 'node')
+                      .attr('r', function(d) { return scope.weight(d.connections); })
+                      .attr('fill', function(d) { return scope.color(d.type); })
+
+                  scope.node.on('click', function(d) {
+                          console.log(d);
+                      });
+                  scope.node.exit().remove();
+              }
 
               force.start();
           }
@@ -108,13 +162,11 @@ angular.module('interfaceApp')
               scope.total = 0;
               scope.processed = 0;
 
-              // kick off the progress update in a moment; needs time to get going..
-              $timeout(function() { scope.update(); }, 200);
-
-              var url;
-              url = scope.service + '/network/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
+              var url = scope.service + '/network/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
               console.log(url);
               $http.jsonp(url).then(function() {
+                  // kick off the progress update in a moment; needs time to get going..
+                  $timeout(function() { scope.update(); }, 200);
                   scope.progress = false;
               },
               function() {
@@ -137,7 +189,7 @@ angular.module('interfaceApp')
                   } else {
                       scope.progress = false;
                       scope.controls = true;
-                      scope.updateGraph(response.data);
+                      scope.processData(response.data);
                   }
               },
               function(){
