@@ -1,5 +1,17 @@
+<controls site="{{site}}" entity="{{entity}}" graph="{{graph}}" ng-if="!progress && !datasetError && ready"></controls>
+
+<div class="row" ng-if="datasetError">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <div ng-if="datasetError"><h4 class="text-center">Requested dataset unavailable...</h4></div>
+    </div>
+</div>
+<div class="row" ng-if="progress">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <progress-meter processed="{{processed}}" total="{{total}}" error="{{datasetError}}"></progress-meter>
+    </div>
+</div>
 <div class="row">
-    <div class="col-sm-12 col-md-12 col-lg-12" ng-if="!progress">
-        <force-network-graph site="{{site}}" graph="{{graph}}"></force-network-graph>
+    <div class="col-sm-12 col-md-12 col-lg-12" ng-if="!progress && !datasetError && ready">
+        <force-network-graph></force-network-graph>
     </div>
 </div>
