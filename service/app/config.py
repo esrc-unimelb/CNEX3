@@ -31,6 +31,8 @@ class Config:
             site_data = {}
             site_data['slug'] = cfg.get('GENERAL', 'slug') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'slug')) else None
             site_data['eac']  = cfg.get('GENERAL', 'eac') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'eac')) else None
+            site_data['name']  = cfg.get('GENERAL', 'name') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'name')) else None
+            site_data['url']  = cfg.get('GENERAL', 'url') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'url')) else None
             source_map = cfg.get('GENERAL', 'map') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'map')) else None
             site_data['map']  = source_map.split(', ')
             self.sites[s] = site_data

@@ -31,6 +31,8 @@ from .models import (
 from Helpers import *
 from Network import Network
 
+import multiprocessing
+
 @view_config(route_name='health-check', request_method='GET', renderer='string')
 def health_check(request):
     """
@@ -59,7 +61,7 @@ def home_page(request):
     return { 'sites': sites }
 
 @view_config(route_name='network-build', request_method='GET', renderer='jsonp')
-def site_graph(request):
+def network_build(request):
     """For a given site - assemble the entity graph
     
     @params:
@@ -67,12 +69,25 @@ def site_graph(request):
     """
     graph_type = request.matchdict['explore']
     n = Network(request)
-    graph = n.build(graph_type)
+    n.build()
 
-    return { }
+    log.debug('job started')
+    return { 'started': True }
+
+@view_config(route_name="network-stats", request_method='GET', renderer='jsonp')
+def network_stats(request):
+    n = Network(request)
+    degree = n.calculate_average_degree()
+    d = [ d[1] * 100 for d in degree.items() ]
+
+    return {
+        'name': n.name,
+        'url': n.url,
+        'degree': sum(d) / len(d)
+    }
 
 @view_config(route_name='network-status', request_method='GET', renderer='jsonp')
-def status(request):
+def network_status(request):
     dbs = DBSession()
     site = request.matchdict['code']
     graph_type = request.matchdict['explore']

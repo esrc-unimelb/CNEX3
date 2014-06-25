@@ -1,3 +1,6 @@
+from pyramid.response import Response
+from pyramid.view import view_config
+
 import os
 import sys
 import time
@@ -24,6 +27,9 @@ from networkx.readwrite import json_graph
 
 from Helpers import *
 
+import multiprocessing
+
+
 class Network:
 
     def __init__(self, request):
@@ -36,69 +42,71 @@ class Network:
 
         self.request = request
         self.site = request.matchdict['code']
+        self.graph_type = request.matchdict['explore']
 
         # read the site config and bork if bad site requested
         conf = Config(request)
         self.eac_path = conf.sites[self.site]['eac']
         self.source_map = conf.sites[self.site]['map']
+        self.name = conf.sites[self.site]['name']
+        self.url = conf.sites[self.site]['url']
         log.debug("Processing site: %s, data path: %s" % (self.site, self.eac_path))
 
-    def build(self, graph_type):
+    def build(self) :
         t1 = time.time()
 
+        # is the data available? return now; nothing to do
         try:
-            # if we already have the data - return it immediately
             n = self.dbs.query(NetworkModel) \
                     .filter(NetworkModel.site == self.site) \
-                    .filter(NetworkModel.graph_type == graph_type) \
+                    .filter(NetworkModel.graph_type == self.graph_type) \
                     .one()
-
-            # get the site name out of the last file
-            t2 = time.time()
-            log.debug("Time taken to prepare data '/site': %s" % (t2 - t1))
-            return n.graph_data
+            log.debug('Graph already built. No need to build it again.')
+            return
         except sq.orm.exc.NoResultFound:
             pass
         
+        # is a graph generation in progress? return now; nothing to do
+        try:
+            p = self.dbs.query(Progress).filter(Progress.site == self.site).one()
+            log.debug('Graph being built. Not starting another build.')
+            return
+        except sq.orm.exc.NoResultFound:
+            pass
+
         # OTHERWISE:
-        # generate the list of datafiles
+        # generate the list of datafiles and build the graph
         for (dirpath, dirnames, filenames) in os.walk(self.eac_path):
             if dirpath == self.eac_path:
                 datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
 
+        #  store a trace that indicates we're counting
         total = len(datafiles.items())
         log.debug("Total number of entities in dataset: %s" % total)
 
-        # in the case of multiple users requesting the graph at the same time
-        #  see if a progress trace exists - if not, start a fresh one
-        try:
-            p = self.dbs.query(Progress) \
-                    .filter(Progress.site == self.site) \
-                    .one()
-        except sq.orm.exc.NoResultFound:
-            #  store a trace that indicates we're counting
-            p = Progress(
-                processed = -1, 
-                total = total,
-                site = self.site,
-                valid_to = datetime.now() + timedelta(hours=float(self.request.registry.settings['data_age']))
-            )
-            self.dbs.add(p)
-            transaction.commit()
+        p = Progress(
+            processed = 0, 
+            total = total,
+            site = self.site,
+            valid_to = datetime.now() + timedelta(hours=float(self.request.registry.settings['data_age']))
+        )
+        self.dbs.add(p)
+        transaction.commit()
+
+        j = multiprocessing.Process(target=self.build_graph, args=(self.graph_type, datafiles, total))
+        j.start()
+
+    def build_graph(self, graph_type, datafiles, total): 
+        log.debug('Building the graph.')
+        t1 = time.time()
 
         graph = nx.DiGraph()
         count = 0
+        save_counter = 0
         nodes = {}
         for fpath, fname in datafiles.items():
             log.debug("Processing: %s" % os.path.join(fpath,fname))
             count += 1
-
-            p = self.dbs.query(Progress) \
-                .filter(Progress.site == self.site) \
-                .one()
-            p.processed = count
-            p.total = total
-            transaction.commit()
 
             try:
                 tree = etree.parse(fname)
@@ -106,33 +114,32 @@ class Network:
                 log.error("Invalid XML file: %s. %s." % (fname, sys.exc_info()[1]))
                 continue
 
-            if graph_type == 'byEntity':
+            if self.graph_type == 'byEntity':
                 self.entities_as_nodes(graph, tree);
-            elif graph_type == 'byFunction':
+            elif self.graph_type == 'byFunction':
                 self.functions_as_nodes(graph, tree)
- 
-            # save the graph
-            try:
-                # either we get an existing record
-                n = self.dbs.query(NetworkModel) \
-                        .filter(NetworkModel.site == self.site) \
-                        .filter(NetworkModel.graph_type == graph_type) \
-                        .one()
-                n.graph_data = json.dumps(json_graph.node_link_data(graph))
 
-            except sq.orm.exc.NoResultFound:
-                # or we create a new one
-                n = NetworkModel(site = self.site, graph_type = graph_type)
-                n.graph_data = json.dumps(json_graph.node_link_data(graph))
-                self.dbs.add(n)
+            if save_counter == 20:
+                # save a progress count
+                p = self.dbs.query(Progress) \
+                    .filter(Progress.site == self.site) \
+                    .one()
+                p.processed = count
+                transaction.commit()
 
-            self.dbs.flush()
-            transaction.commit()
+                # reset the counter
+                save_counter = 0
+            save_counter +=1 
 
+        # count the number of connections
         for n in graph:
             graph.node[n]['connections'] = len(graph.neighbors(n))
 
-        site_name = get(tree, '/e:eac-cpf/e:control/e:maintenanceAgency/e:agencyName')
+        # save the graph
+        n = NetworkModel(site = self.site, graph_type = self.graph_type)
+        n.graph_data = json.dumps(json_graph.node_link_data(graph))
+        self.dbs.add(n)
+        transaction.commit()
 
         # delete any existing progress counters
         self.dbs.query(Progress) \
@@ -140,11 +147,12 @@ class Network:
             .delete()
         transaction.commit()
 
-        # get the site name out of the last file
+   
+        # all done
         t2 = time.time()
         log.debug("Time taken to prepare data '/site': %s" % (t2 - t1))
-        return json.dumps(json_graph.node_link_data(graph))
-    
+        return
+
     def functions_as_nodes(self, graph, tree):
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
             ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
@@ -196,4 +204,13 @@ class Network:
                 except KeyError:
                     pass
             #print node_id, node_source, node_type
+
+    def calculate_average_degree(self):
+        n = self.dbs.query(NetworkModel.graph_data) \
+            .filter(NetworkModel.site == self.site) \
+            .filter(NetworkModel.graph_type == self.graph_type) \
+            .one()
+
+        g = json_graph.node_link_graph(json.loads(n[0]), directed=False, multigraph=False)
+        return nx.degree_centrality(g)
 
