@@ -37,6 +37,7 @@ class Network:
         
         @params:
         request.matchdict: code, the site of interest
+        request.matchdict: explore, the type of graph being requested
         """
         self.dbs = DBSession()
 
@@ -156,7 +157,8 @@ class Network:
     def functions_as_nodes(self, graph, tree):
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
             ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
-            graph.add_node(node_id, { 'type': ntype })
+            url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
+            graph.add_node(node_id, { 'type': ntype, 'url': url })
 
             if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
@@ -173,7 +175,8 @@ class Network:
     def entities_as_nodes(self, graph, tree):
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
             ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
-            graph.add_node(node_id, { 'type': ntype })
+            url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
+            graph.add_node(node_id, { 'type': ntype, 'url': url })
 
             neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
             for node in neighbours:

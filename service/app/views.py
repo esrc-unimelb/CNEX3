@@ -86,8 +86,8 @@ def network_stats(request):
         'degree': sum(d) / len(d)
     }
 
-@view_config(route_name='network-status', request_method='GET', renderer='jsonp')
-def network_status(request):
+@view_config(route_name='build-status', request_method='GET', renderer='jsonp')
+def build_status(request):
     dbs = DBSession()
     site = request.matchdict['code']
     graph_type = request.matchdict['explore']

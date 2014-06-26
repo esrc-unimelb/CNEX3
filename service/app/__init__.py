@@ -21,7 +21,7 @@ def main(global_config, **settings):
     config.add_route('health-check',   '/health-check')
     config.add_route('network-stats',  '/stats/{code}/{explore}')
     config.add_route('network-build',  '/network/{code}/{explore}')
-    config.add_route('network-status', '/network/{code}/{explore}/status')
+    config.add_route('build-status',   '/network/{code}/{explore}/status')
     config.add_route('entity_graph',   '/entity/{code}/{id}')
 
     config.scan()
