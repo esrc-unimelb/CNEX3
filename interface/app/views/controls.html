@@ -1,34 +1,45 @@
-<div class="above" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: 50px; z-index: 2000000;">
+<div class="above" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: 50px; z-index: 2000000; padding: 15px;">
     <div class="row">
-        <div class="col-sm-1 col-md-1 col-lg-1">
+        <div class="col-sm-1 col-sm-offset-11 col-md-1 col-md-offset-11 col-lg-1 col-lg-offset-11">
             <span class="glyphicon glyphicon-cog" ng-click="visible = !visible"></span>
-        </div>
-        <div class="col-sm-11 col-md-11 col-lg-11">
         </div>
     </div>
 </div>
 <div class="below" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
 </div>
-<div class="above" style="padding: 15px; top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
-    <div class="row">
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <h3>{{site}}</h3>
-            <small><a href="{{url}}" target="_blank">{{name}}</a></small>
-            <hr/>
-        </div>
+<div class="above" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+        <h3>{{site}}</h3>
+        <h4><a href="{{data.url}}" target="_blank">{{data.name}}</a></h4>
+        <hr/>
     </div>
-    <div class="row">
+    <div class="row" ng-show="!contextNodeData">
         <div class="col-sm-12 col-md-12 col-lg-12">
             <dl>
-                <dt>Total number of Context Entities</dt>
-                <dd>{{nodes.length}}</dd>
+                <dt>Total number of nodes</dt>
+                <dd>{{data.nodes.length}}</dd>
                 <dt>Total number of Associative relationships</dt>
-                <dd>{{links.length}}</dd>
-                <dt>% nodes unconnected (not shown)</dt>
-                <dd>{{percentUnConnected | number:0}}</dd>
+                <dd>{{data.links.length}}</dd>
+                <dt>Dataset % nodes unconnected (not shown)</dt>
+                <dd>{{data.percentUnConnected | number:0}}</dd>
                 <dt>Average network degree</dt>
-                <dd>{{degree | number:1}}</dd>
+                <dd>{{data.degree | number:1}}</dd>
             </dl>
+        </div>
+    </div>
+    <div class="row" ng-show="contextNodeData">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+           Context Node: <a href="{{contextNodeData.id}}" target="_blank">{{contextNodeData.name}} ({{contextNodeData.type}})</a>
+        </div>
+    </div>
+    <div class="row" ng-show="contextNodeData">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+           Neighbours:
+        </div>
+    </div>
+    <div class="row" ng-show="contextNodeData">
+        <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="n in contextNetworkData">
+           <a href="{{n.id}}" target="_blank">{{n.name}} ({{n.type}})</a>
         </div>
     </div>
 </div>

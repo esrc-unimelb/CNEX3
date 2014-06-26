@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .service('ForceData', function ForceData() {
+  .service('DataService', [ function ForceData() {
     // AngularJS will instantiate a singleton by calling "new" on this function
     //
 
@@ -15,5 +15,6 @@ angular.module('interfaceApp')
         // links
         links: []
     }
+
     return d;
-  });
+  }]);

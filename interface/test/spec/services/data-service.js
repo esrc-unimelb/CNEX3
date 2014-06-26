@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Service: forceData', function () {
+describe('Service: DataService', function () {
 
   // load the service's module
   beforeEach(module('interfaceApp'));

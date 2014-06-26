@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('controls', [ '$http', '$window', '$rootScope', 'ForceData', 'configuration',
-        function ($http, $window, $rootScope, ForceData, configuration) {
+  .directive('controls', [ '$http', '$window', '$rootScope', 'DataService', 'configuration',
+        function ($http, $window, $rootScope, DataService, configuration) {
     return {
       templateUrl: 'views/controls.html',
       restrict: 'E',
@@ -19,24 +19,32 @@ angular.module('interfaceApp')
               'height': $window.innerHeight,
           }
 
-          $rootScope.$watch('ForceData', function() {
-              scope.nodes = ForceData.nodes;
-              scope.links = ForceData.links;
-              scope.percentUnConnected = ForceData.unConnectedNodes.length / (scope.nodes.length + ForceData.unConnectedNodes.length) * 100;
 
+          $rootScope.$on('graph-data-loaded', function() {
+              scope.data = {
+                  nodes: DataService.nodes,
+                  links: DataService.links,
+                  percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
+              }
               calculateDegree();
           })
+          $rootScope.$on('context-node-data-ready', function() {
+              scope.contextNodeData = DataService.contextNodeData;
+          });
+          $rootScope.$on('context-node-neighbour-data-ready', function() {
+              scope.contextNetworkData = DataService.contextNetworkData;
+          });
 
           var calculateDegree = function() {
               scope.service = configuration[configuration.service];
               var url = scope.service + '/stats/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
-              console.log(url);
               $http.jsonp(url).then(function(response) {
-                  scope.name = response.data.name;
-                  scope.url = response.data.url;
-                  scope.degree = response.data.degree;
+                  scope.data.name = response.data.name;
+                  scope.data.url = response.data.url;
+                  scope.data.degree = response.data.degree;
               },
               function() {
+                  console.log('Service failure when asking for network degree');
               });
           }
       }

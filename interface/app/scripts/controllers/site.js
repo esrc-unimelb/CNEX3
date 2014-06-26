@@ -1,8 +1,9 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .controller('SiteCtrl', [ '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'ForceData',
-    function ($scope, $routeParams, $http, $timeout, configuration, ForceData) {
+  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'DataService',
+    function($rootScope, $scope, $routeParams, $http, $timeout, configuration, DataService) {
+
         $scope.site = $routeParams.code; 
         $scope.graph = $routeParams.explore;
         $scope.service = configuration[configuration.service];
@@ -49,11 +50,11 @@ angular.module('interfaceApp')
             });
         };
 
-        $scope.processData = function(data) {
+        $scope.processData = function(d) {
             console.log('update graph');
 
-            var ns = JSON.parse(data.graph).nodes;
-            var ls = JSON.parse(data.graph).links;
+            var ns = JSON.parse(d.graph).nodes;
+            var ls = JSON.parse(d.graph).links;
 
             // given the graph, create an array with unconnected nodes
             //
@@ -68,8 +69,9 @@ angular.module('interfaceApp')
             for (i=0; i<ns.length; i++) {
                 var n = ns[i].id;
                 var t = ns[i].type;
+                var u = ns[i].url;
                 var c = ns[i].connections;
-                nodeData[n] = { 'type': t, 'connections': c };
+                nodeData[n] = { 'type': t, 'connections': c, 'url': u };
                 weightBounds.push(c);
             }
             weightBounds = [Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)];
@@ -82,11 +84,13 @@ angular.module('interfaceApp')
 
                 if (nodesTmp.indexOf(sn) === -1) {
                     nodesTmp.push(sn);
-                    nodes.push({ 'name': sn, 'type': nodeData[sn].type, 'connections': nodeData[sn].connections });
+                    nodeData[sn].name = sn
+                    nodes.push(nodeData[sn]);
                 }
                 if (nodesTmp.indexOf(tn) === -1) {
                     nodesTmp.push(tn);
-                    nodes.push({ 'name': tn, 'type': nodeData[tn].type, 'connections': nodeData[tn].connections });
+                    nodeData[tn].name = tn;
+                    nodes.push(nodeData[tn]);
                 }
                 links.push({ 'source': nodesTmp.indexOf(sn), 'target': nodesTmp.indexOf(tn) });
             }
@@ -100,10 +104,11 @@ angular.module('interfaceApp')
                 }
             }
 
-            ForceData.nodes = nodes;
-            ForceData.links = links;
-            ForceData.unConnectedNodes = unConnectedNodes;
-            ForceData.weightBounds = weightBounds;
+            DataService.nodes = nodes;
+            DataService.links = links;
+            DataService.unConnectedNodes = unConnectedNodes;
+            DataService.weightBounds = weightBounds;
+            $rootScope.$broadcast('graph-data-loaded');
 
             // now instantiate the graph
             $scope.ready = true;

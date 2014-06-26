@@ -5,5 +5,6 @@ angular.module('interfaceApp')
       'development': 'http://dev01:3000/app',
       'testing':    '',
       'production': '',
-      'service': 'development'
+      'service': 'development',
+      'solr': 'https://data.esrc.info/solr/ESRC/select'
   });
