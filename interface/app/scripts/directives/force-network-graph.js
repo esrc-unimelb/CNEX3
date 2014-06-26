@@ -10,6 +10,18 @@ angular.module('interfaceApp')
       },
       link: function postLink(scope, element, attrs) {
 
+          $rootScope.$on('force-reset', function() {
+              link.attr('class', 'link')
+                  .attr('stroke', '#ccc')
+                  .attr('stroke-width', 2)
+                  .attr('opacity', '1');
+
+              node.attr('class', 'node')
+                  .attr('r', function(d) { return scope.weight(d.connections); })
+                  .attr('fill', function(d) { return scope.color(d.type); })
+                  .attr('opacity', '1');
+          });
+
           scope.nodes = DataService.nodes;
           scope.links = DataService.links;
           console.log(scope.nodes);
@@ -148,6 +160,7 @@ angular.module('interfaceApp')
                   //   on change
                   var url = configuration.solr + '?spellcheck=off&q=id:"' + scope.data[n].url + '"&wt=json&json.wrf=JSON_CALLBACK';
                   $http.jsonp(url).then(function(d) {
+                      d.data.response.docs[0].nodeid = n;
                       DataService.contextNodeData = d.data.response.docs[0];
                       $rootScope.$broadcast('context-node-data-ready');
                   },
@@ -159,6 +172,7 @@ angular.module('interfaceApp')
                   angular.forEach(neighbours, function(v,k) {
                       var url = configuration.solr + '?spellcheck=off&q=id:"' + scope.data[v].url + '"&wt=json&json.wrf=JSON_CALLBACK';
                       $http.jsonp(url).then(function(d) {
+                          d.data.response.docs[0].nodeid = v;
                           DataService.contextNetworkData.push(d.data.response.docs[0]);
                           $rootScope.$broadcast('context-node-neighbour-data-ready');
                       },
@@ -170,6 +184,10 @@ angular.module('interfaceApp')
           node.exit().remove();
 
           force.start();
+
+          force.on('end', function() {
+              $rootScope.$broadcast('graph-ready');
+          });
 
       }
     };

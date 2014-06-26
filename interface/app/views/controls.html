@@ -1,17 +1,19 @@
-<div class="above" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: 50px; z-index: 2000000; padding: 15px;">
+<div class="above" style="top: {{cls.top}}px; left: {{cls.left}}px; width: {{cls.width}}px; height: 50px; z-index: 2000000;">
     <div class="row">
         <div class="col-sm-1 col-sm-offset-11 col-md-1 col-md-offset-11 col-lg-1 col-lg-offset-11">
             <span class="glyphicon glyphicon-cog" ng-click="visible = !visible"></span>
         </div>
     </div>
 </div>
-<div class="below" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
+<div class="below" style="top: {{cls.top}}px; left: {{cls.left}}px; width: {{cls.width}}px; height: {{cls.height}}px;" ng-hide="visible">
 </div>
-<div class="above" style="top: {{controls.top}}px; left: {{controls.left}}px; width: {{controls.width}}px; height: {{controls.height}}px;" ng-hide="visible">
-    <div class="col-sm-12 col-md-12 col-lg-12">
-        <h3>{{site}}</h3>
-        <h4><a href="{{data.url}}" target="_blank">{{data.name}}</a></h4>
-        <hr/>
+<div class="above" style="top: {{cls.top}}px; left: {{cls.left}}px; width: {{cls.width}}px; height: {{cls.height}}px; overflow-y: auto; padding: 15px;" ng-hide="visible">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <h3>{{site}}</h3>
+            <h4><a href="{{data.url}}" target="_blank">{{data.name}}</a></h4>
+            <hr/>
+        </div>
     </div>
     <div class="row" ng-show="!contextNodeData">
         <div class="col-sm-12 col-md-12 col-lg-12">
@@ -27,19 +29,33 @@
             </dl>
         </div>
     </div>
-    <div class="row" ng-show="contextNodeData">
+    <div class="row" ng-show="!contextNodeData">
         <div class="col-sm-12 col-md-12 col-lg-12">
-           Context Node: <a href="{{contextNodeData.id}}" target="_blank">{{contextNodeData.name}} ({{contextNodeData.type}})</a>
+            <button class="btn btn-sm btn-default" ng-click="sizeNodesEvenly()">Size nodes evenly</button>
+            <button class="btn btn-sm btn-default" ng-click="reset()">Reset</button>
         </div>
     </div>
     <div class="row" ng-show="contextNodeData">
-        <div class="col-sm-12 col-md-12 col-lg-12">
-           Neighbours:
+        <div class="col-sm-10 col-md-10 col-lg-10">
+           <strong>{{contextNodeData.type}}:</strong> <a href="{{contextNodeData.id}}" target="_blank">({{contextNodeData.nodeid}}) {{contextNodeData.name}}</a>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <button class="btn btn-sm btn-default" ng-click="reset()">Reset</button><br/>
         </div>
     </div>
+    <hr/>
     <div class="row" ng-show="contextNodeData">
-        <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="n in contextNetworkData">
-           <a href="{{n.id}}" target="_blank">{{n.name}} ({{n.type}})</a>
+        <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="(type, data) in contextNetworkData">
+            <span class="form-inline">
+                <span class="checkbox"><input type="checkbox" ng-click="selectAll(type)"></span>
+                <strong>{{type}} ({{data.length}})</strong><br/>
+            </span>
+            <span ng-repeat="d in data">
+                <span class="form-inline">
+                    <span class="checkbox"><input type="checkbox" ng-click="highlight(d.nodeid)" ng-checked="d.checked"></span>
+                    <a href="{{d.id}}" target="_blank">({{d.nodeid}}) {{d.name}}</a><br/>
+                </span>
+            </span>
         </div>
     </div>
 </div>

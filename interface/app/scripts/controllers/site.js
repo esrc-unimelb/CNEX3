@@ -8,6 +8,11 @@ angular.module('interfaceApp')
         $scope.graph = $routeParams.explore;
         $scope.service = configuration[configuration.service];
 
+        $rootScope.$on('graph-ready', function() {
+            console.log('here');
+            $scope.showControls = true;
+        })
+
         var init = function() {
             $scope.progress = false;
             $scope.datasetError = false;
