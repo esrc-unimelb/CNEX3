@@ -1,0 +1,10 @@
+[GENERAL]:
+# Site descriptive name
+name: Find & Connect Tasmania
+url: http://www.findandconnect.gov.au
+
+# Location of the EAC data files
+eac: /srv/ha/web/FCTS//testing/eac
+
+## For file loads, map the URL back in the to filesystem
+map: http://www.findandconnect.gov.au/ref/tas, /srv/ha/web/FCTS//testing
