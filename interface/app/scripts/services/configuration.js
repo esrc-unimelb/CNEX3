@@ -3,9 +3,9 @@
 angular.module('interfaceApp')
   .constant('configuration', {
       'development': 'http://dev01:3000/app',
-      'testing':    '',
+      'testing':    'https://cnex.esrc.info/app',
       'production': '',
-      'service': 'development',
+      'service': 'testing',
       'solr': 'https://data.esrc.info/solr/ESRC/select',
       'highlight': {
           'contextNode': 'green',
