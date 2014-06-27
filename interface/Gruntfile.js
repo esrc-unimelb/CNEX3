@@ -30,7 +30,7 @@ module.exports = function (grunt) {
           },
         testing: {
             options: {
-                remote: '',
+                remote: 'git@bitbucket.org:esrc/cnex.git',
                 branch: 'testing'
               }
         },
