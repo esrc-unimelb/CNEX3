@@ -2,6 +2,8 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSONP
 from sqlalchemy import engine_from_config
 
+from pyramid.paster import setup_logging
+
 from .models import (
     DBSession,
     Base,
@@ -15,6 +17,7 @@ def main(global_config, **settings):
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
+    setup_logging(global_config['__file__'])
     config.add_renderer('jsonp', JSONP(param_name='callback'))
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home',           '/')
