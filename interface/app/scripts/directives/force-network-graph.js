@@ -146,28 +146,28 @@ angular.module('interfaceApp')
                   node.transition()
                       .attr('fill', function(d) {
                           if (d.name === n) {
-                              return 'red';
+                              return configuration.highlight.contextNode;
                           } else if (neighbours.indexOf(d.name) !== -1) {
-                              return 'green';
+                              return configuration.highlight.contextNeighbourDefault;
                           } else {
-                              return 'grey';
+                              return configuration.highlight.default;
                           }
                       })
                       .attr('opacity', function(d) {
                           if (neighbours.indexOf(d.name) !== -1 || d.name === n) {
-                            return '1';
+                            return configuration.opacity.highlight;
                           } else {
-                              return '0.3';
+                              return configuration.opacity.fade;
                           }
                       })
                   link.transition()
                       .attr('stroke', function(d) {
                           if (d.source.name === n && neighbours.indexOf(d.target.name) !== -1) {
-                              return 'green';
+                              return configuration.highlight.contextNeighbourDefault;
                           } else if (neighbours.indexOf(d.source.name) !== -1 && d.target.name === n) {
-                              return 'green';
+                              return configuration.highlight.contextNeighbourDefault;
                           } else {
-                              return '#ccc';
+                              return configuration.highlight.default;
                           }
                       })
                       .attr('opacity', function(d) {
@@ -186,26 +186,34 @@ angular.module('interfaceApp')
                   // store the data context node and neighbours in the service
                   //   which is watching for these and will update the local data 
                   //   on change
-                  var url = configuration.solr + '?spellcheck=off&q=id:"' + scope.data[n].url + '"&wt=json&json.wrf=JSON_CALLBACK';
-                  $http.jsonp(url).then(function(d) {
-                      d.data.response.docs[0].nodeid = n;
-                      DataService.contextNodeData = d.data.response.docs[0];
-                      $rootScope.$broadcast('context-node-data-ready');
-                  },
-                  function() {
-                  });
-                 
-
-                  DataService.contextNetworkData = [];
-                  angular.forEach(neighbours, function(v,k) {
-                      var url = configuration.solr + '?spellcheck=off&q=id:"' + scope.data[v].url + '"&wt=json&json.wrf=JSON_CALLBACK';
+                  if (scope.data[n].url !== undefined) {
+                      var url = configuration.solr + '?spellcheck=off&q=id:"' + scope.data[n].url + '"&wt=json&json.wrf=JSON_CALLBACK';
                       $http.jsonp(url).then(function(d) {
-                          d.data.response.docs[0].nodeid = v;
-                          DataService.contextNetworkData.push(d.data.response.docs[0]);
-                          $rootScope.$broadcast('context-node-neighbour-data-ready');
+                          d.data.response.docs[0].nodeid = n;
+                          DataService.contextNodeData = d.data.response.docs[0];
+                          $rootScope.$broadcast('context-node-data-ready');
                       },
                       function() {
                       });
+                  } else {
+                    DataService.contextNodeData = d;
+                    $rootScope.$broadcast('context-node-data-ready');
+                  }
+
+                  DataService.contextNetworkData = [];
+                  angular.forEach(neighbours, function(v,k) {
+                      if (scope.data[v].url !== undefined) {
+                          var url = configuration.solr + '?spellcheck=off&q=id:"' + scope.data[v].url + '"&wt=json&json.wrf=JSON_CALLBACK';
+                          $http.jsonp(url).then(function(d) {
+                              d.data.response.docs[0].nodeid = v;
+                              DataService.contextNetworkData.push(d.data.response.docs[0]);
+                              $rootScope.$broadcast('context-node-neighbour-data-ready');
+                          },
+                          function() {
+                          });
+                      } else {
+                          $rootScope.$broadcast('context-node-neighbour-data-ready');
+                      }
                  });
           });
 

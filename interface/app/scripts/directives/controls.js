@@ -18,15 +18,46 @@ angular.module('interfaceApp')
               'width': 550,
               'height': $window.innerHeight - 100,
           }
+          scope.highlightedTypes = [];
+          scope.color = d3.scale.category20();  
 
+          // populate the controls widget
           $rootScope.$on('graph-data-loaded', function() {
               scope.data = {
                   nodes: DataService.nodes,
                   links: DataService.links,
                   percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
-              calculateDegree();
+              //calculateDegree();
+              generateTypeStatistics();
           })
+
+          var calculateDegree = function() {
+              scope.service = configuration[configuration.service];
+              var url = scope.service + '/stats/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
+              $http.jsonp(url).then(function(response) {
+                  scope.data.name = response.data.name;
+                  scope.data.url = response.data.url;
+                  scope.data.degree = response.data.degree;
+              },
+              function() {
+                  console.log('Service failure when asking for network degree');
+              });
+          }
+
+          var generateTypeStatistics = function() {
+              var types = {};
+              angular.forEach(scope.data.nodes, function(v,k) { 
+                  if (types[v.type] === undefined) {
+                      types[v.type] = 1;
+                  } else {
+                      types[v.type] += 1;
+                  }
+              })
+              scope.data.types = types;
+          }
+
+          // process the data coming from solr when a node is selected
           $rootScope.$on('context-node-data-ready', function() {
               scope.contextNodeData = DataService.contextNodeData;
           });
@@ -42,20 +73,8 @@ angular.module('interfaceApp')
               scope.contextNetworkData = sorted;
           });
 
-          var calculateDegree = function() {
-              scope.service = configuration[configuration.service];
-              var url = scope.service + '/stats/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
-              $http.jsonp(url).then(function(response) {
-                  scope.data.name = response.data.name;
-                  scope.data.url = response.data.url;
-                  scope.data.degree = response.data.degree;
-              },
-              function() {
-                  console.log('Service failure when asking for network degree');
-              });
-          }
-
-          scope.highlight = function(nodeid) {
+          // handle node selection - highlight connected neighbours
+         scope.highlight = function(nodeid) {
               angular.forEach(scope.contextNetworkData, function(v, k) {
                   if (v.nodeid === nodeid) {
                       v.checked = !v.checked;
@@ -65,15 +84,17 @@ angular.module('interfaceApp')
                 .attr('fill', function(d) {
                     if (d.name === nodeid) {
                         if (d3.select(this).attr('fill') === 'blue') {
-                            return 'green';
+                            return configuration.highlight.contextNeighbourDefault;
                         } else {
-                            return 'blue';
+                            return configuration.highlight.contextNeighbourHighlight;
                         }
                     } else { 
                         return d3.select(this).attr('fill');
                     }
                 });
           }
+
+          // handle select all by type
           scope.selectAll = function(type) {
               angular.forEach(scope.contextNetworkData, function(v,k) {
                   if (k === type) { 
@@ -85,13 +106,58 @@ angular.module('interfaceApp')
               })
           }
 
+          scope.highlightByType = function(type) {
+              if (scope.highlightedTypes.indexOf(type) === -1) {
+                  scope.highlightedTypes.push(type);
+              } else {
+                  scope.highlightedTypes.splice(scope.highlightedTypes.indexOf(type), 1)
+              }
+              d3.selectAll('.node')
+                .attr('fill', function(d) {
+                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
+                        return scope.color(d.type);
+                    } else {
+                        return configuration.highlight.default;
+                    }
+                })
+                .attr('opacity', function(d) {
+                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
+                        return configuration.opacity.highlight;
+                    } else {
+                        return configuration.opacity.fade;
+                    }
+                })
+                .attr('r', '10')
+                .transition(4)
+                .attr('r', function(d) {
+                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
+                        return '30';
+                    } else {
+                        return '10';
+                    }
+                });
+
+                d3.selectAll('.link')
+                  .attr('opacity', function(d) {
+                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
+                        return configuration.opacity.highlight;
+                    } else {
+                        return configuration.opacity.fade;
+                    }
+                  });
+          }
+
+          // handle the trigger to set the same size for all nodes
           scope.sizeNodesEvenly = function() {
               d3.selectAll('.node').attr('r', '10');
           }
+
+          // trigger an app reset
           scope.reset = function() {
               $rootScope.$broadcast('force-reset');
               scope.contextNodeData = undefined;
               scope.contextNetworkData = undefined;
+              scope.highlightedTypes = [];
           }
       }
     };

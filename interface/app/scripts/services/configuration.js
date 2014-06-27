@@ -6,5 +6,15 @@ angular.module('interfaceApp')
       'testing':    '',
       'production': '',
       'service': 'development',
-      'solr': 'https://data.esrc.info/solr/ESRC/select'
+      'solr': 'https://data.esrc.info/solr/ESRC/select',
+      'highlight': {
+          'contextNode': 'green',
+          'contextNeighbourDefault': 'orange',
+          'contextNeighbourHighlight': 'blue',
+          'default': 'grey'
+      },
+      'opacity': {
+          'highlight': '1',
+          'fade': '0.3'
+      }
   });
