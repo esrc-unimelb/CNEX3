@@ -28,7 +28,7 @@ angular.module('interfaceApp')
                   links: DataService.links,
                   percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
-              //calculateDegree();
+              calculateDegree();
               generateTypeStatistics();
           })
 
@@ -38,7 +38,7 @@ angular.module('interfaceApp')
               $http.jsonp(url).then(function(response) {
                   scope.data.name = response.data.name;
                   scope.data.url = response.data.url;
-                  scope.data.degree = response.data.degree;
+                  //scope.data.degree = response.data.degree;
               },
               function() {
                   console.log('Service failure when asking for network degree');
