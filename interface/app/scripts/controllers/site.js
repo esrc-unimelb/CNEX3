@@ -9,7 +9,6 @@ angular.module('interfaceApp')
         $scope.service = configuration[configuration.service];
 
         $rootScope.$on('graph-ready', function() {
-            console.log('here');
             $scope.showControls = true;
         })
 

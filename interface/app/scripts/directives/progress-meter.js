@@ -7,9 +7,22 @@ angular.module('interfaceApp')
       restrict: 'E',
       scope: {
           processed: '@',
-          total: '@'
+          total: '@',
+          invert: '@'
       },
       link: function postLink(scope, element, attrs) {
+          scope.$watch('processed', function() {
+             updateProgressBar();
+          });
+
+          var updateProgressBar = function() {
+              var width = (scope.processed / scope.total) * 100;
+              if (angular.fromJson(scope.invert) === true) { 
+                  scope.width = 100 - width || 1;
+              } else {
+                  scope.width = width;
+              }
+          }
       }
     };
   });

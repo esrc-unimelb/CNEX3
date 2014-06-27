@@ -44,10 +44,13 @@ angular.module('interfaceApp')
           scope.weight.domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
           scope.unConnectedNodes = [];
 
+          // redraw the view when zooming
           var redraw = function() {
               svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
           }
 
+          // calculate node / link positions during the simulation
+          scope.tickCounter = 0;
           var tick = function() {
               link.attr('x1', function(d) { return d.source.x; })
                   .attr('y1', function(d) { return d.source.y; })
@@ -57,6 +60,27 @@ angular.module('interfaceApp')
               node.attr('transform', function(d) {
                 return 'translate(' + d.x + ',' + d.y + ')';
               });
+
+
+              // we can't update on every cycle as the html 
+              //  element can't doesn't keep up
+              scope.tickCounter += 1;
+              if (scope.tickCounter === 2) {
+                  scope.tickCounter = 0;
+                  scope.$apply(function() {
+                      scope.total = 0.1;
+                      scope.processed = force.alpha();
+                  });
+              }
+
+              // we ditch the cooling bar indicator as the
+              //   simulation doesn't seem to get to 0 thus triggering
+              //   the 'end' event
+              if (force.alpha() < 0.0055) {
+                  scope.$apply(function() {
+                      scope.relaxed = true;
+                  })
+              }
           }
 
           var force = d3.layout.force()
@@ -81,6 +105,7 @@ angular.module('interfaceApp')
           var link = svg.selectAll('.link').data(force.links());
           var node = svg.selectAll('.node').data(force.nodes());
 
+          // draw the links
           link.enter()
               .append('line')
               .attr('class', 'link')
@@ -88,12 +113,15 @@ angular.module('interfaceApp')
               .attr('stroke-width', 2);
           link.exit().remove();
 
+          //draw the nodes
           node.enter()
               .append('circle')
               .attr('class', 'node')
               .attr('r', function(d) { return scope.weight(d.connections); })
               .attr('fill', function(d) { return scope.color(d.type); })
+          node.exit().remove();
 
+          // handle the node click event
           node.on('click', function(d) {
                   var highlightLocalEnvironment = function() {
                   }
@@ -179,9 +207,7 @@ angular.module('interfaceApp')
                       function() {
                       });
                  });
-
-              });
-          node.exit().remove();
+          });
 
           force.start();
 

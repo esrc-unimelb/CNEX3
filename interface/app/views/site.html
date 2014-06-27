@@ -5,9 +5,21 @@
         <div ng-if="datasetError"><h4 class="text-center">Requested dataset unavailable...</h4></div>
     </div>
 </div>
-<div class="row" style="margin-top: 15px;" ng-if="progress">
+<div class="row" style="margin-top: 10px;" ng-if="progress">
     <div class="col-sm-12 col-md-12 col-lg-12">
         <progress-meter processed="{{processed}}" total="{{total}}" error="{{datasetError}}"></progress-meter>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3">
+            <h4 class="text-center">Building the graph: {{processed}} of {{total}} entities processed.</h4>
+            <p class="text-center">
+                This can take some time. You'll also notice the screen go blank after it's done building the<br/>
+                graph as the browser works desperately to draw the components.
+                <br/><br/>
+                The amount of time the browser requires to draw the graph <em>increases</em><br/>
+                with increasing graph size so please <em>be patient.</em>
+            </p>
+        </div>
     </div>
 </div>
 <div class="row">

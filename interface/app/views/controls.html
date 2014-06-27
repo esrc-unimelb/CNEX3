@@ -1,3 +1,4 @@
+<!-- the cog which hides / shows the controls panel -->
 <div class="above" style="top: {{cls.top}}px; left: {{cls.left}}px; width: {{cls.width}}px; height: 50px; z-index: 2000000;">
     <div class="row">
         <div class="col-sm-1 col-sm-offset-11 col-md-1 col-md-offset-11 col-lg-1 col-lg-offset-11">
@@ -5,8 +6,12 @@
         </div>
     </div>
 </div>
+
+<!-- the white, semi opaque div behind the controls panel -->
 <div class="below" style="top: {{cls.top}}px; left: {{cls.left}}px; width: {{cls.width}}px; height: {{cls.height}}px;" ng-hide="visible">
 </div>
+
+<!-- the controls panel -->
 <div class="above" style="top: {{cls.top}}px; left: {{cls.left}}px; width: {{cls.width}}px; height: {{cls.height}}px; overflow-y: auto; padding: 15px;" ng-hide="visible">
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
