@@ -137,7 +137,11 @@ class Network:
             graph.node[n]['connections'] = len(graph.neighbors(n))
 
         # save the graph
-        n = NetworkModel(site = self.site, graph_type = self.graph_type)
+        n = NetworkModel(
+            site = self.site, 
+            graph_type = self.graph_type, 
+            valid_to = datetime.now() + timedelta(hours=float(self.request.registry.settings['data_age']))
+        )
         n.graph_data = json.dumps(json_graph.node_link_data(graph))
         self.dbs.add(n)
         transaction.commit()
