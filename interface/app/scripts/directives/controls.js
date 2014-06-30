@@ -28,6 +28,12 @@ angular.module('interfaceApp')
                   links: DataService.links,
                   percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
+              scope.data.colors = {};
+              angular.forEach(scope.data.nodes, function(v, k) {
+                  if (scope.data.colors[v.type] === undefined) {
+                      scope.data.colors[v.type] = v.color;
+                  }
+              })
               calculateDegree();
               generateTypeStatistics();
           })
@@ -49,9 +55,9 @@ angular.module('interfaceApp')
               var types = {};
               angular.forEach(scope.data.nodes, function(v,k) { 
                   if (types[v.type] === undefined) {
-                      types[v.type] = 1;
+                      types[v.type] = { 'count': 1, 'checked': false };
                   } else {
-                      types[v.type] += 1;
+                      types[v.type].count += 1;
                   }
               })
               scope.data.types = types;
@@ -109,13 +115,15 @@ angular.module('interfaceApp')
           scope.highlightByType = function(type) {
               if (scope.highlightedTypes.indexOf(type) === -1) {
                   scope.highlightedTypes.push(type);
+                  scope.data.types[type].checked = true;
               } else {
                   scope.highlightedTypes.splice(scope.highlightedTypes.indexOf(type), 1)
+                  scope.data.types[type].checked = false;
               }
               d3.selectAll('.node')
                 .attr('fill', function(d) {
                     if (scope.highlightedTypes.indexOf(d.type) !== -1) {
-                        return scope.color(d.type);
+                        return scope.data.colors[d.type];
                     } else {
                         return configuration.highlight.default;
                     }
@@ -158,6 +166,10 @@ angular.module('interfaceApp')
               scope.contextNodeData = undefined;
               scope.contextNetworkData = undefined;
               scope.highlightedTypes = [];
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k].checked = false;
+                  
+              })
           }
       }
     };

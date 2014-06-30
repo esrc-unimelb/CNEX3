@@ -18,7 +18,7 @@ angular.module('interfaceApp')
 
               node.attr('class', 'node')
                   .attr('r', function(d) { return scope.weight(d.connections); })
-                  .attr('fill', function(d) { return scope.color(d.type); })
+                  .attr('fill', function(d) { return d.color; })
                   .attr('opacity', '1');
           });
 
@@ -39,7 +39,7 @@ angular.module('interfaceApp')
           var h = $window.innerHeight;
 
           d3.select('svg').remove();
-          scope.color = d3.scale.category20();
+          //scope.color = d3.scale.category20();
           scope.weight = d3.scale.linear().range([10, 80]);
           scope.weight.domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
           scope.unConnectedNodes = [];
@@ -118,7 +118,9 @@ angular.module('interfaceApp')
               .append('circle')
               .attr('class', 'node')
               .attr('r', function(d) { return scope.weight(d.connections); })
-              .attr('fill', function(d) { return scope.color(d.type); })
+              .attr('fill', function(d) { 
+                  return d.color; 
+              })
           node.exit().remove();
 
           // handle the node click event
@@ -218,10 +220,6 @@ angular.module('interfaceApp')
           });
 
           force.start();
-
-          force.on('end', function() {
-              $rootScope.$broadcast('graph-ready');
-          });
 
       }
     };

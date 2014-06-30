@@ -64,17 +64,17 @@
     <!-- dataset type statistics -->
     <div class="row" ng-show="!contextNodeData">
         <hr/>
-        <span ng-repeat="(type, count) in data.types">
+        <span ng-repeat="(type, typeData) in data.types">
             <div class="col-sm-6 col-md-6 col-lg-6">
                 {{type}}
             </div>
             <div class="col-sm-4 col-md-4 col-lg-4">
-                {{count}}
+                {{typeData.count}}
             </div>
-            <div class="col-sm-2 col-md-2 col-lg-2">
+            <div class="col-sm-2 col-md-2 col-lg-2 text-center" style="background-color: {{data.colors[type]}}">
                 <span class="form-inline">
                     <span class="checkbox">
-                        <input type="checkbox" ng-click="highlightByType(type)">
+                        <input type="checkbox" ng-click="highlightByType(type)" ng-checked="typeData.checked">
                     </span>
                 </span>
             </div>

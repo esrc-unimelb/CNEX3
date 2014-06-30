@@ -108,6 +108,12 @@ angular.module('interfaceApp')
                 }
             }
 
+            // add some color
+            var color = d3.scale.category20();
+            for (i=0; i<nodes.length; i++) {
+                nodes[i].color = color(nodes[i].type);
+            }
+
             DataService.nodes = nodes;
             DataService.links = links;
             DataService.unConnectedNodes = unConnectedNodes;
