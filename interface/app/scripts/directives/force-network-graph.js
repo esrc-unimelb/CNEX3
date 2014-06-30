@@ -11,12 +11,14 @@ angular.module('interfaceApp')
       link: function postLink(scope, element, attrs) {
 
           $rootScope.$on('force-reset', function() {
-              link.attr('class', 'link')
+              link.transition()
+                  .attr('class', 'link')
                   .attr('stroke', '#ccc')
                   .attr('stroke-width', 2)
                   .attr('opacity', '1');
 
-              node.attr('class', 'node')
+              node.transition()
+                  .attr('class', 'node')
                   .attr('r', function(d) { return scope.weight(d.connections); })
                   .attr('fill', function(d) { return d.color; })
                   .attr('opacity', '1');
