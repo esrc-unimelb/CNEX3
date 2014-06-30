@@ -120,6 +120,11 @@ angular.module('interfaceApp')
                   scope.highlightedTypes.splice(scope.highlightedTypes.indexOf(type), 1)
                   scope.data.types[type].checked = false;
               }
+
+              if (scope.highlightedTypes.length === 0) {
+                  scope.reset();
+                  return;
+              }
               d3.selectAll('.node')
                 .attr('fill', function(d) {
                     if (scope.highlightedTypes.indexOf(d.type) !== -1) {
