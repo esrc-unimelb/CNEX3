@@ -9,10 +9,8 @@
         stroke-width: 2.0;
     }
 </style>
-<div class="row" ng-if="!relaxed">
-    <div class="col-sm-12 col-md-12 col-lg-12" style="z-index: 500000; margin-top: 10px;">
-        <progress-meter processed="{{processed}}" total="{{total}}" invert="true"></progress-meter>
-    </div>
+<div ng-if="!relaxed" style="position: fixed; top: 0px; left: 0px; z-index:500000; width: 200px; padding: 15px 30px;">
+    <progress-meter processed="{{processed}}" total="{{total}}" invert="true"></progress-meter>
 </div>
 <div class="row">
     <div class="col-sm-12 col-md-12 col-lg-12" style="z-index: 1;">
