@@ -186,11 +186,19 @@ class Network:
             for node in neighbours:
                 try:
                     neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
-                    neighbour_ref_local = neighbour_ref.replace(self.source_map[0], self.source_map[1])
+                    if neighbour_ref.startswith('http'):
+                        neighbour_ref_local = neighbour_ref.replace(self.source_map[0], self.source_map[1])
+                    else:
+                        # assume it's relative
+                        neighbour_ref_local = "%s/%s" % (self.source_map[1], neighbour_ref)
                     try:
                         xml_datafile = get_xml(href=neighbour_ref_local)
                         if xml_datafile is not None:
-                            xml_datafile_local = xml_datafile.replace(self.source_map[0], self.source_map[1])
+                            if xml_datafile.startswith('http'):
+                                xml_datafile_local = xml_datafile.replace(self.source_map[0], self.source_map[1])
+                            else:
+                                # assume it's relative
+                                xml_datafile_local = "%s/%s" % (self.source_map[1], xml_datafile)
                             tree = etree.parse(xml_datafile_local)
                         else:
                             raise IOError

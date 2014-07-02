@@ -136,11 +136,15 @@ def _expunge_expired_data():
     progress = dbs.query(Progress).filter(Progress.valid_to < now)
     if progress.count() > 0:
         progress.delete()
+
+    ## comment out the next line
 #    dbs.query(Progress).delete()
 
     nm = dbs.query(NetworkModel).filter(NetworkModel.valid_to < now)
     if nm.count() > 0:
         nm.delete()
+
+    ## comment out the next line
 #    dbs.query(NetworkModel).delete()
 
     dbs.flush()

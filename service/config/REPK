@@ -1,0 +1,10 @@
+[GENERAL]:
+# Site descriptive name
+name: Return, Reconcile, Renew
+url:
+
+# Location of the EAC data files
+eac: /srv/ha/web/REPK//testing/eac
+
+## For file loads, map the URL back in the to filesystem
+map: , /srv/ha/web/REPK//testing
