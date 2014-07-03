@@ -16,7 +16,7 @@ angular.module('interfaceApp', [
           templateUrl: 'views/site.html',
           controller: 'SiteCtrl'
       })
-      .when('/play/:code/:explore', {
+      .when('/play', {
           templateUrl: 'views/play.html',
           controler: 'PlayCtrl',
       })
