@@ -162,7 +162,9 @@ class Network:
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
             ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
             url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
-            graph.add_node(node_id, { 'type': ntype, 'url': url })
+            df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate")
+            dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate")
+            graph.add_node(node_id, { 'type': ntype, 'url': url, 'df': df, 'dt': dt })
 
             if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
@@ -180,7 +182,15 @@ class Network:
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
             ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
             url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
-            graph.add_node(node_id, { 'type': ntype, 'url': url })
+            df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
+            dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
+            if len(df) == 0:
+                df = None
+            if len(dt) == 0:
+                dt = None
+            print df, dt
+
+            graph.add_node(node_id, { 'type': ntype, 'url': url, 'df': df, 'dt': dt })
 
             neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
             for node in neighbours:
