@@ -11,5 +11,9 @@ angular.module('interfaceApp')
               sites.push([k, v]);
           });
           $scope.sites = sites.sort();
+          $scope.serviceUnavailable = false;
+      },
+      function() {
+          $scope.serviceUnavailable = true;
       });
   }]);
