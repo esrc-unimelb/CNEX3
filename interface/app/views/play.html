@@ -1,11 +1,16 @@
-
-<div class="row" ng-controller="PlayCtrl">
-    <div class="col-sm-2 col-md-2 col-lg-2">
-        <button type="button" class="btn btn-default" ng-click="addOne()">Add 1 node.</button>
-        <button type="button" class="btn btn-default" ng-click="addTen()">Add 10 nodes.</button>
-        <button type="button" class="btn btn-default" ng-click="removeOne()">Remove 1 node.</button>
-    </div>
-    <div class="col-sm-10 col-md-10 col-lg-10">
-        <div id="graph"></div>
-    </div>
+<style>
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: cripsEdges;
+    }
+    .axis text {
+        font-family: sans-serif;
+        font-size: 11px;
+    }
+        
+</style>
+<div ng-controller="PlayCtrl">
+    <div id="graph"></div>
 </div>
