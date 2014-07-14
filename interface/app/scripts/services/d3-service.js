@@ -104,11 +104,13 @@ angular.module('interfaceApp')
      * @function: highlightNode
      */
     function highlightNode(id) {
-        var nodeDefaultColor;
+        var nodeDefaultColor, dateDefaultColor;
         if (DataService.contextNode !== undefined) {
             nodeDefaultColor = configuration.fill.contextNeighbourDefault;
+            dateDefaultColor = configuration.fill.contextNeighbourDefault;
         } else {
             nodeDefaultColor = DataService.nodeMap[id].color;
+            dateDefaultColor = DataService.nodeMap[id].color;
         }
 
         var n = d3.select('#' + id.replace(' ', '_') + '_node');
@@ -121,7 +123,7 @@ angular.module('interfaceApp')
         var d = d3.select('#' + id + '_date');
         try {
             if (d.attr('fill') === configuration.fill.contextNeighbourHighlight) {
-                d.attr('fill', configuration.fill.default);
+                d.attr('fill', dateDefaultColor);
             } else {
                 d.attr('fill', configuration.fill.contextNeighbourHighlight);
             }
