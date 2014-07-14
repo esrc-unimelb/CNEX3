@@ -162,21 +162,24 @@ class Network:
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
             ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
             url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
-            df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate")
-            dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate")
+            df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
+            dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
             name = self.get_entity_name(tree, ntype)
+            if len(df) == 0:
+                df = None
+            if len(dt) == 0:
+                dt = None
+
             graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
             if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
-                    #graph.add_node(function.text, { 'source': '', 'type': 'function', 'name': function.text, 'from': '', 'to': '' })
-                    graph.add_node(function.text, { 'type': function.text })
+                    graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
                     graph.add_edge(node_id, function.text, source_name=node_id, target_name=function.text)
 
             else:
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
-                    #graph.add_node(function.text, { 'source': '', 'type': 'function', 'name': function.text, 'from': '', 'to': '' })
-                    graph.add_node(function.text)
+                    graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
                     graph.add_edge(node_id, function.text, source_name=node_id, target_name=function.text)
         
     def entities_as_nodes(self, graph, tree):
