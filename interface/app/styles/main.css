@@ -31,3 +31,6 @@ body {
     position: fixed;
     z-index: 100000;
 }
+.contextNodeData.ng-hide-remove {
+    animation: fadeIn 0.5s;
+}

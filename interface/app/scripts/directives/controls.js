@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('controls', [ '$http', '$window', '$rootScope', 'DataService', 'configuration',
-        function ($http, $window, $rootScope, DataService, configuration) {
+  .directive('controls', [ '$http', '$window', '$rootScope', 'DataService', 'configuration', 'D3Service',
+        function ($http, $window, $rootScope, DataService, configuration, d3s) {
     return {
       templateUrl: 'views/controls.html',
       restrict: 'E',
@@ -18,8 +18,17 @@ angular.module('interfaceApp')
               'width': 550,
               'height': $window.innerHeight - 100,
           }
-          scope.highlightedTypes = [];
-          scope.color = d3.scale.category20();  
+          scope.showData = false;
+
+          // handle the reset call
+          $rootScope.$on('reset', function() {
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k].checked = false;
+              })
+              scope.contextNodeData = undefined;
+              scope.contextNetworkData = undefined;
+              scope.showData = false;
+          })
 
           // populate the controls widget
           $rootScope.$on('graph-data-loaded', function() {
@@ -28,76 +37,42 @@ angular.module('interfaceApp')
                   links: DataService.links,
                   percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
-              scope.data.colors = {};
-              angular.forEach(scope.data.nodes, function(v, k) {
-                  if (scope.data.colors[v.type] === undefined) {
-                      scope.data.colors[v.type] = v.color;
-                  }
-              })
-              calculateDegree();
-              generateTypeStatistics();
-          })
 
-          var calculateDegree = function() {
-              scope.service = configuration[configuration.service];
-              var url = scope.service + '/stats/' + scope.site + '/' + scope.graph + '?callback=JSON_CALLBACK';
-              $http.jsonp(url).then(function(response) {
-                  scope.data.name = response.data.name;
-                  scope.data.url = response.data.url;
-                  //scope.data.degree = response.data.degree;
-              },
-              function() {
-                  console.log('Service failure when asking for network degree');
-              });
-          }
-
-          var generateTypeStatistics = function() {
               var types = {};
               angular.forEach(scope.data.nodes, function(v,k) { 
                   if (types[v.type] === undefined) {
-                      types[v.type] = { 'count': 1, 'checked': false };
+                      types[v.type] = { 'count': 1, 'checked': false, 'color': v.color };
                   } else {
                       types[v.type].count += 1;
                   }
               })
               scope.data.types = types;
-          }
+          })
 
           // process the data coming from solr when a node is selected
-          $rootScope.$on('context-node-data-ready', function() {
-              scope.contextNodeData = DataService.contextNodeData;
-          });
-          $rootScope.$on('context-node-neighbour-data-ready', function() {
-              // sort by type
+          $rootScope.$on('search-result-data-ready', function() {
               var sorted = {};
-              angular.forEach(DataService.contextNetworkData, function(v,k) {
-                  var t = v.type;
-                  if (sorted[t] === undefined) { sorted[t] = []; }
-                  v.checked = false;
-                  sorted[t].push(v);
-              })
+              angular.forEach(DataService.selected, function(v,k) {
+                  if (v === DataService.contextNode) {
+                      scope.contextNodeData = DataService.nodeMap[v];
+                  } else {
+                      var d = DataService.nodeMap[v];
+                      if (sorted[d.type] === undefined) { sorted[d.type] = []; }
+                      d.checked = false;
+                      sorted[d.type].push(d);
+                  }
+              });
               scope.contextNetworkData = sorted;
           });
 
           // handle node selection - highlight connected neighbours
          scope.highlight = function(nodeid) {
-              angular.forEach(scope.contextNetworkData, function(v, k) {
-                  if (v.nodeid === nodeid) {
-                      v.checked = !v.checked;
-                  }
-              })
-              d3.selectAll('.node')
-                .attr('fill', function(d) {
-                    if (d.name === nodeid) {
-                        if (d3.select(this).attr('fill') === 'blue') {
-                            return configuration.highlight.contextNeighbourDefault;
-                        } else {
-                            return configuration.highlight.contextNeighbourHighlight;
-                        }
-                    } else { 
-                        return d3.select(this).attr('fill');
-                    }
-                });
+             angular.forEach(scope.contextNetworkData, function(v, k) {
+                 if (v.id === nodeid) {
+                     v.checked = !v.checked;
+                 }
+             })
+             d3s.highlightNode(nodeid);
           }
 
           // handle select all by type
@@ -106,76 +81,27 @@ angular.module('interfaceApp')
                   if (k === type) { 
                       angular.forEach(v, function(v,k) {
                           v.checked = !v.checked;
-                          scope.highlight(v.nodeid);
+                          d3s.highlightNode(v.id);
                       });
                   }
               })
           }
 
           scope.highlightByType = function(type) {
-              if (scope.highlightedTypes.indexOf(type) === -1) {
-                  scope.highlightedTypes.push(type);
-                  scope.data.types[type].checked = true;
-              } else {
-                  scope.highlightedTypes.splice(scope.highlightedTypes.indexOf(type), 1)
-                  scope.data.types[type].checked = false;
-              }
-
-              if (scope.highlightedTypes.length === 0) {
-                  scope.reset();
-                  return;
-              }
-              d3.selectAll('.node')
-                .attr('fill', function(d) {
-                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
-                        return scope.data.colors[d.type];
-                    } else {
-                        return configuration.highlight.default;
-                    }
-                })
-                .attr('opacity', function(d) {
-                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
-                        return configuration.opacity.highlight;
-                    } else {
-                        return configuration.opacity.fade;
-                    }
-                })
-                .attr('r', '10')
-                .transition(4)
-                .attr('r', function(d) {
-                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
-                        return '30';
-                    } else {
-                        return '10';
-                    }
-                });
-
-                d3.selectAll('.link')
-                  .attr('opacity', function(d) {
-                    if (scope.highlightedTypes.indexOf(d.type) !== -1) {
-                        return configuration.opacity.highlight;
-                    } else {
-                        return configuration.opacity.fade;
-                    }
-                  });
+              scope.data.types[type].checked = !scope.data.types[type].checked;
+              d3s.highlightByType(type);
           }
 
           // handle the trigger to set the same size for all nodes
           scope.sizeNodesEvenly = function() {
-              d3.selectAll('.node').attr('r', '10');
+              d3s.sizeNodesEvenly();
           }
 
-          // trigger an app reset
+          // trigger a reset
           scope.reset = function() {
-              $rootScope.$broadcast('force-reset');
-              scope.contextNodeData = undefined;
-              scope.contextNetworkData = undefined;
-              scope.highlightedTypes = [];
-              angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k].checked = false;
-                  
-              })
+              d3s.reset();
           }
+
       }
     };
   }]);

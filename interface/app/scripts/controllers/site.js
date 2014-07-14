@@ -12,27 +12,24 @@ angular.module('interfaceApp')
             $scope.showControls = true;
         })
 
-        var init = function() {
+        $scope.progress = false;
+        $scope.datasetError = false;
+        $scope.controls = false;
+        $scope.total = 0;
+        $scope.processed = 0;
+
+        var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '?callback=JSON_CALLBACK';
+        console.log(url);
+        $http.jsonp(url).then(function() {
+            // kick off the progress update in a moment; needs time to get going..
+            $timeout(function() { $scope.update(); }, 200);
             $scope.progress = false;
-            $scope.datasetError = false;
-            $scope.controls = false;
-            $scope.total = 0;
-            $scope.processed = 0;
+        },
+        function() {
+            $scope.datasetError = true;
+            $scope.progress = false;
+        });
 
-            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '?callback=JSON_CALLBACK';
-            console.log(url);
-            $http.jsonp(url).then(function() {
-                // kick off the progress update in a moment; needs time to get going..
-                $timeout(function() { $scope.update(); }, 200);
-                $scope.progress = false;
-            },
-            function() {
-                $scope.datasetError = true;
-                $scope.progress = false;
-            });
-
-        };
-        init();
 
         $scope.update = function() {
             var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status?callback=JSON_CALLBACK';
@@ -55,8 +52,6 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
-            console.log('update graph');
-
             var ns = JSON.parse(d.graph).nodes;
             var ls = JSON.parse(d.graph).links;
 
@@ -65,17 +60,15 @@ angular.module('interfaceApp')
             // and
             //
             // nodes / links arrays
-            var nodes = [], links = [];
+            var nodes = [], nodeMap = {}, links = [];
             var i, j = 0, nodesTmp = [], nodeData = {};
             var connectedNodes = [], unConnectedNodes = [], processedLinks = [];
             var weightBounds = [];
 
             for (i=0; i<ns.length; i++) {
                 var n = ns[i].id;
-                var t = ns[i].type;
-                var u = ns[i].url;
                 var c = ns[i].connections;
-                nodeData[n] = { 'type': t, 'connections': c, 'url': u };
+                nodeData[n] = ns[i];
                 weightBounds.push(c);
             }
             weightBounds = [Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)];
@@ -88,13 +81,13 @@ angular.module('interfaceApp')
 
                 if (nodesTmp.indexOf(sn) === -1) {
                     nodesTmp.push(sn);
-                    nodeData[sn].name = sn
                     nodes.push(nodeData[sn]);
+                    nodeMap[sn] = nodeData[sn];
                 }
                 if (nodesTmp.indexOf(tn) === -1) {
                     nodesTmp.push(tn);
-                    nodeData[tn].name = tn;
                     nodes.push(nodeData[tn]);
+                    nodeMap[tn] = nodeData[tn];
                 }
                 links.push({ 'source': nodesTmp.indexOf(sn), 'target': nodesTmp.indexOf(tn) });
             }
@@ -104,7 +97,7 @@ angular.module('interfaceApp')
             for (i=0; i<ns.length; i++) {
                 var n = ns[i].id;
                 if (nodesTmp.indexOf(n) === -1) {
-                    unConnectedNodes.push({ 'name': n});
+                    unConnectedNodes.push(ns[i]);
                 }
             }
 
@@ -115,6 +108,7 @@ angular.module('interfaceApp')
             }
 
             DataService.nodes = nodes;
+            DataService.nodeMap = nodeMap;
             DataService.links = links;
             DataService.unConnectedNodes = unConnectedNodes;
             DataService.weightBounds = weightBounds;

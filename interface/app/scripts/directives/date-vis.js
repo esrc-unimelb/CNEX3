@@ -1,127 +1,127 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('dateVis', [ '$rootScope', '$window', 'configuration', 'DataService', function ($rootScope, $window, configuration, DataService) {
+  .directive('dateVis', [ '$rootScope', 'configuration', 'DataService', 'D3Service', function ($rootScope, configuration, DataService, D3Service) {
     return {
       templateUrl: 'views/date-vis.html',
       restrict: 'E',
       scope: {
+          'width': '@',
+          'height': '@'
       },
       link: function postLink(scope, element, attrs) {
-          scope.visible = true;
-          $rootScope.$on('force-reset', function() {
-              rect.transition()
-                  .attr('fill', configuration.highlight.default)
-                  .attr('opacity', configuration.opacity.highlight)
-                  .attr('height', '5')
-                  .attr('stroke', configuration.highlight.default);
-              circle.transition()
-                    .attr('fill', configuration.highlight.default)
-                    .attr('opacity', configuration.opacity.highlight)
-                    .attr('r', '5')
-                    .attr('stroke', configuration.highlight.default);
+
+          $rootScope.$on('reset', function() {
+              var rect = d3.selectAll('.rect');
+              rect.attr('fill', configuration.fill.default)
+                  .attr('opacity', configuration.opacity.default)
+                  .attr('height', configuration.height.default) 
+                  .attr('stroke', configuration.stroke.date.default);
+
+              var circle = d3.selectAll('.circle');
+              circle.attr('fill', configuration.fill.default)
+                    .attr('opacity', configuration.opacity.default)
+                    .attr('r', configuration.radius.date.default)
+                    .attr('stroke', configuration.stroke.date.default);
           });
 
-          scope.width = 400;
-          scope.height = 400;
-          scope.top = $window.innerHeight - scope.height - 15;
+          $rootScope.$on('graph-data-loaded', function() {
+              // ditch any previous svg though I'm not sure why there's
+              //  still one there
+              d3.select('#datevis').select('svg').remove();
 
-          var nodes = DataService.nodes;
-          var points = [], ranges = [], dates = [];
+              var nodes = DataService.nodes;
+              var points = [], ranges = [], dates = [];
 
-          angular.forEach(nodes, function(v,k) {
-              if (v.df !== null && v.dt !== null) {
-                  dates.push(v.df);
-                  dates.push(v.dt);
-                  ranges.push(v);
-              } else {
-                  if (v.df !== null) {
+              // split the dataset into those nodes with both start and end
+              //  dates and those with either of start or end date
+              angular.forEach(nodes, function(v,k) {
+                  if (v.df !== null && v.dt !== null) {
                       dates.push(v.df);
-                      points.push(v);
-                  } else if (v.dt !== null) {
                       dates.push(v.dt);
-                      points.push(v);
-                  }
-              }
-          });
-
-          var t1 = Date.parse(d3.min(dates));
-          var t2 = Date.parse(d3.max(dates));
-
-          var xScale = d3.time.scale()
-                          .domain([t1, t2])
-                          .range([10, (scope.width - 10)]);
-
-          var xAxis = d3.svg.axis()
-                        .scale(xScale)
-                        .ticks(d3.time.years)
-                        .ticks(6)
-                        .orient("bottom");
-
-          // redraw the view when zooming
-          var redraw = function() {
-              svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
-          }
-
-          var svg = d3.select('#datevis')
-                      .append('svg')
-                      //.attr('viewBox', '0 0 ' + scope.width + ' ' + scope.height)
-                      //.attr('preserveAspectRatio', 'xMidYMid meet')
-                      //.call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
-                      .append('g');
-
-          var gx = svg.append('g')
-                      .attr('class', 'axis')
-                      .attr('transform', 'translate(0,' + (scope.height - 30) + ')')
-                      .call(xAxis);
-
-
-          var yScale = d3.scale.linear()
-                         .domain([0, ranges.length])
-                         .range([10, (scope.height-50)]);
-
-          var rect = svg.selectAll('rect').data(ranges);
-          rect.enter()
-              .append('rect')
-              .attr('class', 'rect')
-              .attr('x', function(d) {
-                  var date = Date.parse(d.df);
-                  return xScale(date);
-              })
-              .attr('y', function(d, i) {
-                  return yScale(i);
-              })
-              .attr('width', function(d) {
-                  if (d.dt === undefined || d.dt === '') {
-                      return 100;
+                      ranges.push(v);
                   } else {
+                      if (v.df !== null) {
+                          dates.push(v.df);
+                          points.push(v);
+                      } else if (v.dt !== null) {
+                          dates.push(v.dt);
+                          points.push(v);
+                      }
+                  }
+              });
+
+              var t1 = Date.parse(d3.min(dates));
+              var t2 = Date.parse(d3.max(dates));
+
+              var xScale = d3.time.scale()
+                              .domain([t1, t2])
+                              .range([10,scope.width-20]);
+
+              var xAxis = d3.svg.axis()
+                            .scale(xScale)
+                            .ticks(d3.time.years)
+                            .ticks(6)
+                            .orient("bottom");
+
+              var svg = d3.select('#datevis')
+                          .append('svg')
+                          .attr('width', scope.width)
+                          .attr('height', scope.height)
+                          .append('g');
+
+              var gx = svg.append('g')
+                          .attr('class', 'axis')
+                          .attr('transform', 'translate(0,' + (scope.height - 30) + ')')
+                          .call(xAxis);
+
+              var yScale = d3.scale.linear()
+                             .domain([0, ranges.length])
+                             .range([10, (scope.height-40)]);
+
+              var rect = svg.selectAll('.rect').data(ranges);
+              rect.enter()
+                  .append('rect')
+                  .attr('class', 'rect')
+                  .attr('x', function(d) {
+                      var date = Date.parse(d.df);
+                      return xScale(date);
+                  })
+                  .attr('y', function(d, i) {
+                      return yScale(i);
+                  })
+                  .attr('width', function(d) {
                       var df = Date.parse(d.df);
                       var dt = Date.parse(d.dt);
                       return xScale(dt) - xScale(df);
-                  }
-              })
-              .attr('height', '5')
-              .attr('fill', configuration.highlight.default);
+                  })
+                  .attr('height', configuration.height.default)
+                  .attr('fill', configuration.fill.default)
+                  .attr('id', function(d) { return d.id + '_date'; })
+                  .on('click', function(d) { D3Service.highlightNode(d.id); });
 
 
-          yScale.domain([0, points.length]);
-          var circle = svg.selectAll('circle').data(points);
-          circle.enter()
-              .append('circle')
-              .attr('class', 'circle')
-              .attr('cx', function(d) {
-                  if (d.df !== null) {
-                      var date = Date.parse(d.df);
-                  } else {
-                      var date = Date.parse(d.dt);
-                  }
-                  return xScale(date);
-              })
-              .attr('cy', function(d, i) {
-                  return yScale(i);
-              })
-              .attr('r', '3')
-              .attr('fill', configuration.highlight.default);
+              yScale.domain([0, points.length]);
+              var circle = svg.selectAll('circle').data(points);
+              circle.enter()
+                  .append('circle')
+                  .attr('class', 'circle')
+                  .attr('cx', function(d) {
+                      if (d.df !== null) {
+                          var date = Date.parse(d.df);
+                      } else {
+                          var date = Date.parse(d.dt);
+                      }
+                      return xScale(date);
+                  })
+                  .attr('cy', function(d, i) {
+                      return yScale(i);
+                  })
+                  .attr('r', configuration.radius.date.default)
+                  .attr('fill', configuration.fill.default)
+                  .attr('id', function(d) { return d.id + '_date'; })
+                  .on('click', function(d) { D3Service.highlightNode(d.id); });
+          });
       }
     };
   }]);
