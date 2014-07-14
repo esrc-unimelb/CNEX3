@@ -164,7 +164,8 @@ class Network:
             url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
             df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate")
             dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate")
-            graph.add_node(node_id, { 'type': ntype, 'url': url, 'df': df, 'dt': dt })
+            name = self.get_entity_name(tree, ntype)
+            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
             if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
@@ -184,13 +185,13 @@ class Network:
             url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
             df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
             dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
+            name = self.get_entity_name(tree, ntype)
             if len(df) == 0:
                 df = None
             if len(dt) == 0:
                 dt = None
-            print df, dt
 
-            graph.add_node(node_id, { 'type': ntype, 'url': url, 'df': df, 'dt': dt })
+            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
             neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
             for node in neighbours:
@@ -229,6 +230,24 @@ class Network:
                 except KeyError:
                     pass
             #print node_id, node_source, node_type
+
+    def get_entity_name(self, tree, ntype):
+        if ntype == 'Person':
+            if get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part[@localType='familyname']"):
+
+                ln = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part[@localType='familyname']")
+                gn = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry/e:part[@localType='givenname']")
+                return "%s, %s" % (ln, gn)
+            else:
+                fn = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry[position() = 1]/e:part")
+                if type(fn) == list:
+                    return ', '.join(fn)
+                return fn
+        else:
+            fn = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry[position() = 1]/e:part")
+            if type(fn) == list:
+                return ', '.join(fn)
+            return fn
 
     def calculate_average_degree(self):
         n = self.dbs.query(NetworkModel.graph_data) \
