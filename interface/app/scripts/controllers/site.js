@@ -20,10 +20,14 @@ angular.module('interfaceApp')
 
         var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '?callback=JSON_CALLBACK';
         console.log(url);
-        $http.jsonp(url).then(function() {
+        $http.jsonp(url).then(function(d) {
             // kick off the progress update in a moment; needs time to get going..
             $timeout(function() { $scope.update(); }, 200);
             $scope.progress = false;
+            DataService.site = {
+                'name': d.data.name,
+                'url': d.data.url
+            }
         },
         function() {
             $scope.datasetError = true;

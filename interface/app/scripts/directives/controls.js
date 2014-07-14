@@ -32,6 +32,7 @@ angular.module('interfaceApp')
 
           // populate the controls widget
           $rootScope.$on('graph-data-loaded', function() {
+              scope.siteData = DataService.site;
               scope.data = {
                   nodes: DataService.nodes,
                   links: DataService.links,
