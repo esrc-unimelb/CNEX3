@@ -111,7 +111,7 @@ angular.module('interfaceApp')
             nodeDefaultColor = DataService.nodeMap[id].color;
         }
 
-        var n = d3.select('#' + id + '_node');
+        var n = d3.select('#' + id.replace(' ', '_') + '_node');
         if (n.attr('fill') === configuration.fill.contextNeighbourHighlight) {
             n.attr('fill', nodeDefaultColor);
         } else {

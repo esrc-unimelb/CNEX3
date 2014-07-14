@@ -97,7 +97,7 @@ angular.module('interfaceApp')
                   })
                   .attr('height', configuration.height.default)
                   .attr('fill', configuration.fill.default)
-                  .attr('id', function(d) { return d.id + '_date'; })
+                  .attr('id', function(d) { return d.id.replace(' ', '_')+ '_date'; })
                   .on('click', function(d) { D3Service.highlightNode(d.id); });
 
 
@@ -119,7 +119,7 @@ angular.module('interfaceApp')
                   })
                   .attr('r', configuration.radius.date.default)
                   .attr('fill', configuration.fill.default)
-                  .attr('id', function(d) { return d.id + '_date'; })
+                  .attr('id', function(d) { return d.id.replace(' ', '_') + '_date'; })
                   .on('click', function(d) { D3Service.highlightNode(d.id); });
           });
       }

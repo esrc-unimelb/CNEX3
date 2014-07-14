@@ -97,13 +97,13 @@
         <div class="row" ng-show="contextNodeData">
             <hr/>
             <div class="col-sm-12 col-md-12 col-lg-12">
-                <span ng-show="contextNodeData.id">
+                <span ng-show="contextNodeData.url">
                     <strong>{{contextNodeData.type}}:</strong> 
-                    <a href="{{contextNodeData.id}}" target="_blank">({{contextNodeData.id}}) {{contextNodeData.name}}</a>
+                    <a href="{{contextNodeData.url}}" target="_blank">({{contextNodeData.id}}) {{contextNodeData.name}}</a>
                 </span>
-                <span ng-show="!contextNodeData.id">
+                <span ng-show="!contextNodeData.url">
                     <strong>Function:</strong> 
-                    {{contextNodeData.name}}
+                    {{contextNodeData.id}}
                 </span>
             </div>
         </div>
@@ -117,7 +117,8 @@
                 <span ng-repeat="d in data">
                     <span class="form-inline">
                         <span class="checkbox"><input type="checkbox" ng-click="highlight(d.id)" ng-checked="d.checked"></span>
-                        <a href="{{d.id}}" target="_blank">({{d.id}}) {{d.name}}</a><br/>
+                        <span ng-if="d.url"><a href="{{d.url}}" target="_blank">({{d.id}}) {{d.name}}</a><br/></span>
+                        <span ng-if="!d.url">{{d.name}}<br/></span>
                     </span>
                 </span>
             </div>

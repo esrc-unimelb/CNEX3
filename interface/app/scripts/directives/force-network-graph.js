@@ -122,7 +122,7 @@ angular.module('interfaceApp')
               .attr('fill', function(d) { 
                   return d.color; 
               })
-              .attr('id', function(d) { return d.id + '_node'; });
+              .attr('id', function(d) { return d.id.replace(' ', '_') + '_node'; });
           node.exit().remove();
 
           // handle the node click event
