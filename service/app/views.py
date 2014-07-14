@@ -31,7 +31,7 @@ from .models import (
 from Helpers import *
 from Network import Network
 
-import multiprocessing
+from config import Config
 
 @view_config(route_name='health-check', request_method='GET', renderer='string')
 def health_check(request):
@@ -68,11 +68,15 @@ def network_build(request):
     request.matchdict: code, the site of interest
     """
     graph_type = request.matchdict['explore']
+    site = request.matchdict['code']
+    conf = Config(request)
+    name = conf.sites[site]['name']
+    url = conf.sites[site]['url']
     n = Network(request)
     n.build()
 
     log.debug('job started')
-    return { 'started': True }
+    return { 'started': True, 'name': name, 'url': url }
 
 @view_config(route_name="network-stats", request_method='GET', renderer='jsonp')
 def network_stats(request):
