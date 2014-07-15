@@ -1,12 +1,15 @@
 <div class="row">
-    <div class="col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6 text-center">
-            <h1>Contextual Network Explorer</h4>
+    <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
+            <h1>Contextual Network Explorer<span class="beta"></span></h1>
             <h5>...a (side-)product of the <a href="www.esrc.unimelb.edu.au" target="_blank">eScholarship Research Centre</a></h5>
+            <br/>
+            <hr/>
+            <br/>
     </div>
 </div>
 <span ng-repeat="site in sites">
     <div class="row">
-        <div class="col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6 text-center">
+        <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
             <div class="col-md-1 col-lg-2">{{site[0]}}: {{site[1]}}</div>
             <div class="col-md-3 col-lg-5"><a href="#/site/{{site[0]}}/byEntity">Explore by Context Entity</a></div>
             <div class="col-md-3 col-lg-5"><a href="#/site/{{site[0]}}/byFunction">Explore by Function</a></div>
@@ -17,7 +20,7 @@
     <br/>
     <br/>
     <br/>
-    <div class="col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6 text-center">
+    <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
         <h4>Unfortunately, the service is currently unavailable. Please try again later.</h4>
     </div>
 </div>

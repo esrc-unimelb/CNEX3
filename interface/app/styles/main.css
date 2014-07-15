@@ -2,6 +2,17 @@
 body {
 }
 
+.beta {
+    background-image: url('beta.jpg');
+    background-repeat: no-repeat;
+    background-size: 20%;
+    position: fixed;
+    width: 30%;
+    height: 30%;
+    opacity: 1;
+    z-index: -1;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   /* Remove the padding we set earlier */
