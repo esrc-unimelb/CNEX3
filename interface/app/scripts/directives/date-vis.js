@@ -97,8 +97,8 @@ angular.module('interfaceApp')
                   })
                   .attr('height', configuration.height.default)
                   .attr('fill', configuration.fill.default)
-                  .attr('id', function(d) { return d.id.replace(' ', '_')+ '_date'; })
-                  .on('click', function(d) { D3Service.highlightNode(d.id); });
+                  .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
+                  .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
 
 
               yScale.domain([0, points.length]);
@@ -119,8 +119,8 @@ angular.module('interfaceApp')
                   })
                   .attr('r', configuration.radius.date.default)
                   .attr('fill', configuration.fill.default)
-                  .attr('id', function(d) { return d.id.replace(' ', '_') + '_date'; })
-                  .on('click', function(d) { D3Service.highlightNode(d.id); });
+                  .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
+                  .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
           });
       }
     };

@@ -113,14 +113,14 @@ angular.module('interfaceApp')
             dateDefaultColor = DataService.nodeMap[id].color;
         }
 
-        var n = d3.select('#' + id.replace(' ', '_') + '_node');
+        var n = d3.select('#' + d3s.sanitize(id) + '_node');
         if (n.attr('fill') === configuration.fill.contextNeighbourHighlight) {
             n.attr('fill', nodeDefaultColor);
         } else {
             n.attr('fill', configuration.fill.contextNeighbourHighlight);
         }
 
-        var d = d3.select('#' + id + '_date');
+        var d = d3.select('#' + d3s.sanitize(id) + '_date');
         try {
             if (d.attr('fill') === configuration.fill.contextNeighbourHighlight) {
                 d.attr('fill', dateDefaultColor);
@@ -241,6 +241,14 @@ angular.module('interfaceApp')
         $rootScope.$broadcast('reset');
     }
 
+    /*
+     * @function: sanitize
+     */
+    function sanitize(selector) {
+        var s = selector.replace(/\(|\)/g, '').replace(/ /g, '_');
+        return s;
+    }
+
     var d3s = {
         highlightedTypes: [],
         colors: d3.scale.category20(),
@@ -252,7 +260,8 @@ angular.module('interfaceApp')
         highlightPoints: highlightPoints, 
         highlightByType: highlightByType,
         sizeNodesEvenly: sizeNodesEvenly,
-        reset: reset
+        reset: reset,
+        sanitize: sanitize
     }
     return d3s;
 

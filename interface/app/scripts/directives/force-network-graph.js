@@ -122,7 +122,7 @@ angular.module('interfaceApp')
               .attr('fill', function(d) { 
                   return d.color; 
               })
-              .attr('id', function(d) { return d.id.replace(' ', '_') + '_node'; });
+              .attr('id', function(d) { return D3Service.sanitize(d.id) + '_node'; });
           node.exit().remove();
 
           // handle the node click event
