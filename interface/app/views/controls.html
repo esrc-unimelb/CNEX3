@@ -99,7 +99,9 @@
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <span ng-show="contextNodeData.url">
                     <strong>{{contextNodeData.type}}:</strong> 
-                    <a href="{{contextNodeData.url}}" target="_blank">({{contextNodeData.id}}) {{contextNodeData.name}}</a>
+                    <a href="{{contextNodeData.url}}" target="_blank">
+                        ({{contextNodeData.id}}) {{contextNodeData.name}} ({{contextNodeData.df | date:'yyyy'}} - {{contextNodeData.dt | date:'yyyy'}})
+                    </a>
                 </span>
                 <span ng-show="!contextNodeData.url">
                     <strong>Function:</strong> 
@@ -117,8 +119,12 @@
                 <span ng-repeat="d in data">
                     <span class="form-inline">
                         <span class="checkbox"><input type="checkbox" ng-click="highlight(d.id)" ng-checked="d.checked"></span>
-                        <span ng-if="d.url"><a href="{{d.url}}" target="_blank">({{d.id}}) {{d.name}}</a><br/></span>
-                        <span ng-if="!d.url">{{d.name}}<br/></span>
+                        <span ng-if="d.url">
+                            <a href="{{d.url}}" target="_blank">({{d.id}}) {{d.name}} ({{d.df | date:'yyyy'}} - {{d.dt | date:'yyyy'}})</a><br/>
+                        </span>
+                        <span ng-if="!d.url">
+                            {{d.name}}<br/>
+                        </span>
                     </span>
                 </span>
             </div>
