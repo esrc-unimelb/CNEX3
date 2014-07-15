@@ -7,11 +7,7 @@ angular.module('interfaceApp')
 
     function getNodeData(nodes, contextNode) {
         DataService.selected = nodes;
-        if (contextNode !== undefined) {
-            DataService.contextNode = contextNode;
-        } else {
-            DataService.contextNode = undefined;
-        }
+        DataService.contextNode = contextNode;
         $rootScope.$broadcast('search-result-data-ready');
     }
 

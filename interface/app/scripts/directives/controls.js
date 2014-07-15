@@ -53,6 +53,9 @@ angular.module('interfaceApp')
           // process the data coming from solr when a node is selected
           $rootScope.$on('search-result-data-ready', function() {
               var sorted = {};
+              if (DataService.contextNode === undefined) {
+                  scope.contextNodeData = undefined;
+              }
               angular.forEach(DataService.selected, function(v,k) {
                   if (v === DataService.contextNode) {
                       scope.contextNodeData = DataService.nodeMap[v];
