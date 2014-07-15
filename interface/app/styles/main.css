@@ -3,7 +3,7 @@ body {
 }
 
 .beta {
-    background-image: url('beta.jpg');
+    background-image: url('../images/beta.jpeg');
     background-repeat: no-repeat;
     background-size: 20%;
     position: fixed;
