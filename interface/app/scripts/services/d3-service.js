@@ -95,8 +95,8 @@ angular.module('interfaceApp')
         } else {
             node.transition()
                 .attr('fill',    function(d) { return fill[d[by]]; })
-                .attr('opacity', function(d) { return opacity[d[by]]; })
-                .attr('r',       function(d) { return radius[d[by]]; });
+                .attr('opacity', function(d) { return opacity[d[by]]; });
+                //.attr('r',       function(d) { return radius[d[by]]; });
         }
     }
 
@@ -162,8 +162,8 @@ angular.module('interfaceApp')
         var pnts = d3.selectAll('.circle');
         pnts.attr('fill',    function(d) { return fill[d[by]]; })
             .attr('opacity', function(d) { return opacity[d[by]]; })
-            .attr('r',       function(d) { return radius[d[by]]; })
             .attr('stroke',  function(d) { return stroke[d[by]]; });
+            //.attr('r',       function(d) { return radius[d[by]]; })
     }
 
     /*
