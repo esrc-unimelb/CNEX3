@@ -17,7 +17,7 @@
 <br/>
 <div class="row">
     <div class="col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-6 col-lg-offset-3">
-        <span ng-if="ready">Hi {{fullname}}.</span>
+        <span ng-if="ready">Logged in as: {{fullname}}.</span>
         <span ng-if="!ready">Please log in.</span>
         <button class="btn btn-default bt-sm pull-right" ng-click="login()" ng-if="!ready">Login</button>
         <button class="btn btn-default bt-sm pull-right" ng-click="logout()" ng-if="ready">Logout</button>

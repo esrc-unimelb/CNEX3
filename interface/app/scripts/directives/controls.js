@@ -21,7 +21,7 @@ angular.module('interfaceApp')
           scope.showData = false;
 
           // handle the reset call
-          $rootScope.$on('reset', function() {
+          scope.$on('reset', function() {
               angular.forEach(scope.data.types, function(v,k) {
                   scope.data.types[k].checked = false;
               })
@@ -31,7 +31,7 @@ angular.module('interfaceApp')
           })
 
           // populate the controls widget
-          $rootScope.$on('graph-data-loaded', function() {
+          scope.$on('graph-data-loaded', function() {
               scope.siteData = DataService.site;
               scope.data = {
                   nodes: DataService.nodes,
@@ -51,7 +51,7 @@ angular.module('interfaceApp')
           })
 
           // process the data coming from solr when a node is selected
-          $rootScope.$on('search-result-data-ready', function() {
+          scope.$on('search-result-data-ready', function() {
               var sorted = {};
               if (DataService.contextNode === undefined) {
                   scope.contextNodeData = undefined;
@@ -99,8 +99,15 @@ angular.module('interfaceApp')
           // handle the trigger to set the same size for all nodes
           scope.sizeNodesEvenly = function() {
               d3s.sizeNodesEvenly();
+              scope.nodesSizedEvenly = true;
           }
 
+          // handle the trigger to reset the node dimensions based on n connections
+          scope.resetNodeDimensions = function() {
+              d3s.resetNodeDimensions();
+              scope.nodesSizedEvenly = false;
+          }
+          
           // trigger a reset
           scope.reset = function() {
               d3s.reset();

@@ -1,9 +1,10 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .service('D3Service', [ '$rootScope', 'configuration', 'DataService', function D3Service($rootScope, configuration, DataService) {
+  .service('D3Service', [ '$rootScope', 'configuration', 'DataService', 
+    function D3Service($rootScope, configuration, DataService) {
+
     // AngularJS will instantiate a singleton by calling "new" on this function
-    //
     
     /* 
      * @function: highlightNodeAndLocalEnvironment
@@ -234,6 +235,15 @@ angular.module('interfaceApp')
     }
 
     /*
+     * @function: resetNodeDimensions
+     */
+    function resetNodeDimensions() {
+        d3.selectAll('.node')
+          .transition()
+          .attr('r', function(d) { return d.r; });
+    }
+
+    /*
      * @function: reset
      */
     function reset() {
@@ -260,6 +270,7 @@ angular.module('interfaceApp')
         highlightPoints: highlightPoints, 
         highlightByType: highlightByType,
         sizeNodesEvenly: sizeNodesEvenly,
+        resetNodeDimensions: resetNodeDimensions,
         reset: reset,
         sanitize: sanitize
     }

@@ -33,6 +33,7 @@ angular.module('interfaceApp')
       });
       $scope.$on('user-logged-out', function() {
           $scope.ready = false;
+          $scope.sites = undefined;
       });
 
       // Valid token?

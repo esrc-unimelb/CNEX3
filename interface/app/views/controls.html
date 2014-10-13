@@ -25,7 +25,8 @@
         <div class="row">
             <hr/>
             <div class="col-sm-10 col-md-10 col-lg-10">
-                <button class="btn btn-sm btn-default" ng-click="sizeNodesEvenly()">Size nodes evenly</button>
+                <button class="btn btn-sm btn-default" ng-click="sizeNodesEvenly()" ng-if="!nodesSizedEvenly">Size nodes evenly</button>
+                <button class="btn btn-sm btn-default" ng-click="resetNodeDimensions()" ng-if="nodesSizedEvenly">Reset node sizes</button>
                 <button class="btn btn-sm btn-default" ng-click="showData = !showData">
                     <span ng-hide='showData'>View the Data</span>
                     <span ng-show='showData'>Show Controls</span>

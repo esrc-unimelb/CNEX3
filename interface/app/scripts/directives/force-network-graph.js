@@ -10,7 +10,7 @@ angular.module('interfaceApp')
       },
       link: function postLink(scope, element, attrs) {
 
-          $rootScope.$on('reset', function() {
+          scope.$on('reset', function() {
               link.transition()
                   .attr('class', 'link')
                   .attr('stroke', '#ccc')
@@ -19,7 +19,7 @@ angular.module('interfaceApp')
 
               node.transition()
                   .attr('class', 'node')
-                  .attr('r', function(d) { return scope.weight(d.connections); })
+                  .attr('r', function(d) { return d.r; })
                   .attr('fill', function(d) { return d.color; })
                   .attr('opacity', configuration.opacity.default);
           });
@@ -118,7 +118,7 @@ angular.module('interfaceApp')
           node.enter()
               .append('circle')
               .attr('class', 'node')
-              .attr('r', function(d) { return scope.weight(d.connections); })
+              .attr('r', function(d) { return d.r; })
               .attr('fill', function(d) { 
                   return d.color; 
               })
