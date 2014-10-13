@@ -6,7 +6,7 @@ angular.module('interfaceApp')
       'testing':    'https://cnex.esrc.info/app',
       'production': '',
       'service': 'testing',
-      'solr': 'https://data.esrc.info/solr/ESRC/select',
+      'solr': 'https://solr.esrc.info/ESRC/select',
 
       'fill': {
           'contextNode': 'green',
