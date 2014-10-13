@@ -1,38 +1,44 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'DataService',
-    function($rootScope, $scope, $routeParams, $http, $timeout, configuration, DataService) {
+  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'DataService', 'AuthService',
+    function($rootScope, $scope, $routeParams, $http, $timeout, configuration, DataService, AuthService) {
 
-        $scope.site = $routeParams.code; 
-        $scope.graph = $routeParams.explore;
-        $scope.service = configuration[configuration.service];
+        $scope.$on('user-logged-in', function() {
+            $scope.site = $routeParams.code; 
+            $scope.graph = $routeParams.explore;
+            $scope.service = configuration[configuration.service];
 
-        $rootScope.$on('graph-ready', function() {
+            $scope.progress = false;
+            $scope.datasetError = false;
+            $scope.controls = false;
+            $scope.total = 0;
+            $scope.processed = 0;
+
+            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '?callback=JSON_CALLBACK';
+            console.log(url);
+            $http.jsonp(url).then(function(d) {
+                // kick off the progress update in a moment; needs time to get going..
+                $timeout(function() { $scope.update(); }, 200);
+                $scope.progress = false;
+                DataService.site = {
+                    'name': d.data.name,
+                    'url': d.data.url
+                }
+            },
+            function() {
+                $scope.datasetError = true;
+                $scope.progress = false;
+            });
+
+
+        })
+        $scope.$on('user-logged-out', function() {
+        })
+        $scope.$on('graph-ready', function() {
             $scope.showControls = true;
         })
-
-        $scope.progress = false;
-        $scope.datasetError = false;
-        $scope.controls = false;
-        $scope.total = 0;
-        $scope.processed = 0;
-
-        var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '?callback=JSON_CALLBACK';
-        console.log(url);
-        $http.jsonp(url).then(function(d) {
-            // kick off the progress update in a moment; needs time to get going..
-            $timeout(function() { $scope.update(); }, 200);
-            $scope.progress = false;
-            DataService.site = {
-                'name': d.data.name,
-                'url': d.data.url
-            }
-        },
-        function() {
-            $scope.datasetError = true;
-            $scope.progress = false;
-        });
+        AuthService.verify();
 
 
         $scope.update = function() {
