@@ -1,26 +1,27 @@
 <div class="row">
     <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
-            <h1>Contextual Network Explorer<span class="beta"></span></h1>
-            <h5>...a (side-)product of the <a href="www.esrc.unimelb.edu.au" target="_blank">eScholarship Research Centre</a></h5>
-            <br/>
-            <hr/>
-            <br/>
+        <h1>Contextual Network Explorer</h1>
+        <h5>...a <em>side-</em>product of the <a href="www.esrc.unimelb.edu.au" target="_blank">eScholarship Research Centre</a></h5>
+        <hr/>
+    </div>
+    <div class="text-center"><mc-messages></mc-messages></div>
+</div>
+<div class="row">
+    <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6">
+        <span ng-if="ready">Hi {{fullname}}.</span>
+        <span ng-if="!ready">Please log in.</span>
+        <button class="btn btn-default pull-right" ng-click="login()" ng-if="!ready">Login</button>
+        <button class="btn btn-default pull-right" ng-click="logout()" ng-if="ready">Logout</button>
     </div>
 </div>
-<span ng-repeat="site in sites">
-    <div class="row">
-        <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
-            <div class="col-md-1 col-lg-2">{{site[0]}}: {{site[1]}}</div>
-            <div class="col-md-3 col-lg-5"><a href="#/site/{{site[0]}}/byEntity">Explore by Context Entity</a></div>
-            <div class="col-md-3 col-lg-5"><a href="#/site/{{site[0]}}/byFunction">Explore by Function</a></div>
+<div ng-if="ready">
+    <span ng-repeat="site in sites">
+        <div class="row">
+            <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
+                <div class="col-md-1 col-lg-2">{{site[0]}}: {{site[1]}}</div>
+                <div class="col-md-3 col-lg-5"><a href="#/site/{{site[0]}}/byEntity">Explore by Context Entity</a></div>
+                <div class="col-md-3 col-lg-5"><a href="#/site/{{site[0]}}/byFunction">Explore by Function</a></div>
+            </div>
         </div>
-    </div>
-</span>
-<div class="row" ng-if="serviceUnavailable">
-    <br/>
-    <br/>
-    <br/>
-    <div class="col-sm-offset-3 col-sm-6 col-lg-offset-3 col-lg-6 text-center">
-        <h4>Unfortunately, the service is currently unavailable. Please try again later.</h4>
-    </div>
+    </span>
 </div>

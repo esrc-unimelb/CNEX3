@@ -4,7 +4,8 @@ angular.module('interfaceApp', [
   'ngCookies',
   'ngSanitize',
   'ngRoute',
-  'ngAnimate'
+  'ngAnimate',
+  'MessageCenterModule'
 ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -20,7 +21,34 @@ angular.module('interfaceApp', [
           templateUrl: 'views/play.html',
           controler: 'PlayCtrl',
       })
+      .when('/login/:code', {
+        template: '<div></div>',
+        controller: [ 'AuthService', function(AuthService) { AuthService.getToken(); }] 
+      })
+      .when('/forbidden', {
+        template: "<h4 class='text-center'>You don't have permission to use this site.</h4>"
+      })
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .factory('authInterceptor', function ($rootScope, $q, $window) {
+    return {
+      request: function (config) {
+        config.headers = config.headers || {};
+        if ($window.localStorage.token) {
+          config.headers.Authorization = 'Bearer ' + $window.localStorage.token;
+        }
+        return config;
+      },
+      response: function (response) {
+        if (response.status === 401) {
+          // handle the case where the user is not authenticated
+        }
+        return response || $q.when(response);
+      }
+    };
+  })
+  .config(function ($httpProvider) {
+    $httpProvider.interceptors.push('authInterceptor');
   });
