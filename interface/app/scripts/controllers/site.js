@@ -75,20 +75,18 @@ angular.module('interfaceApp')
             var connectedNodes = [], unConnectedNodes = [], processedLinks = [];
             var weightBounds = [];
 
-            for (i=0; i<ns.length; i++) {
-                var n = ns[i].id;
-                var c = ns[i].connections;
-                nodeData[n] = ns[i];
+            angular.forEach(ns, function(v, k) {
+                var n = v.id;
+                var c = v.connections;
+                nodeData[n] = v;
                 weightBounds.push(c);
-            }
+            })
             weightBounds = [Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)];
 
             // figure out the connectedNodes and associated links
-            for (i=0; i<ls.length; i++) {
-                j++;
-                var sn = ls[i].source_name;
-                var tn = ls[i].target_name;
-
+            angular.forEach(ls, function(v, k) {
+                var sn = v.source_name;
+                var tn = v.target_name;
                 if (nodesTmp.indexOf(sn) === -1) {
                     nodesTmp.push(sn);
                     nodes.push(nodeData[sn]);
@@ -100,22 +98,24 @@ angular.module('interfaceApp')
                     nodeMap[tn] = nodeData[tn];
                 }
                 links.push({ 'source': nodesTmp.indexOf(sn), 'target': nodesTmp.indexOf(tn) });
-            }
+            });
 
             // figure out the unConnected Nodes
             var unConnectedNodes = [];
-            for (i=0; i<ns.length; i++) {
-                var n = ns[i].id;
+            angular.forEach(ns, function(v,k) {
+                var n = v.id;
                 if (nodesTmp.indexOf(n) === -1) {
-                    unConnectedNodes.push(ns[i]);
+                    unConnectedNodes.push(v);
                 }
-            }
+            });
 
-            // add some color
+            // add some color and the default node radius
             var color = d3.scale.category20();
-            for (i=0; i<nodes.length; i++) {
-                nodes[i].color = color(nodes[i].type);
-            }
+            var weight = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
+            angular.forEach(nodes, function(v, k) {
+                nodes[k].color = color(v.type);
+                nodes[k].r = weight(v.connections);
+            });
 
             DataService.nodes = nodes;
             DataService.nodeMap = nodeMap;
