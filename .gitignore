@@ -6,6 +6,8 @@
 *.cover
 service/app.egg-info/
 service/app.sqlite
+service/config/sites
+service/config/config
 interface/node_modules
 interface/dist
 interface/.tmp
