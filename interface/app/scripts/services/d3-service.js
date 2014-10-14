@@ -154,7 +154,7 @@ angular.module('interfaceApp')
             d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
         })
 
-        d3s.highlightNodes(true);
+        d3s.highlightNodes();
         d3s.highlightLinks();
         d3s.highlightRects();
         d3s.highlightPoints();
