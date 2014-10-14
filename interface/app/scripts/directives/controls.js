@@ -12,12 +12,23 @@ angular.module('interfaceApp')
           graph: '@'
       },
       link: function postLink(scope, element, attrs) {
-          scope.cls = {
-              'top': 10,
-              'left': $window.innerWidth - 570,
-              'width': 550,
-              'height': $window.innerHeight - 100,
+
+          var w = angular.element($window);
+          w.bind('resize', function() {
+              scope.$apply(function() {
+                  sizeThePanel();
+              })
+          });
+
+          var sizeThePanel = function() {
+              scope.cls = {
+                  'top': 10,
+                  'left': $window.innerWidth - 570,
+                  'width': 550,
+                  'height': $window.innerHeight - 100,
+              }
           }
+          sizeThePanel();
           scope.showData = false;
 
           // handle the reset call
