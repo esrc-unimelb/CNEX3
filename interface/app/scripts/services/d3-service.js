@@ -113,7 +113,7 @@ angular.module('interfaceApp')
         })
  
         angular.forEach(links, function(v,k) {
-            d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.unselected;
+            d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.unselected;
             d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
         })
 
@@ -150,7 +150,7 @@ angular.module('interfaceApp')
         })
 
         angular.forEach(links, function(v,k) {
-            d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.unselected;
+            d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.unselected;
             d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
         })
 
