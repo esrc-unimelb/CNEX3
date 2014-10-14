@@ -6,7 +6,7 @@ angular.module('interfaceApp')
       'testing':    'https://cnex.esrc.info/app',
       'production': '',
       'service': 'testing',
-      'solr': 'https://solr.esrc.info/ESRC/select',
+      'solr': 'https://solr.esrc.unimelb.edu.au/ESRC/select',
 
       'fill': {
           'contextNode': 'green',
@@ -17,7 +17,7 @@ angular.module('interfaceApp')
 
       'opacity': {
           'default': '1',
-          'unselected': '0.7'
+          'unselected': '0.3'
       },
 
       'stroke': {

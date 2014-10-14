@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('controls', [ '$http', '$window', '$rootScope', 'DataService', 'configuration', 'D3Service',
-        function ($http, $window, $rootScope, DataService, configuration, d3s) {
+  .directive('controls', [ '$http', '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
+        function ($http, $window, DataService, configuration, d3s, SolrService) {
     return {
       templateUrl: 'views/controls.html',
       restrict: 'E',
@@ -50,8 +50,8 @@ angular.module('interfaceApp')
               scope.data.types = types;
           })
 
-          // process the data coming from solr when a node is selected
-          scope.$on('search-result-data-ready', function() {
+          // process the data when it's available
+          scope.$on('node-data-ready', function() {
               var sorted = {};
               if (DataService.contextNode === undefined) {
                   scope.contextNodeData = undefined;
@@ -68,6 +68,12 @@ angular.module('interfaceApp')
               });
               scope.contextNetworkData = sorted;
           });
+
+
+          // process the search data
+          scope.$on('search-data-ready', function() {
+              d3s.highlightById(SolrService.selected);
+          })
 
           // handle node selection - highlight connected neighbours
          scope.highlight = function(nodeid) {

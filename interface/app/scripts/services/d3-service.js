@@ -53,52 +53,42 @@ angular.module('interfaceApp')
                 opacity[v.id] = configuration.opacity.default;
                 stroke[v.id] = configuration.stroke.date.selected;
                 height[v.id] = configuration.height.selected;
-                radiusNode[v.id] = configuration.radius.node.selected;
-                radiusDate[v.id] = configuration.radius.date.selected;
             } else if (neighbours.indexOf(v.id) !== -1) {
                 // set the properties of the neighbours
                 fill[v.id] = configuration.fill.contextNeighbourDefault;
                 opacity[v.id] = configuration.opacity.default;
                 stroke[v.id] = configuration.stroke.date.selected;
                 height[v.id] = configuration.height.selected;
-                radiusNode[v.id] = configuration.radius.node.selected;
-                radiusDate[v.id] = configuration.radius.date.selected;
             } else {
-                //set the properties of the other nodes
+                // set the properties of the other nodes
                 fill[v.id] = configuration.fill.default;
                 opacity[v.id] = configuration.opacity.unselected;
                 stroke[v.id] = configuration.stroke.date.unselected;
                 height[v.id] = configuration.height.default;
-                radiusNode[v.id] = configuration.radius.node.unselected;
-                radiusDate[v.id] = configuration.radius.date.default;
             }
         });
 
-        d3s.highlightNodes('id', fill, opacity, radiusNode);
+        d3s.highlightNodes(fill, opacity);
         d3s.highlightLinksById(linkStroke, linkOpacity);
-        d3s.highlightRects('id', fill, opacity, height, stroke);
-        d3s.highlightPoints('id', fill, opacity, stroke, radiusDate);
+        d3s.highlightRects(fill, opacity, height, stroke);
+        d3s.highlightPoints(fill, opacity, stroke);
 
         DataService.getNodeData(neighbours, contextNode);
     }
 
     /* 
      * @function: highlightNodes
+     *
+     * @params:
+     * fill, opacity:
      */
-    function highlightNodes(by, fill, opacity, radius) {
+    function highlightNodes(fill, opacity) {
         // get a handle to all nodes
         var node = d3.selectAll('.node');
 
-        if (radius === undefined) {
-            node.transition()
-                .attr('fill',    function(d) { return fill[d[by]]; })
-                .attr('opacity', function(d) { return opacity[d[by]]; });
-        } else {
-            node.transition()
-                .attr('fill',    function(d) { return fill[d[by]]; })
-                .attr('opacity', function(d) { return opacity[d[by]]; });
-                //.attr('r',       function(d) { return radius[d[by]]; });
-        }
+        node.transition()
+            .attr('fill',    function(d) { return fill[d.id]; })
+            .attr('opacity', function(d) { return opacity[d.id]; });
     }
 
     /*
@@ -145,26 +135,31 @@ angular.module('interfaceApp')
 
     /*
      * @function: highlightRects
+     *
+     * @params:
+     * fill, opacity, height, stroke:
      */
-    function highlightRects(by, fill, opacity, height, stroke) {
+    function highlightRects(fill, opacity, height, stroke) {
         // get a handle to the relevant elements
         var rect = d3.selectAll('.rect');
-        rect.attr('fill',    function(d) { return fill[d[by]]; })
-            .attr('opacity', function(d) { return opacity[d[by]]; })
-            .attr('height',  function(d) { return height[d[by]]; })
-            .attr('stroke',  function(d) { return stroke[d[by]]; });
+        rect.attr('fill',    function(d) { return fill[d.id]; })
+            .attr('opacity', function(d) { return opacity[d.id]; })
+            .attr('height',  function(d) { return height[d.id]; })
+            .attr('stroke',  function(d) { return stroke[d.id]; });
     }
 
     /*
      * @function: highlightPoints
+     *
+     * @params:
+     * fill, opacity, stroke:
      */
-    function highlightPoints(by, fill, opacity, stroke, radius) {
+    function highlightPoints(fill, opacity, stroke) {
         // get a handle to the relevant elements
         var pnts = d3.selectAll('.circle');
-        pnts.attr('fill',    function(d) { return fill[d[by]]; })
-            .attr('opacity', function(d) { return opacity[d[by]]; })
-            .attr('stroke',  function(d) { return stroke[d[by]]; });
-            //.attr('r',       function(d) { return radius[d[by]]; })
+        pnts.attr('fill',    function(d) { return fill[d.id]; })
+            .attr('opacity', function(d) { return opacity[d.id]; })
+            .attr('stroke',  function(d) { return stroke[d.id]; });
     }
 
     /*
@@ -194,20 +189,16 @@ angular.module('interfaceApp')
         var selectedNodes = [];
         angular.forEach(nodes, function(v,k) {
             if (types.indexOf(v.type) !== -1) {
-                fill[v.type] = v.color;
-                opacity[v.type] = configuration.opacity.default;
-                radiusNode[v.type] = configuration.radius.node.selected;
-                radiusDate[v.type] = configuration.radius.date.selected;
-                height[v.type] = configuration.height.selected;
-                stroke[v.type] = configuration.stroke.date.selected;
+                fill[v.id] = v.color;
+                opacity[v.id] = configuration.opacity.default;
+                height[v.id] = configuration.height.selected;
+                stroke[v.id] = configuration.stroke.date.selected;
                 selectedNodes.push(v.id);
             } else {
-                fill[v.type] = configuration.fill.default 
-                opacity[v.type] = configuration.opacity.unselected;
-                radiusNode[v.type] = configuration.radius.node.unselected;
-                radiusDate[v.type] = configuration.radius.node.default;
-                height[v.type] = configuration.height.default;
-                stroke[v.type] = configuration.stroke.date.unselected;
+                fill[v.id] = configuration.fill.default 
+                opacity[v.id] = configuration.opacity.unselected;
+                height[v.id] = configuration.height.default;
+                stroke[v.id] = configuration.stroke.date.unselected;
             }
         })
  
@@ -216,13 +207,53 @@ angular.module('interfaceApp')
             linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
         })
 
-        d3s.highlightNodes('type', fill, opacity, radiusNode);
+        d3s.highlightNodes(fill, opacity);
         d3s.highlightLinksById(linkStroke, linkOpacity);
-        d3s.highlightRects('type', fill, opacity, height, stroke);
-        d3s.highlightPoints('type', fill, opacity, stroke, radiusDate);
+        d3s.highlightRects(fill, opacity, height, stroke);
+        d3s.highlightPoints(fill, opacity, stroke);
         d3s.highlightedTypes = types;
 
         DataService.getNodeData(selectedNodes, undefined);
+    }
+
+    /*
+     * @function: highlightById
+     */
+    function highlightById(ids) {
+        var nodes = DataService.nodes;
+        var links = DataService.links;
+
+        var fill = [], opacity = [], radiusNode = [], radiusDate = [], height = [], stroke = [];
+        var linkStroke = [], linkOpacity = [];
+        var selectedNodes = [];
+        angular.forEach(nodes, function(v,k) {
+            if (ids.indexOf(v.id) !== -1) {
+                fill[v.id] = v.color;
+                opacity[v.id] = configuration.opacity.default;
+                height[v.id] = configuration.height.selected;
+                stroke[v.id] = configuration.stroke.date.selected;
+                selectedNodes.push(v.id);
+            } else {
+                fill[v.id] = configuration.fill.default 
+                opacity[v.id] = configuration.opacity.unselected;
+                height[v.id] = configuration.height.default;
+                stroke[v.id] = configuration.stroke.date.unselected;
+            }
+        })
+
+        angular.forEach(links, function(v,k) {
+            linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.unselected;
+            linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
+        })
+
+        console.log(ids.length, selectedNodes.length);
+        d3s.highlightNodes(fill, opacity);
+        d3s.highlightLinksById(linkStroke, linkOpacity);
+        d3s.highlightRects(fill, opacity, height, stroke);
+        d3s.highlightPoints(fill, opacity, stroke);
+
+        DataService.getNodeData(selectedNodes, undefined);
+ 
     }
 
     /*
@@ -269,6 +300,7 @@ angular.module('interfaceApp')
         highlightRects: highlightRects,
         highlightPoints: highlightPoints, 
         highlightByType: highlightByType,
+        highlightById: highlightById,
         sizeNodesEvenly: sizeNodesEvenly,
         resetNodeDimensions: resetNodeDimensions,
         reset: reset,

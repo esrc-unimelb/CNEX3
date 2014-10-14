@@ -127,7 +127,6 @@ angular.module('interfaceApp')
 
           // handle the node click event
           node.on('click', function(d) {
-              var n = d.id;
               scope.$apply(function() {
                   D3Service.highlightNodeAndLocalEnvironment(d.id);
               });

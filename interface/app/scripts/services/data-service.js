@@ -8,7 +8,7 @@ angular.module('interfaceApp')
     function getNodeData(nodes, contextNode) {
         DataService.selected = nodes;
         DataService.contextNode = contextNode;
-        $rootScope.$broadcast('search-result-data-ready');
+        $rootScope.$broadcast('node-data-ready');
     }
 
     var DataService = {
