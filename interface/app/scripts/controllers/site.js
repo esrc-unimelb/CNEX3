@@ -40,20 +40,19 @@ angular.module('interfaceApp')
         })
         AuthService.verify();
 
-
         $scope.update = function() {
             var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status?callback=JSON_CALLBACK';
-            $http.jsonp(url).then(function(response) {
-                if (response.data.processed !== null) {
+            $http.jsonp(url).then(function(resp) {
+                if (resp.data.processed !== null) {
                     $scope.progress = true;
                     $scope.controls = false;
-                    $scope.processed = response.data.processed;
-                    $scope.total = response.data.total;
+                    $scope.processed = resp.data.processed;
+                    $scope.total = resp.data.total;
                     $timeout(function() { $scope.update(); }, 100);
                 } else {
                     $scope.progress = false;
                     $scope.controls = true;
-                    $scope.processData(response.data);
+                    $scope.processData(resp.data);
                 }
             },
             function(){
@@ -62,8 +61,9 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
-            var ns = JSON.parse(d.graph).nodes;
-            var ls = JSON.parse(d.graph).links;
+            console.log(d);
+            var ns = d.graph.nodes;
+            var ls = d.graph.links;
 
             // given the graph, create an array with unconnected nodes
             //

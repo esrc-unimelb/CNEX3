@@ -2,10 +2,10 @@
 
 angular.module('interfaceApp')
   .constant('configuration', {
-      'development': 'http://dev01:3000/app',
+      'development': 'http://dev01:3000',
       'testing':    'https://cnex.esrc.info/app',
       'production': '',
-      'service': 'testing',
+      'service': 'development',
       'solr': 'https://solr.esrc.unimelb.edu.au/ESRC/select',
 
       'fill': {
