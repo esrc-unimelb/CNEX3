@@ -154,7 +154,7 @@ angular.module('interfaceApp')
             d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
         })
 
-        d3s.highlightNodes();
+        d3s.highlightNodes(true);
         d3s.highlightLinks();
         d3s.highlightRects();
         d3s.highlightPoints();
@@ -202,13 +202,32 @@ angular.module('interfaceApp')
     /* 
      * @function: highlightNodes
      */
-    function highlightNodes() {
+    function highlightNodes(highlight) {
         // get a handle to all nodes
         var node = d3.selectAll('.node');
 
-        node.transition()
-            .attr('fill',    function(d) { return d3s.fill[d.id]; })
-            .attr('opacity', function(d) { return d3s.opacity[d.id]; });
+        if (highlight === true) {
+            node.transition()
+                .attr('fill',    function(d) { return d3s.fill[d.id]; })
+                .attr('opacity', function(d) { return d3s.opacity[d.id]; })
+                .transition()
+                .attr('r', function(d) { 
+                    if (d3s.fill[d.id] !== configuration.fill.default) {
+                        return d.r * 5; 
+                    } else {
+                        return d.r;
+                    }
+                })
+                .transition()
+                .delay(2000)
+                .attr('r', function(d) { 
+                    return d.r; 
+                });
+        } else {
+            node.transition()
+                .attr('fill',    function(d) { return d3s.fill[d.id]; })
+                .attr('opacity', function(d) { return d3s.opacity[d.id]; });
+        }
     }
 
     /*
