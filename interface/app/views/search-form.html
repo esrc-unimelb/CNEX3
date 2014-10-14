@@ -16,4 +16,7 @@
         <input type="radio" ng-checked="keywordSearch" ng-click="setSearchType('keyword')" />
         Keyword search
     </label>
+    <label class="radio-inline" ng-if="nSearchMatches">
+        {{nSearchMatches}} matches in dataset.    
+    </label>
 </span>

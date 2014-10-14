@@ -7,9 +7,20 @@ angular.module('interfaceApp')
       templateUrl: 'views/search-form.html',
       restrict: 'E',
       scope: {
-          searchType: '@'
+          searchType: '@',
       },
       link: function postLink(scope, element, attrs) {
+
+          // handle app reset 
+          scope.$on('reset', function() {
+              scope.nSearchMatches = undefined;
+              scope.searchBox = undefined;
+          });
+
+          // process the search data
+          scope.$on('search-data-ready', function() {
+              scope.nSearchMatches = SolrService.selected.length;
+          })
 
           scope.search = function() {
               if (scope.searchBox === '') {
