@@ -180,7 +180,11 @@ angular.module('interfaceApp')
         if (n.attr('fill') === configuration.fill.contextNeighbourHighlight) {
             n.attr('fill', nodeDefaultColor);
         } else {
-            n.attr('fill', configuration.fill.contextNeighbourHighlight);
+            n.attr('fill', configuration.fill.contextNeighbourHighlight)
+            .transition()
+            .attr('r', configuration.radius.node.unselected * 5)
+            .transition()
+            .attr('r', configuration.radius.node.unselected);
         }
 
         var d = d3.select('#' + d3s.sanitize(id) + '_date');
