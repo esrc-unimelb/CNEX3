@@ -10,17 +10,8 @@ from lxml import etree, html
 
 from config import Config
 
-import sqlalchemy as sq
-
-import transaction
-from .models import (
-    DBSession,
-    Progress,
-    NetworkModel
-    )
-
 import logging
-log = logging.getLogger('app')
+log = logging.getLogger(__name__)
 
 import networkx as nx
 from networkx.readwrite import json_graph
@@ -29,6 +20,10 @@ from Helpers import *
 
 import multiprocessing
 
+from pymongo.errors import (
+    OperationFailure
+    )
+import pymongo
 
 class Network:
 
@@ -39,41 +34,33 @@ class Network:
         request.matchdict: code, the site of interest
         request.matchdict: explore, the type of graph being requested
         """
-        self.dbs = DBSession()
-
         self.request = request
+        self.db = mdb(request)
         self.site = request.matchdict['code']
         self.graph_type = request.matchdict['explore']
 
         # read the site config and bork if bad site requested
-        conf = Config(request)
-        self.eac_path = conf.sites[self.site]['eac']
-        self.source_map = conf.sites[self.site]['map']
-        self.name = conf.sites[self.site]['name']
-        self.url = conf.sites[self.site]['url']
+        sites = get_site_data(request)
+        site = sites[self.site]
+
+        self.eac_path = site.eac
+        self.source_map = site.map
+        self.name = site.name
+        self.url = site.url
         log.debug("Processing site: %s, data path: %s" % (self.site, self.eac_path))
 
     def build(self) :
         t1 = time.time()
 
         # is the data available? return now; nothing to do
-        try:
-            n = self.dbs.query(NetworkModel) \
-                    .filter(NetworkModel.site == self.site) \
-                    .filter(NetworkModel.graph_type == self.graph_type) \
-                    .one()
-            log.debug('Graph already built. No need to build it again.')
-            return
-        except sq.orm.exc.NoResultFound:
-            pass
+        doc = self.db.network.find_one({ 'site': self.site })
+        if doc is not None:
+            log.debug('Graph already built. No need to build it again')
+            return 
         
-        # is a graph generation in progress? return now; nothing to do
-        try:
-            p = self.dbs.query(Progress).filter(Progress.site == self.site).one()
-            log.debug('Graph being built. Not starting another build.')
-            return
-        except sq.orm.exc.NoResultFound:
-            pass
+        doc = self.db.progress.find_one({ 'site': self.site })
+        if doc is not None:
+            return 
 
         # OTHERWISE:
         # generate the list of datafiles and build the graph
@@ -85,14 +72,13 @@ class Network:
         total = len(datafiles.items())
         log.debug("Total number of entities in dataset: %s" % total)
 
-        p = Progress(
-            processed = 0, 
-            total = total,
-            site = self.site,
-            valid_to = datetime.now() + timedelta(hours=float(self.request.registry.settings['data_age']))
-        )
-        self.dbs.add(p)
-        transaction.commit()
+        self.db.progress.insert({
+            'processed': 0,
+            'total': total,
+            'site': self.site,
+            'createdAt': datetime.utcnow()
+        })
+        self.db.progress.ensure_index('createdAt', expireAfterSeconds = 600)
 
         j = multiprocessing.Process(target=self.build_graph, args=(self.graph_type, datafiles, total))
         j.start()
@@ -122,12 +108,10 @@ class Network:
 
             if save_counter == 20:
                 # save a progress count
-                p = self.dbs.query(Progress) \
-                    .filter(Progress.site == self.site) \
-                    .one()
-                p.processed = count
-                transaction.commit()
-
+                self.db.progress.update(
+                    { 'site': self.site },
+                    { '$set': { 'processed': count }}
+                )
                 # reset the counter
                 save_counter = 0
             save_counter +=1 
@@ -137,20 +121,14 @@ class Network:
             graph.node[n]['connections'] = len(graph.neighbors(n))
 
         # save the graph
-        n = NetworkModel(
-            site = self.site, 
-            graph_type = self.graph_type, 
-            valid_to = datetime.now() + timedelta(hours=float(self.request.registry.settings['data_age']))
-        )
-        n.graph_data = json.dumps(json_graph.node_link_data(graph))
-        self.dbs.add(n)
-        transaction.commit()
-
-        # delete any existing progress counters
-        self.dbs.query(Progress) \
-            .filter(Progress.site == self.site) \
-            .delete()
-        transaction.commit()
+        self.db.network.insert({
+            'site': self.site,
+            'graph_type': self.graph_type,
+            'createdAt': datetime.utcnow(),
+            'graph_data': json_graph.node_link_data(graph)
+        })
+        data_age = self.request.registry.app_config['general']['data_age']
+        self.db.progress.ensure_index('createdAt', expireAfterSeconds = data_age)
 
    
         # all done

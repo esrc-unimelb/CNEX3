@@ -1,13 +1,33 @@
 
 import os
+import sys
 import os.path
 import ConfigParser
+import collections
+import traceback
+import ast
 
 from pyramid.httpexceptions import HTTPBadRequest
 
-class Config:
+import logging
+log = logging.getLogger(__name__)
 
-    def __init__(self, request):
+
+class ConfigBase:
+    def __init__(self):
+        pass
+
+    def get(self, section, param, aslist=False):
+        data = self.cfg.get(section, param) if (self.cfg.has_section(section) and self.cfg.has_option(section, param)) else None
+        if data == None:
+            log.error("Missing parameter %s in section %s" % (param, section))
+        if aslist:
+            return [ d.strip() for d in data.split(',') ]
+        return data
+
+class Config(ConfigBase):
+
+    def __init__(self, conf):
         """
         Expects to be called with a pyramid request object.
 
@@ -20,20 +40,48 @@ class Config:
         @params:
         request: a pyramid request object
         """
-        settings = request.registry.settings
-        app_config = settings['app.config']
+        self.cfg = ConfigParser.SafeConfigParser()
+        try:
+            self.cfg.read(conf)
+        except ConfigParser.ParsingError:
+            log.error('Config file parsing errors')
+            log.error(sys.exc_info()[1])
+            sys.exit()
 
-        self.sites = {}
-        for s in os.listdir(app_config):
-            cfg = ConfigParser.SafeConfigParser()
-            cfg.read(os.path.join(app_config, s))
+        self.app_config = {
+            'general': {
+                'token': self.get('GENERAL', 'token'),
+                'data_age': self.get('GENERAL', 'data_age'),
+                'sites': self.get('GENERAL', 'sites'),
+            },
+            'mongodb': {
+                'nodes': self.get('MONGODB', 'nodes', aslist=True),
+                'user': self.get('MONGODB', 'user'),
+                'pass': self.get('MONGODB', 'pass'),
+                'db': self.get('MONGODB', 'db'),
+                'replica_set': self.get('MONGODB', 'replica.set'),
+                'write_concern': self.get('MONGODB', 'write.concern')
+            }
+        }
 
-            site_data = {}
-            site_data['slug'] = cfg.get('GENERAL', 'slug') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'slug')) else None
-            site_data['eac']  = cfg.get('GENERAL', 'eac') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'eac')) else None
-            site_data['name']  = cfg.get('GENERAL', 'name') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'name')) else None
-            site_data['url']  = cfg.get('GENERAL', 'url') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'url')) else None
-            source_map = cfg.get('GENERAL', 'map') if (cfg.has_section('GENERAL') and cfg.has_option('GENERAL', 'map')) else None
-            site_data['map']  = source_map.split(', ')
-            self.sites[s] = site_data
+class SiteConfig(ConfigBase):
+    def __init__(self, conf):
+        self.cfg = ConfigParser.SafeConfigParser()
+        try:
+            self.cfg.read(conf)
+        except ConfigParser.ParsingError:
+            log.error('Config file parsing errors')
+            log.error(sys.exc_info()[1])
+            sys.exit()
+
+    def load(self, site):
+        conf = collections.namedtuple('siteconf', 
+            [ 'code', 'name', 'url', 'eac', 'map' ]
+        )
+        return conf(site,
+                    self.get('GENERAL', 'name'), 
+                    self.get('GENERAL', 'url'),
+                    self.get('GENERAL', 'eac'),
+                    self.get('GENERAL', 'map', aslist=True),
+                   )
 

@@ -3,9 +3,6 @@ import transaction
 
 from pyramid import testing
 
-from .models import DBSession
-
-
 class TestMyView(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()

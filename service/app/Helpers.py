@@ -2,11 +2,9 @@ import os
 import sys
 import time
 from lxml import etree, html
-from .models import (
-    DBSession,
-    Progress,
-    NetworkModel
-    )
+from config import SiteConfig
+
+from connectors import MongoDBConnection as mdb
 
 def get(tree, path, attrib=None, element=None):
     """Extract data from an etree tree
@@ -83,3 +81,12 @@ def cleanup(site, graph=None):
     transaction.commit()
 
     dbs.flush()
+
+def get_site_data(request):
+    site_configs = os.path.join(os.path.dirname(request.registry.settings['app.config']), request.registry.app_config['general']['sites'])
+    sites = {}
+    for f in os.listdir(site_configs):
+        c = SiteConfig(os.path.join(site_configs, f))
+        d = c.load(f)
+        sites[f] = d
+    return sites
