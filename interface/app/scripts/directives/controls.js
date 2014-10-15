@@ -23,9 +23,9 @@ angular.module('interfaceApp')
           var sizeThePanel = function() {
               scope.cls = {
                   'top': 10,
-                  'left': $window.innerWidth - 570,
+                  'left': $window.innerWidth - 560,
                   'width': 550,
-                  'height': $window.innerHeight - 100,
+                  'height': $window.innerHeight - 20,
               }
           }
           sizeThePanel();

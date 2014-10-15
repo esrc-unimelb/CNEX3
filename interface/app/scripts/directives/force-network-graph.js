@@ -27,8 +27,6 @@ angular.module('interfaceApp')
           scope.nodes = DataService.nodes;
           scope.links = DataService.links;
           console.log(scope.nodes);
-          var weightBounds = DataService.weightBounds;
-
 
           // create a local data object keyed on name to allow
           //  easy retrival of node data when required
@@ -41,8 +39,6 @@ angular.module('interfaceApp')
           var h = $window.innerHeight;
 
           //d3.select('svg').remove();
-          scope.weight = d3.scale.linear().range([10, 80]);
-          scope.weight.domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
           scope.unConnectedNodes = [];
 
           // redraw the view when zooming
