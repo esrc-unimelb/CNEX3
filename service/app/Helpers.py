@@ -3,8 +3,20 @@ import sys
 import time
 from lxml import etree, html
 from config import SiteConfig
+import ast
+import json
 
 from connectors import MongoDBConnection as mdb
+
+import logging
+log = logging.getLogger(__name__)
+
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPUnauthorized
+)
+
+import requests
 
 def get(tree, path, attrib=None, element=None):
     """Extract data from an etree tree
@@ -71,18 +83,9 @@ def get_xml(href):
     except IOError:
         return None
 
-def cleanup(site, graph=None):
-    dbs = DBSession()
-
-    # delete any existing progress counters
-    dbs.query(Progress) \
-        .filter(Progress.site == site) \
-        .delete()
-    transaction.commit()
-
-    dbs.flush()
-
 def get_site_data(request):
+    claims = verify_access(request)
+
     site_configs = os.path.join(os.path.dirname(request.registry.settings['app.config']), request.registry.app_config['general']['sites'])
     sites = {}
     for f in os.listdir(site_configs):
@@ -90,3 +93,22 @@ def get_site_data(request):
         d = c.load(f)
         sites[f] = d
     return sites
+
+def verify_access(request):
+    if ast.literal_eval(request.registry.app_config['general']['disable_auth']):
+        log.info("Authentication disabled!")
+        return 
+    
+    try:
+        resp = requests.get(request.registry.app_config['general']['token'], headers={ 'Authorization': request.headers['Authorization'] })
+        if resp.status_code != 200:
+            log.info("%s: Access denied. %s, %s" % (request.client_addr, resp.status_code, resp.text))
+            raise HTTPForbidden
+        else:
+            claims = json.loads(resp.text)['claims']
+            log.info("%s: Access granted to: %s" % (request.client_addr, claims['fullname']))
+            return claims
+
+    except:
+        log.info("%s: Access denied. %s" % (request.client_addr, sys.exc_info()))
+        raise HTTPForbidden

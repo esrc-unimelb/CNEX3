@@ -31,19 +31,22 @@ def health_check(request):
     log.info("GET {0} - {1} - {2}".format(request.path, request.remote_addr, request.user_agent))
     return 'OK'
 
-@view_config(route_name='home', request_method='GET', renderer='jsonp')
+@view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
+    claims = verify_access(request)
     sites = get_site_data(request)
     request.response.headers['Access-Control-Allow-Origin'] = '*'
     return { 'sites': sites }
 
-@view_config(route_name='network-build', request_method='GET', renderer='jsonp')
+@view_config(route_name='network-build', request_method='GET', renderer='json')
 def network_build(request):
     """For a given site - assemble the entity graph
     
     @params:
     request.matchdict: code, the site of interest
     """
+    claims = verify_access(request)
+
     site = request.matchdict['code']
 
     n = Network(request)
@@ -60,8 +63,10 @@ def network_build(request):
     return { 'started': True, 'name': name, 'url': url }
 
 
-@view_config(route_name="network-stats", request_method='GET', renderer='jsonp')
+@view_config(route_name="network-stats", request_method='GET', renderer='json')
 def network_stats(request):
+    claims = verify_access(request)
+
     n = Network(request)
     degree = n.calculate_average_degree()
     d = [ d[1] * 100 for d in degree.items() ]
@@ -72,8 +77,10 @@ def network_stats(request):
         'degree': sum(d) / len(d)
     }
 
-@view_config(route_name='build-status', request_method='GET', renderer='jsonp')
+@view_config(route_name='build-status', request_method='GET', renderer='json')
 def build_status(request):
+    claims = verify_access(request)
+
     db = mdb(request)
     site = request.matchdict['code']
     graph_type = request.matchdict['explore']

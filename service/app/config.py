@@ -53,6 +53,7 @@ class Config(ConfigBase):
                 'token': self.get('GENERAL', 'token'),
                 'data_age': self.get('GENERAL', 'data_age'),
                 'sites': self.get('GENERAL', 'sites'),
+                'disable_auth': self.get('GENERAL', 'disable_auth'),
             },
             'mongodb': {
                 'nodes': self.get('MONGODB', 'nodes', aslist=True),

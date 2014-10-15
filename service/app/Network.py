@@ -34,6 +34,8 @@ class Network:
         request.matchdict: code, the site of interest
         request.matchdict: explore, the type of graph being requested
         """
+        claims = verify_access(request)
+
         self.request = request
         self.db = mdb(request)
         self.site = request.matchdict['code']
@@ -128,8 +130,7 @@ class Network:
             'graph_data': json_graph.node_link_data(graph)
         })
         data_age = self.request.registry.app_config['general']['data_age']
-        self.db.progress.ensure_index('createdAt', expireAfterSeconds = data_age)
-
+        self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
    
         # all done
         t2 = time.time()
