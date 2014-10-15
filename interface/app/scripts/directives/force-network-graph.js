@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('forceNetworkGraph', [ '$rootScope', '$window', '$http', '$routeParams', 'configuration', 'DataService', 'D3Service',
-    function ($rootScope, $window, $http, $routeParams, configuration, DataService, D3Service) {
+  .directive('forceNetworkGraph', [ '$rootScope', '$window', '$routeParams', 'configuration', 'DataService', 'D3Service',
+    function ($rootScope, $window, $routeParams, configuration, DataService, D3Service) {
     return {
       templateUrl: 'views/force-network-graph.html',
       restrict: 'E',

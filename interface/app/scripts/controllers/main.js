@@ -6,9 +6,9 @@ angular.module('interfaceApp')
 
 
       var getSitesList = function() {
-        var q = configuration[configuration.service] + '?callback=JSON_CALLBACK';
+        var q = configuration[configuration.service];
         console.log(q);
-        $http.jsonp(q).then(function(d) {
+        $http.get(q).then(function(d) {
             $scope.sites = d.data.sites;
             $scope.serviceUnavailable = false;
         },

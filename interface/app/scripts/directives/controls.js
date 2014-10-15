@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('controls', [ '$http', '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
-        function ($http, $window, DataService, configuration, d3s, SolrService) {
+  .directive('controls', [ '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
+        function ($window, DataService, configuration, d3s, SolrService) {
     return {
       templateUrl: 'views/controls.html',
       restrict: 'E',

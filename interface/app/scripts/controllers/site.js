@@ -15,9 +15,9 @@ angular.module('interfaceApp')
             $scope.total = 0;
             $scope.processed = 0;
 
-            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '?callback=JSON_CALLBACK';
+            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph;
             console.log(url);
-            $http.jsonp(url).then(function(d) {
+            $http.get(url).then(function(d) {
                 // kick off the progress update in a moment; needs time to get going..
                 $timeout(function() { $scope.update(); }, 200);
                 $scope.progress = false;
@@ -41,8 +41,8 @@ angular.module('interfaceApp')
         AuthService.verify();
 
         $scope.update = function() {
-            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status?callback=JSON_CALLBACK';
-            $http.jsonp(url).then(function(resp) {
+            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status';
+            $http.get(url).then(function(resp) {
                 if (resp.data.processed !== null) {
                     $scope.progress = true;
                     $scope.controls = false;

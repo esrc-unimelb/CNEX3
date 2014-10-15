@@ -2,7 +2,7 @@
 
 angular.module('interfaceApp')
   .constant('configuration', {
-      'development': 'http://dev01:3000',
+      'development': 'https://service.esrc.info',
       'testing':    'https://cnex.esrc.info/app',
       'production': '',
       'service': 'development',
