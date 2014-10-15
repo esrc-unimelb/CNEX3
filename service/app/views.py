@@ -79,7 +79,6 @@ def network_stats(request):
 
 @view_config(route_name='build-status', request_method='GET', renderer='json')
 def build_status(request):
-    claims = verify_access(request)
 
     db = mdb(request)
     site = request.matchdict['code']
@@ -87,6 +86,7 @@ def build_status(request):
 
     doc = db.network.find_one({ 'site': site, 'graph_type': graph_type })
     if doc is not None:
+        claims = verify_access(request)
         graph_data = doc['graph_data']
         doc = db.progress.remove({ 'site': site })
         return { 'total': None, 'processed': None, 'graph': graph_data }

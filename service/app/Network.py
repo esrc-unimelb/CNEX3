@@ -126,11 +126,11 @@ class Network:
         self.db.network.insert({
             'site': self.site,
             'graph_type': self.graph_type,
-            'createdAt': datetime.utcnow(),
-            'graph_data': json_graph.node_link_data(graph)
+            'graph_data': json_graph.node_link_data(graph),
+            'createdAt': datetime.utcnow()
         })
         data_age = self.request.registry.app_config['general']['data_age']
-        self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
+        self.db.network.ensure_index('createdAt', expireAfterSeconds = int(data_age))
    
         # all done
         t2 = time.time()
