@@ -6,10 +6,11 @@
             <h1 style="text-shadow: 1px -1px 2px #595959; color: #658095; line-height: 1.1;">
                 <span style="color: #3d4343;">ConneX: Contextual Network Explorer</span>
             </h1>
+            <h5>Visualise the Context Entity relationships in an OHRM dataset.</h5>
             <h4 style="font-size: 16px; font-weight: 300; text-rendering: optimizelegibility; color: #24658A;">
-                ...a <em>side-</em>product of the 
+                A product of the 
                 <a href="http://www.esrc.unimelb.edu.au" style="color: #24658A;">eScholarship Research Centre</a>,
-                <a href="http://www.lib.unimelb.edu.au" target="_blank" style="color: #24658A;" >The University of Melbourne Library</a>
+                <a href="http://www.lib.unimelb.edu.au" target="_blank" style="color: #24658A;" >The University of Melbourne Library</a>.
             </h4>
         </div>
     </div>
@@ -21,8 +22,10 @@
             <button class="btn btn-default bt-sm pull-right" ng-click="login()" ng-if="!ready">Login</button>
             <button class="btn btn-default bt-sm pull-right" ng-click="logout()" ng-if="ready">Logout</button>
             <hr/>
-            <div class="alert alert-info">This application uses the very latest in HTML5 and Javascript technology. In order to have the best possible
-            experience we recommend that you use a modern browser. Google Chrome and Mozilla Firefox are both known to work well.</div>
+            <div class="alert alert-info text-center">This application uses the very latest in HTML5 and Javascript technology. In order to have the best possible
+            experience we recommend that you use a modern browser. Google Chrome and Mozilla Firefox are both known to work well.
+            This application will work on a tablet computer (eg. iPad) and even a phone (you don't really want to do that!) though note that it was designed for larger 
+            screens and computers with more processing power than is normally found on tablets.</div>
             <!--[if lte IE 9]>
                 <div class="alert alert-danger">We've detected that you're using Internet Explorer version 9 or older. This application
                 likely won't work well (or at all!) in those browsers.</div>
@@ -39,5 +42,50 @@
                 </div>
             </div>
         </span>
+    </div>
+    <hr style="border-color: #003268;"/>
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12"><h4>Technology Credits:</h4></div>
+    </div>
+    <style>
+        a:link    { color: #3d4343; }
+        a:hover   { color: #003268; }
+        a:active  { color: #003268; }
+        a:visited { color: #3d4343; }
+    </style>
+    <div class="row">
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <a href="https://angularjs.org/" target="_blank"><button class="btn btn-info btn-block">AngularJS</button></a>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <a href="http://getbootstrap.com/" target="_blank"><button class="btn btn-info btn-block">Bootstrap</button></a>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <a href="http://d3js.org/" target=_blank"><button class="btn btn-info btn-block">d3</button></a>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <a href="http://www.html5rocks.com/en/" target="_blank"><button class="btn btn-info btn-block">HTML5</button></a>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <a href="http://python.org" target="_blank"><button class="btn btn-info btn-block">Python</button></a>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <a href="http://lxml.de" target="_blank"><button class="btn btn-info btn-block">lxml</button></a>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <a href="https://networkx.github.io/" target="_blank"><button class="btn btn-info btn-block">NetworkX</button></a>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <a href="http://gruntjs.com" target="blank"><button class="btn btn-info btn-block">Grunt</button></a>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <a href="http://yeoman.io/" target="_blank"><button class="btn btn-info btn-block">Yeoman</button></a>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <a href="http://nodejs.org" target="_blank"><button class="btn btn-info btn-block">NodeJS</button></a>
+        </div>
     </div>
 </div>
