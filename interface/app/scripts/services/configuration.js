@@ -3,9 +3,8 @@
 angular.module('interfaceApp')
   .constant('configuration', {
       'development': 'https://service.esrc.info',
-      'testing':    'https://cnex.esrc.info/app',
-      'production': '',
-      'service': 'development',
+      'production': 'https://cnex.esrc.unimelb.edu.au',
+      'service': 'production',
       'solr': 'https://solr.esrc.unimelb.edu.au/ESRC/select',
 
       'fill': {
@@ -46,5 +45,4 @@ angular.module('interfaceApp')
               'default': '3'
           }
       }
-
   });

@@ -12,7 +12,7 @@ angular.module('interfaceApp')
             $scope.sites = d.data.sites;
             $scope.serviceUnavailable = false;
         },
-        function() {
+        function(resp) {
             $scope.serviceUnavailable = true;
         });
       }
