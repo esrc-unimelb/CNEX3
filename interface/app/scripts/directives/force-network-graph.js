@@ -92,7 +92,7 @@ angular.module('interfaceApp')
 
           var svg = d3.select('#graph')
                 .append('svg')
-                .attr('width', w)
+                .attr('width', w - 30)
                 .attr('height', h)
                 .attr('viewBox', '0 0 ' + w + ' ' + h)
                 .attr('preserveAspectRatio', 'xMidYMid meet')
