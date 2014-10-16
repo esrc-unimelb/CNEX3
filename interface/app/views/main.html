@@ -21,6 +21,12 @@
             <button class="btn btn-default bt-sm pull-right" ng-click="login()" ng-if="!ready">Login</button>
             <button class="btn btn-default bt-sm pull-right" ng-click="logout()" ng-if="ready">Logout</button>
             <hr/>
+            <div class="alert alert-info">This application uses the very latest in HTML5 and Javascript technology. In order to have the best possible
+            experience we recommend that you use a modern browser. Google Chrome and Mozilla Firefox are both known to work well.</div>
+            <!--[if lte IE 9]>
+                <div class="alert alert-danger">We've detected that you're using Internet Explorer version 9 or older. This application
+                likely won't work well (or at all!) in those browsers.</div>
+            <![endif]-->
         </div>
     </div>
     <div ng-if="ready">
