@@ -36,7 +36,7 @@ module.exports = function (grunt) {
         },
         production: {
             options: {
-                remote: '',
+                remote: 'git@bitbucket.org:esrc/cnex.git',
                 branch: 'production'
             }
         }
