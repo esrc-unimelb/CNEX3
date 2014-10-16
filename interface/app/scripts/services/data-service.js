@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .service('DataService', [ '$http', '$rootScope', 'configuration', function ForceData($http, $rootScope, configuration) {
+  .service('DataService', [ '$rootScope', function ForceData($rootScope) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     //
 

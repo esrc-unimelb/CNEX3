@@ -38,6 +38,8 @@ angular.module('interfaceApp')
               })
               scope.contextNodeData = undefined;
               scope.contextNetworkData = undefined;
+              DataService.selected = undefined;
+              DataService.contextNode = undefined;
               scope.showData = false;
           })
 
@@ -125,6 +127,10 @@ angular.module('interfaceApp')
               scope.nodesSizedEvenly = false;
           }
           
+          scope.fadeBackground = function() {
+              d3s.fadeBackground(scope.fade);
+          }
+
           // trigger a reset
           scope.reset = function() {
               d3s.reset();

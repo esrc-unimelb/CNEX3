@@ -27,7 +27,7 @@
         <span ng-repeat="site in sites">
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="col-sm-6 col-md-6"><a href="{{site[2]}}">{{site[1]}}</a> ({{site[0]}})</div>
+                    <div class="col-sm-6 col-md-6"><span style="font-family:monospace;">{{site[0]}}</span>&nbsp;&#8212;&nbsp;<a href="{{site[2]}}">{{site[1]}}</a></div>
                     <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site[0]}}/byEntity">Explore by Context Entity</a></div>
                     <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site[0]}}/byFunction">Explore by Function</a></div>
                 </div>

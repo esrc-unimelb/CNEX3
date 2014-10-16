@@ -68,7 +68,7 @@ angular.module('interfaceApp')
 
         d3s.highlightNodes();
         d3s.highlightLinks();
-        d3s.highlightRects();
+        d3s.highlightDateRange();
         d3s.highlightPoints();
 
         DataService.getNodeData(neighbours, contextNode);
@@ -119,7 +119,7 @@ angular.module('interfaceApp')
 
         d3s.highlightNodes();
         d3s.highlightLinks();
-        d3s.highlightRects();
+        d3s.highlightDateRange();
         d3s.highlightPoints();
         d3s.highlightedTypes = types;
 
@@ -156,7 +156,7 @@ angular.module('interfaceApp')
 
         d3s.highlightNodes();
         d3s.highlightLinks();
-        d3s.highlightRects();
+        d3s.highlightDateRange();
         d3s.highlightPoints();
 
         DataService.getNodeData(selectedNodes, undefined);
@@ -241,12 +241,12 @@ angular.module('interfaceApp')
     }
 
     /*
-     * @function: highlightRects
+     * @function: highlightDateRange
      */
-    function highlightRects() {
+    function highlightDateRange() {
         // get a handle to the relevant elements
-        var rect = d3.selectAll('.rect');
-        rect.attr('fill',    function(d) { return d3s.fill[d.id]; })
+        var dateRange = d3.selectAll('.dateRange');
+        dateRange.attr('fill',    function(d) { return d3s.fill[d.id]; })
             .attr('opacity', function(d) { return d3s.opacity[d.id]; })
             .attr('height',  function(d) { return d3s.height[d.id]; })
             .attr('stroke',  function(d) { return d3s.stroke[d.id]; });
@@ -257,7 +257,7 @@ angular.module('interfaceApp')
      */
     function highlightPoints() {
         // get a handle to the relevant elements
-        var pnts = d3.selectAll('.circle');
+        var pnts = d3.selectAll('.datePoint');
         pnts.attr('fill',    function(d) { return d3s.fill[d.id]; })
             .attr('opacity', function(d) { return d3s.opacity[d.id]; })
             .attr('stroke',  function(d) { return d3s.stroke[d.id]; });
@@ -279,6 +279,57 @@ angular.module('interfaceApp')
         d3.selectAll('.node')
           .transition()
           .attr('r', function(d) { return d.r; });
+    }
+
+    /*
+     * @function: fadeBackground
+     *
+     * @params:
+     * - value
+     */
+    function fadeBackground(value) {
+        if (DataService.selected === undefined) {
+            return;
+        }
+        // iterate over all of the elements fading those not selected
+        var nodes = d3.selectAll('.node');
+        var t;
+        nodes.attr('opacity', function(d, i, n) { 
+            t = d3.select(this); 
+            if (t.attr('fill') === configuration.fill.default) {
+                return value;
+            } else {
+                return d3s.opacity[d.id];
+            }
+        });
+        var link = d3.selectAll('.link');
+        link.attr('opacity', function(d) { 
+            t = d3.select(this); 
+            if (t.attr('stroke') === configuration.stroke.link.unselected) {
+                return value;
+            } else {
+                d3s.linkOpacity[d.source.id + '-' + d.target.id];
+            }
+        });
+        var pnts = d3.selectAll('.datePoint');
+        pnts.attr('opacity', function(d) {
+            t = d3.select(this); 
+            if (t.attr('fill') === configuration.fill.default) {
+                return value;
+            } else {
+                return d3s.opacity[d.id];
+            }
+        })
+
+        var dateRange = d3.selectAll('.dateRange');
+        dateRange.attr('opacity', function(d) {
+            t = d3.select(this); 
+            if (t.attr('fill') === configuration.fill.default) {
+                return value;
+            } else {
+                d3s.opacity[d.id];
+            }
+        })
     }
 
     /*
@@ -304,12 +355,13 @@ angular.module('interfaceApp')
         highlightNodes: highlightNodes,
         highlightNode: highlightNode,
         highlightLinks: highlightLinks,
-        highlightRects: highlightRects,
+        highlightDateRange: highlightDateRange,
         highlightPoints: highlightPoints, 
         highlightByType: highlightByType,
         highlightById: highlightById,
         sizeNodesEvenly: sizeNodesEvenly,
         resetNodeDimensions: resetNodeDimensions,
+        fadeBackground: fadeBackground,
         reset: reset,
         sanitize: sanitize
     }

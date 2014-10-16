@@ -12,7 +12,7 @@ angular.module('interfaceApp')
           'contextNode': 'green',
           'contextNeighbourDefault': 'orange',
           'contextNeighbourHighlight': 'red',
-          'default': '#C8C8C8'
+          'default': '#c8c8c8'
       },
 
       'opacity': {
@@ -23,11 +23,11 @@ angular.module('interfaceApp')
       'stroke': {
           'link': {
               'selected': 'orange',
-              'unselected': '#C8C8C8'
+              'unselected': '#c8c8c8'
           },
           'date': {
               'selected': 'black',
-              'unselected': '#C8C8C8'
+              'unselected': '#c8c8c8'
           }
       },
 

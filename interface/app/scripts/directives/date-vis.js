@@ -11,21 +11,21 @@ angular.module('interfaceApp')
       },
       link: function postLink(scope, element, attrs) {
 
-          $rootScope.$on('reset', function() {
-              var rect = d3.selectAll('.rect');
-              rect.attr('fill', configuration.fill.default)
+          scope.$on('reset', function() {
+              var dateRange = d3.selectAll('.dateRange');
+              dateRange.attr('fill', configuration.fill.default)
                   .attr('opacity', configuration.opacity.default)
                   .attr('height', configuration.height.default) 
                   .attr('stroke', configuration.stroke.date.default);
 
-              var circle = d3.selectAll('.circle');
+              var circle = d3.selectAll('.datePoint');
               circle.attr('fill', configuration.fill.default)
                     .attr('opacity', configuration.opacity.default)
                     .attr('r', configuration.radius.date.default)
                     .attr('stroke', configuration.stroke.date.default);
           });
 
-          $rootScope.$on('graph-data-loaded', function() {
+          scope.$on('graph-data-loaded', function() {
               // ditch any previous svg though I'm not sure why there's
               //  still one there
               d3.select('#datevis').select('svg').remove();
@@ -79,10 +79,10 @@ angular.module('interfaceApp')
                              .domain([0, ranges.length])
                              .range([10, (scope.height-40)]);
 
-              var rect = svg.selectAll('.rect').data(ranges);
-              rect.enter()
+              var dateRange = svg.selectAll('.dateRange').data(ranges);
+              dateRange.enter()
                   .append('rect')
-                  .attr('class', 'rect')
+                  .attr('class', 'dateRange')
                   .attr('x', function(d) {
                       var date = Date.parse(d.df);
                       return xScale(date);
@@ -102,10 +102,10 @@ angular.module('interfaceApp')
 
 
               yScale.domain([0, points.length]);
-              var circle = svg.selectAll('circle').data(points);
+              var circle = svg.selectAll('datePoint').data(points);
               circle.enter()
                   .append('circle')
-                  .attr('class', 'circle')
+                  .attr('class', 'datePoint')
                   .attr('cx', function(d) {
                       if (d.df !== null) {
                           var date = Date.parse(d.df);

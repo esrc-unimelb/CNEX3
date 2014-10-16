@@ -37,6 +37,15 @@
             <div class="col-sm-2 col-md-2 col-lg-2">
                 <button class="btn btn-sm btn-default" ng-click="reset()">Reset</button>
             </div>
+         </div>
+         <br/>
+         <div class="row">
+            <div class="col-sm-4 col-md-4 col-lg-4">
+                Fade background:
+            </div>
+            <div class="col-sm-8 col-md-8 col-lg-8">
+                <input type="range" min="0" max="1" step="0.01" value="0.5" ng-model="fade" slider fade-background="fadeBackground()">
+            </div>
         </div>
         <br/>
         <div class="row">
