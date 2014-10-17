@@ -29,7 +29,15 @@ def health_check(request):
     Show the health check view.
     """
     log.info("GET {0} - {1} - {2}".format(request.path, request.remote_addr, request.user_agent))
-    return 'OK'
+
+    # is mongo ok?
+    try:
+        db = mdb(request)
+        doc =  db.health_check.find_one()
+        return 'OK'
+    except:
+        raise HTTPInternalServerError
+
 
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
