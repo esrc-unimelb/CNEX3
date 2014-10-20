@@ -9,7 +9,7 @@ angular.module('interfaceApp')
        *  the rootScope the message: 'user-logged-in'
        */
 
-      var debug = true;
+      var debug = false;
       var log = function(msg) {
           if (debug) {
               console.log(msg);
@@ -38,7 +38,7 @@ angular.module('interfaceApp')
        */
       function login() {
           log('AuthService.login(). Redirecting to login service.');
-          var redirectTo = AuthService.service + '/?r=' + encodeURIComponent($location.absUrl());
+          var redirectTo = AuthService.service;
           window.location = redirectTo;
       }
 
@@ -60,7 +60,7 @@ angular.module('interfaceApp')
               AuthService.login();
           } else {
               log('Found code. Retrieving token.');
-              var url = AuthService.service + '/token/' + $routeParams.code + '?r=' + encodeURIComponent($location.absUrl());
+              var url = AuthService.service + '/token/' + $routeParams.code;
               $http.get(url).then(function(resp) {
                   log('Saving token. Redirecting to home page.');
                   localStorage.setItem('token', resp.data);
@@ -83,6 +83,7 @@ angular.module('interfaceApp')
           var url = AuthService.service + '/token';
           $http.get(url).then(function(resp) {
               AuthService.claims = resp.data.claims;
+              //console.log(AuthService.claims);
               $rootScope.$broadcast('user-logged-in');
           },
           function(resp) {
@@ -103,15 +104,33 @@ angular.module('interfaceApp')
           });
       }
 
+      /*
+       * @function: getUserData
+       */
+      function getUserData() {
+          console.log(AuthService.claims);
+          var app_data = AuthService.claims.apps[AuthService.appUrl];
+          if (AuthService.claims !== undefined) {
+              return {
+                  'name': AuthService.claims.user.name,
+                  'email': AuthService.claims.user.email,
+                  'admin': app_data.admin
+              }
+          }
+      }
+
       var AuthService = {
           service: 'https://sos.esrc.unimelb.edu.au',
+          appUrl: 'https://dashboard.esrc.unimelb.edu.au/cnex/',
           token: undefined,
+          claims: undefined,
           verified: false,
           init: init,
           login: login,
           logout: logout,
           getToken: getToken,
-          verify: verify
+          verify: verify,
+          getUserData: getUserData
       };
       return AuthService;
 

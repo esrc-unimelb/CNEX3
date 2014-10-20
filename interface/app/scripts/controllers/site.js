@@ -30,11 +30,10 @@ angular.module('interfaceApp')
                 $scope.datasetError = true;
                 $scope.progress = false;
             });
-
-
         })
         $scope.$on('user-logged-out', function() {
         })
+
         $scope.$on('graph-ready', function() {
             $scope.showControls = true;
         })
