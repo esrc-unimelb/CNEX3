@@ -109,18 +109,26 @@ angular.module('interfaceApp')
        */
       function getUserData() {
           var app_data = AuthService.claims.apps[AuthService.appUrl];
+          if (app_data === undefined) {
+              console.log("Something's not right. Not logging you in.");
+              AuthService.logout();
+              MCS.add('danger', "Oh snap! We're having some issues right now. Hopefully these will be resolved soon.");
+              return;
+          }
           if (AuthService.claims !== undefined) {
               return {
                   'name': AuthService.claims.user.name,
                   'email': AuthService.claims.user.email,
                   'admin': app_data.admin
               }
-          }
+          } 
+
       }
 
       var AuthService = {
           service: 'https://sos.esrc.unimelb.edu.au',
           appUrl: 'https://dashboard.esrc.unimelb.edu.au/cnex/',
+          //appUrl: 'https://app.esrc.info/',
           token: undefined,
           claims: undefined,
           verified: false,
