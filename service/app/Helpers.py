@@ -106,7 +106,7 @@ def verify_access(request):
             raise HTTPForbidden
         else:
             claims = json.loads(resp.text)['claims']
-            log.info("%s: Access granted to: %s" % (request.client_addr, claims['fullname']))
+            log.info("%s: Access granted to: %s" % (request.client_addr, claims['user']['name']))
             return claims
 
     except:
