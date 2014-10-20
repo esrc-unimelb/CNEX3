@@ -26,7 +26,7 @@ angular.module('interfaceApp')
 
           scope.nodes = DataService.nodes;
           scope.links = DataService.links;
-          console.log(scope.nodes);
+          //console.log(scope.nodes);
 
           // create a local data object keyed on name to allow
           //  easy retrival of node data when required

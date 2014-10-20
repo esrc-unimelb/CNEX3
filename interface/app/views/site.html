@@ -5,6 +5,11 @@
         <div ng-if="datasetError"><h4 class="text-center">Requested dataset unavailable...</h4></div>
     </div>
 </div>
+<div class="row" style="margin-top: 10px;" ng-if="initting">
+    <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3 text-center">
+        <h4>Initialising...</h4>
+    </div>
+</div>
 <div class="row" style="margin-top: 10px;" ng-if="progress">
     <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3">
         <progress-meter processed="{{processed}}" total="{{total}}" error="{{datasetError}}"></progress-meter>

@@ -108,7 +108,6 @@ angular.module('interfaceApp')
        * @function: getUserData
        */
       function getUserData() {
-          console.log(AuthService.claims);
           var app_data = AuthService.claims.apps[AuthService.appUrl];
           if (AuthService.claims !== undefined) {
               return {

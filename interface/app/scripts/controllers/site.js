@@ -9,6 +9,7 @@ angular.module('interfaceApp')
             $scope.graph = $routeParams.explore;
             $scope.service = configuration[configuration.service];
 
+            $scope.initting = true;
             $scope.progress = false;
             $scope.datasetError = false;
             $scope.controls = false;
@@ -29,6 +30,7 @@ angular.module('interfaceApp')
             function() {
                 $scope.datasetError = true;
                 $scope.progress = false;
+                $scope.initting = false;
             });
         })
         $scope.$on('user-logged-out', function() {
@@ -43,13 +45,15 @@ angular.module('interfaceApp')
             var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status';
             $http.get(url).then(function(resp) {
                 if (resp.data.processed !== null) {
-                    $scope.progress = true;
+                    $scope.initting = false;
                     $scope.controls = false;
+                    $scope.progress = true;
                     $scope.processed = resp.data.processed;
                     $scope.total = resp.data.total;
                     $timeout(function() { $scope.update(); }, 100);
                 } else {
                     $scope.progress = false;
+                    $scope.initting = false;
                     $scope.controls = true;
                     $scope.processData(resp.data);
                 }
@@ -60,7 +64,6 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
-            console.log(d);
             var ns = d.graph.nodes;
             var ls = d.graph.links;
 
