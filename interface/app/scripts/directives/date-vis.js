@@ -13,13 +13,13 @@ angular.module('interfaceApp')
 
           scope.$on('reset', function() {
               var dateRange = d3.selectAll('.dateRange');
-              dateRange.attr('fill', configuration.fill.default)
+              dateRange.attr('fill', function(d) { return d.color; })
                   .attr('opacity', configuration.opacity.default)
                   .attr('height', configuration.height.default) 
                   .attr('stroke', configuration.stroke.date.default);
 
               var circle = d3.selectAll('.datePoint');
-              circle.attr('fill', configuration.fill.default)
+              circle.attr('fill', function(d) { return d.color; })
                     .attr('opacity', configuration.opacity.default)
                     .attr('r', configuration.radius.date.default)
                     .attr('stroke', configuration.stroke.date.default);
@@ -96,7 +96,7 @@ angular.module('interfaceApp')
                       return xScale(dt) - xScale(df);
                   })
                   .attr('height', configuration.height.default)
-                  .attr('fill', configuration.fill.default)
+                  .attr('fill', function(d) { return d.color; })
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
                   .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
 
@@ -118,7 +118,7 @@ angular.module('interfaceApp')
                       return yScale(i);
                   })
                   .attr('r', configuration.radius.date.default)
-                  .attr('fill', configuration.fill.default)
+                  .attr('fill', function(d) { return d.color; })
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
                   .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
           });
