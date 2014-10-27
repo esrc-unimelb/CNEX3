@@ -108,7 +108,12 @@ angular.module('interfaceApp')
        * @function: getUserData
        */
       function getUserData() {
-          var app_data = AuthService.claims.apps[AuthService.appUrl];
+          var app_data;
+          angular.forEach(AuthService.claims.apps, function(v,k) {
+              if ($location.absUrl().search(k) !== -1) {
+                  app_data = v;
+              }
+          })
           if (app_data === undefined) {
               console.log("Something's not right. Not logging you in.");
               AuthService.logout();
@@ -127,8 +132,6 @@ angular.module('interfaceApp')
 
       var AuthService = {
           service: 'https://sos.esrc.unimelb.edu.au',
-          appUrl: 'https://dashboard.esrc.unimelb.edu.au/cnex/',
-          //appUrl: 'https://app.esrc.info/',
           token: undefined,
           claims: undefined,
           verified: false,
