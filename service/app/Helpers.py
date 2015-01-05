@@ -5,7 +5,7 @@ from lxml import etree, html
 from config import SiteConfig
 import ast
 import json
-
+import traceback
 from connectors import MongoDBConnection as mdb
 
 import logging
@@ -83,32 +83,52 @@ def get_xml(href):
     except IOError:
         return None
 
-def get_site_data(request):
-    claims = verify_access(request)
-
+def get_site_data(request, authenticated=False):
     site_configs = os.path.join(os.path.dirname(request.registry.settings['app.config']), request.registry.app_config['general']['sites'])
     sites = {}
     for f in os.listdir(site_configs):
         c = SiteConfig(os.path.join(site_configs, f))
         d = c.load(f)
         sites[f] = d
-    return sites
 
-def verify_access(request):
-    if ast.literal_eval(request.registry.app_config['general']['disable_auth']):
-        log.info("Authentication disabled!")
-        return 
-    
+    if authenticated:
+        # if the user has been authenticated - return all data
+        return sites
+    else:
+        # return only the public data
+        public_sites = {}
+        for s in sites:
+            if sites[s]['public']: 
+                public_sites[s] = sites[s]
+        return public_sites
+
+def verify_access(request, site=None):
+    # Global access checker
     try:
         resp = requests.get(request.registry.app_config['general']['token'], headers={ 'Authorization': request.headers['Authorization'] })
-        if resp.status_code != 200:
+        if resp.status_code == 200:
+            claims = json.loads(resp.text)['claims']
+            sites = get_site_data(request, authenticated=True)
+
+            log.info("%s: Access granted to: %s" % (request.client_addr, claims['user']['name']))
+            if site is not None: 
+                site_data = sites.pop(site, None)
+                if site_data == None:
+                    raise HTTPForbidden
+                return claims, site_data
+            else:
+                return claims, sites
+        else:
             log.info("%s: Access denied. %s, %s" % (request.client_addr, resp.status_code, resp.text))
             raise HTTPForbidden
-        else:
-            claims = json.loads(resp.text)['claims']
-            log.info("%s: Access granted to: %s" % (request.client_addr, claims['user']['name']))
-            return claims
 
     except:
-        log.info("%s: Access denied. %s" % (request.client_addr, sys.exc_info()))
-        raise HTTPForbidden
+        log.info("%s: No Authorisation header in request." % request.client_addr)
+        sites = get_site_data(request, authenticated=False)
+        if site is not None:
+            site_data = sites.pop(site, None)
+            if site_data == None:
+                raise HTTPForbidden
+            return None, site_data
+        else:
+            return None, sites

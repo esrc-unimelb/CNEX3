@@ -34,21 +34,17 @@ class Network:
         request.matchdict: code, the site of interest
         request.matchdict: explore, the type of graph being requested
         """
-        claims = verify_access(request)
 
         self.request = request
         self.db = mdb(request)
         self.site = request.matchdict['code']
         self.graph_type = request.matchdict['explore']
+        claims, site = verify_access(request, site=self.site)
 
-        # read the site config and bork if bad site requested
-        sites = get_site_data(request)
-        site = sites[self.site]
-
-        self.eac_path = site.eac
-        self.source_map = site.map
-        self.name = site.name
-        self.url = site.url
+        self.eac_path = site['eac']
+        self.source_map = site['map']
+        self.name = site['name']
+        self.url = site['url']
         log.debug("Processing site: %s, data path: %s" % (self.site, self.eac_path))
 
     def build(self) :
@@ -180,18 +176,18 @@ class Network:
                 try:
                     neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
                     if neighbour_ref.startswith('http'):
-                        neighbour_ref_local = neighbour_ref.replace(self.source_map[0], self.source_map[1])
+                        neighbour_ref_local = neighbour_ref.replace(self.source_map['source'], self.source_map['localpath'])
                     else:
                         # assume it's relative
-                        neighbour_ref_local = "%s/%s" % (self.source_map[1], neighbour_ref)
+                        neighbour_ref_local = "%s/%s" % (self.source_map['localpath'], neighbour_ref)
                     try:
                         xml_datafile = get_xml(href=neighbour_ref_local)
                         if xml_datafile is not None:
                             if xml_datafile.startswith('http'):
-                                xml_datafile_local = xml_datafile.replace(self.source_map[0], self.source_map[1])
+                                xml_datafile_local = xml_datafile.replace(self.source_map['source'], self.source_map['localpath'])
                             else:
                                 # assume it's relative
-                                xml_datafile_local = "%s/%s" % (self.source_map[1], xml_datafile)
+                                xml_datafile_local = "%s/%s" % (self.source_map['localpath'], xml_datafile)
                             tree = etree.parse(xml_datafile_local)
                         else:
                             raise IOError

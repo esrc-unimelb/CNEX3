@@ -1,6 +1,7 @@
 [GENERAL]:
 # Site descriptive name
 name: Find & Connect Western Australia
+code: FCWA
 url: http://www.findandconnect.gov.au
 
 # Location of the EAC data files
@@ -8,3 +9,6 @@ eac: /srv/ha/web/FCWA//testing/eac
 
 ## For file loads, map the URL back in the to filesystem
 map: http://www.findandconnect.gov.au/ref/wa, /srv/ha/web/FCWA//testing
+
+## Is the site public? True or False
+public: True

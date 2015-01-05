@@ -1,6 +1,7 @@
 [GENERAL]:
 # Site descriptive name
 name: Saulwick Polls & Social Research
+code: SAUL
 url: http://www.saulwick.info
 
 # Location of the EAC data files
@@ -8,3 +9,6 @@ eac: /srv/ha/web/SAUL/testing/eac
 
 ## For file loads, map the URL back in the to filesystem
 map: http://www.saulwick.info, /srv/ha/web/SAUL/testing
+
+## Is the site public? True or False
+public: True

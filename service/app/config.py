@@ -53,7 +53,7 @@ class Config(ConfigBase):
                 'token': self.get('GENERAL', 'token'),
                 'data_age': self.get('GENERAL', 'data_age'),
                 'sites': self.get('GENERAL', 'sites'),
-                'disable_auth': self.get('GENERAL', 'disable_auth'),
+                'disable_auth': ast.literal_eval(self.get('GENERAL', 'disable_auth')),
             },
             'mongodb': {
                 'nodes': self.get('MONGODB', 'nodes', aslist=True),
@@ -76,13 +76,15 @@ class SiteConfig(ConfigBase):
             sys.exit()
 
     def load(self, site):
-        conf = collections.namedtuple('siteconf', 
-            [ 'code', 'name', 'url', 'eac', 'map' ]
-        )
-        return conf(site,
-                    self.get('GENERAL', 'name'), 
-                    self.get('GENERAL', 'url'),
-                    self.get('GENERAL', 'eac'),
-                    self.get('GENERAL', 'map', aslist=True),
-                   )
+        conf = {}
+        conf['code'] = self.get('GENERAL', 'code')
+        conf['name'] = self.get('GENERAL', 'name')
+        conf['url'] = self.get('GENERAL', 'url')
+        conf['eac'] = self.get('GENERAL', 'eac')
+        datamap = self.get('GENERAL', 'map', aslist=True)
+        conf['map'] = {}
+        conf['map']['source'] = datamap[0]
+        conf['map']['localpath'] = datamap[1]
+        conf['public'] = ast.literal_eval(self.get('GENERAL', 'public'))
+        return conf
 

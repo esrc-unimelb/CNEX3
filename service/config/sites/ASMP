@@ -1,10 +1,14 @@
 [GENERAL]:
 # Site descriptive name
 name: Arrowsmith's Australian Maps
+code: ASMP
 url: http://www.asmp.esrc.unimelb.edu.au
 
 # Location of the EAC data files
-eac: /srv/ha/web/ASMP//testing/eac
+eac: /srv/ha/web/ASMP/testing/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: http://www.asmp.esrc.unimelb.edu.au, /srv/ha/web/ASMP//testing
+map: http://www.asmp.esrc.unimelb.edu.au, /srv/ha/web/ASMP/testing
+
+## Is the site public? True or False
+public: True

@@ -41,9 +41,7 @@ def health_check(request):
 
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
-    claims = verify_access(request)
-    sites = get_site_data(request)
-    request.response.headers['Access-Control-Allow-Origin'] = '*'
+    claims, sites = verify_access(request)
     return { 'sites': sites }
 
 @view_config(route_name='network-build', request_method='GET', renderer='json')
@@ -53,27 +51,19 @@ def network_build(request):
     @params:
     request.matchdict: code, the site of interest
     """
-    claims = verify_access(request)
-
     site = request.matchdict['code']
+    claims, site = verify_access(request, site=site)
 
     n = Network(request)
     n.build()
 
-    sites = get_site_data(request)
-    site = sites[site]
-    name = site.name
-    url = site.url
-
-    n = Network(request)
-    n.build()
-
-    return { 'started': True, 'name': name, 'url': url }
+    return { 'started': True, 'name': site['name'], 'url': site['url'] }
 
 
 @view_config(route_name="network-stats", request_method='GET', renderer='json')
 def network_stats(request):
-    claims = verify_access(request)
+    site = request.matchdict['code']
+    claims, site = verify_access(request, site=site)
 
     n = Network(request)
     degree = n.calculate_average_degree()

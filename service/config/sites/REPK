@@ -1,10 +1,14 @@
 [GENERAL]:
 # Site descriptive name
 name: Return, Reconcile, Renew
-url:
+code: REPK
+url: https://web.esrc.unimelb.edu.au/REPKt
 
 # Location of the EAC data files
 eac: /srv/ha/web/REPK//testing/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: , /srv/ha/web/REPK//testing
+map: https://web.esrc.unimelb.edu.au/REPKt, /srv/ha/web/REPK//testing
+
+## Is the site public? True or False
+public: False
