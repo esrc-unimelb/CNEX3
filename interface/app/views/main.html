@@ -17,10 +17,10 @@
     <br/>
     <div class="row" style="">
         <div class="col-sm-12 col-md-12 col-lg-12">
-            <span ng-if="ready">Logged in as: {{name}}.</span>
-            <span ng-if="!ready">Please log in.</span>
-            <button class="btn btn-default bt-sm pull-right" ng-click="login()" ng-if="!ready">Login</button>
-            <button class="btn btn-default bt-sm pull-right" ng-click="logout()" ng-if="ready">Logout</button>
+            <span ng-if="loggedIn">Logged in as: {{name}}.</span>
+            <span ng-if="!loggedIn">Authorised users are required to log in before they can see all sites.</span>
+            <button class="btn btn-default bt-sm pull-right" ng-click="login()" ng-if="!loggedIn">Login</button>
+            <button class="btn btn-default bt-sm pull-right" ng-click="logout()" ng-if="loggedIn">Logout</button>
             <hr/>
             <div class="alert alert-info text-center">This application requires the very latest in HTML5 and Javascript technology. In order to have the best possible
             experience we recommend that you use a modern browser. Google Chrome and Mozilla Firefox are both known to work well.
@@ -36,9 +36,9 @@
         <span ng-repeat="site in sites">
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="col-sm-6 col-md-6"><span style="font-family:monospace;">{{site[0]}}</span>&nbsp;&#8212;&nbsp;<a href="{{site[2]}}">{{site[1]}}</a></div>
-                    <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site[0]}}/byEntity">Explore by Context Entity</a></div>
-                    <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site[0]}}/byFunction">Explore by Function</a></div>
+                    <div class="col-sm-6 col-md-6"><span style="font-family:monospace;">{{site.code}}</span>&nbsp;&#8212;&nbsp;<a href="{{site.url}">{{site.name}}</a></div>
+                    <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site.code}}/byEntity">Explore by Context Entity</a></div>
+                    <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site.code}}/byFunction">Explore by Function</a></div>
                 </div>
             </div>
         </span>

@@ -1,45 +1,40 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'DataService', 'AuthService',
-    function($rootScope, $scope, $routeParams, $http, $timeout, configuration, DataService, AuthService) {
+  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'DataService', 
+    function($rootScope, $scope, $routeParams, $http, $timeout, configuration, DataService) {
 
-        $scope.$on('user-logged-in', function() {
-            $scope.site = $routeParams.code; 
-            $scope.graph = $routeParams.explore;
-            $scope.service = configuration[configuration.service];
+        $scope.site = $routeParams.code; 
+        $scope.graph = $routeParams.explore;
+        $scope.service = configuration[configuration.service];
 
-            $scope.initting = true;
+        $scope.initting = true;
+        $scope.progress = false;
+        $scope.datasetError = false;
+        $scope.controls = false;
+        $scope.total = 0;
+        $scope.processed = 0;
+
+        var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph;
+        console.log(url);
+        $http.get(url).then(function(d) {
+            // kick off the progress update in a moment; needs time to get going..
+            $timeout(function() { $scope.update(); }, 200);
             $scope.progress = false;
-            $scope.datasetError = false;
-            $scope.controls = false;
-            $scope.total = 0;
-            $scope.processed = 0;
-
-            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph;
-            console.log(url);
-            $http.get(url).then(function(d) {
-                // kick off the progress update in a moment; needs time to get going..
-                $timeout(function() { $scope.update(); }, 200);
-                $scope.progress = false;
-                DataService.site = {
-                    'name': d.data.name,
-                    'url': d.data.url
-                }
-            },
-            function() {
-                $scope.datasetError = true;
-                $scope.progress = false;
-                $scope.initting = false;
-            });
-        })
-        $scope.$on('user-logged-out', function() {
-        })
+            DataService.site = {
+                'name': d.data.name,
+                'url': d.data.url
+            }
+        },
+        function() {
+            $scope.datasetError = true;
+            $scope.progress = false;
+            $scope.initting = false;
+        });
 
         $scope.$on('graph-ready', function() {
             $scope.showControls = true;
         })
-        AuthService.verify();
 
         $scope.update = function() {
             var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status';
@@ -87,8 +82,8 @@ angular.module('interfaceApp')
 
             // figure out the connectedNodes and associated links
             angular.forEach(ls, function(v, k) {
-                var sn = v.source_name;
-                var tn = v.target_name;
+                var sn = v.source_id;
+                var tn = v.target_id;
                 if (nodesTmp.indexOf(sn) === -1) {
                     nodesTmp.push(sn);
                     nodes.push(nodeData[sn]);
