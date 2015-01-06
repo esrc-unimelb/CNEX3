@@ -56,10 +56,6 @@ class Network:
             log.debug('Graph already built. No need to build it again')
             return 
         
-        doc = self.db.progress.find_one({ 'site': self.site })
-        if doc is not None:
-            return 
-
         # OTHERWISE:
         # generate the list of datafiles and build the graph
         for (dirpath, dirnames, filenames) in os.walk(self.eac_path):
@@ -70,13 +66,20 @@ class Network:
         total = len(datafiles.items())
         log.debug("Total number of entities in dataset: %s" % total)
 
+        # remove any previous progress traces that might exist
+        doc = self.db.progress.remove({ 'site': self.site })
         self.db.progress.insert({
             'processed': 0,
             'total': total,
             'site': self.site,
             'createdAt': datetime.utcnow()
         })
-        self.db.progress.ensure_index('createdAt', expireAfterSeconds = 600)
+        data_age = self.request.registry.app_config['general']['data_age']
+        try:
+            self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
+        except OperationFailure:
+            self.db.progress.drop_index('createdAt_1')
+            self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
 
         j = multiprocessing.Process(target=self.build_graph, args=(self.graph_type, datafiles, total))
         j.start()
@@ -126,7 +129,11 @@ class Network:
             'createdAt': datetime.utcnow()
         })
         data_age = self.request.registry.app_config['general']['data_age']
-        self.db.network.ensure_index('createdAt', expireAfterSeconds = int(data_age))
+        try:
+            self.db.network.ensure_index('createdAt', expireAfterSeconds = int(data_age))
+        except OperationFailure:
+            self.db.network.drop_index('createdAt_1')
+            self.db.network.ensure_index('createdAt', expireAfterSeconds = int(data_age))
    
         # all done
         t2 = time.time()
