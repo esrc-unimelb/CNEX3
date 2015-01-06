@@ -123,7 +123,7 @@ def verify_access(request, site=None):
             raise HTTPForbidden
 
     except:
-        log.info("%s: No Authorisation header in request." % request.client_addr)
+        log.info("%s: No Authorisation header in request. Stripping private sites." % request.client_addr)
         sites = get_site_data(request, authenticated=False)
         if site is not None:
             site_data = sites.pop(site, None)
