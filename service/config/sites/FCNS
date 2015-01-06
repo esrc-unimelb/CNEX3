@@ -5,10 +5,10 @@ code: FCNS
 url: http://findandconnect.gov.au
 
 # Location of the EAC data files
-eac: /srv/ha/web/FCNS//testing/eac
+eac: /srv/ha/web/FCNS//LIVE/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: http://www.findandconnect.gov.au/ref/nsw, /srv/ha/web/FCNS//testing
+map: http://www.findandconnect.gov.au/ref/nsw, /srv/ha/web/FCNS//LIVE
 
 ## Is the site public? True or False
 public: True

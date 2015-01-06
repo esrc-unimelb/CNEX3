@@ -5,10 +5,10 @@ code: FCTS
 url: http://www.findandconnect.gov.au
 
 # Location of the EAC data files
-eac: /srv/ha/web/FCTS//testing/eac
+eac: /srv/ha/web/FCTS//LIVE/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: http://www.findandconnect.gov.au/ref/tas, /srv/ha/web/FCTS//testing
+map: http://www.findandconnect.gov.au/ref/tas, /srv/ha/web/FCTS//LIVE
 
 ## Is the site public? True or False
 public: True

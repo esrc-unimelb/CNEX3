@@ -5,10 +5,10 @@ code: FCSA
 url: http://www.findandconnect.gov.au
 
 # Location of the EAC data files
-eac: /srv/ha/web/FCSA//testing/eac
+eac: /srv/ha/web/FCSA//LIVE/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: http://www.findandconnect.gov.au/ref/sa, /srv/ha/web/FCSA//testing
+map: http://www.findandconnect.gov.au/ref/sa, /srv/ha/web/FCSA//LIVE
 
 ## Is the site public? True or False
 public: True
