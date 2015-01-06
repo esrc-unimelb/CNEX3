@@ -88,7 +88,7 @@ class Network:
         log.debug('Building the graph.')
         t1 = time.time()
 
-        graph = nx.DiGraph()
+        graph = nx.Graph()
         count = 0
         save_counter = 0
         nodes = {}
@@ -157,12 +157,12 @@ class Network:
             if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
                     graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
-                    graph.add_edge(node_id, function.text, source_name=node_id, target_name=function.text)
+                    graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
 
             else:
                 for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
                     graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
-                    graph.add_edge(node_id, function.text, source_name=node_id, target_name=function.text)
+                    graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
         
     def entities_as_nodes(self, graph, tree):
             node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
@@ -176,9 +176,26 @@ class Network:
             if len(dt) == 0:
                 dt = None
 
-            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+            try:
+                graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+            except:
+                return
 
-            neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation[@cpfRelationType="associative"]', element=True)
+            related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
+            related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)
+            related_publications = 0
+            related_dobjects = 0
+            for r in related_resources:
+                if get(r, 'e:relationEntry', attrib='localType') == "published":
+                    related_publications += 1
+                elif get(r, 'e:relationEntry', attrib='localType') == "digitalObject":
+                    related_dobjects += 1
+            graph.node[node_id]['relatedEntities'] = related_entities
+            graph.node[node_id]['relatedPublications'] = related_publications
+            graph.node[node_id]['relatedDobjects'] = related_dobjects
+
+
+            neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True)
             for node in neighbours:
                 try:
                     neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
@@ -211,7 +228,7 @@ class Network:
                     if len(neighbour_id) == 0:
                         # we've probably read an eac file - try the eac xpath
                         neighbour_id = get(tree, '/eac/control/id')
-                    graph.add_edge(node_id, neighbour_id, source_name=node_id, target_name=neighbour_id)
+                    graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
                 except KeyError:
                     pass
             #print node_id, node_source, node_type
