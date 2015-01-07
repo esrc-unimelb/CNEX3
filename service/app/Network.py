@@ -48,8 +48,6 @@ class Network:
         log.debug("Processing site: %s, data path: %s" % (self.site, self.eac_path))
 
     def build(self) :
-        t1 = time.time()
-
         # is the data available? return now; nothing to do
         doc = self.db.network.find_one({ 'site': self.site })
         if doc is not None:
@@ -67,8 +65,8 @@ class Network:
         log.debug("Total number of entities in dataset: %s" % total)
 
         # remove any previous progress traces that might exist
-        doc = self.db.progress.remove({ 'site': self.site })
-        self.db.progress.insert({
+        doc = self.db.network_progress.remove({ 'site': self.site })
+        self.db.network_progress.insert({
             'processed': 0,
             'total': total,
             'site': self.site,
@@ -76,10 +74,10 @@ class Network:
         })
         data_age = self.request.registry.app_config['general']['data_age']
         try:
-            self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
+            self.db.network_progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
         except OperationFailure:
-            self.db.progress.drop_index('createdAt_1')
-            self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
+            self.db.network_progress.drop_index('createdAt_1')
+            self.db.network_progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
 
         j = multiprocessing.Process(target=self.build_graph, args=(self.graph_type, datafiles, total))
         j.start()
@@ -109,7 +107,7 @@ class Network:
 
             if save_counter == 20:
                 # save a progress count
-                self.db.progress.update(
+                self.db.network_progress.update(
                     { 'site': self.site },
                     { '$set': { 'processed': count }}
                 )
@@ -141,97 +139,97 @@ class Network:
         return
 
     def functions_as_nodes(self, graph, tree):
-            node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
-            ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
-            url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
-            df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
-            dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
-            name = self.get_entity_name(tree, ntype)
-            if len(df) == 0:
-                df = None
-            if len(dt) == 0:
-                dt = None
+        node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
+        ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
+        url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
+        df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
+        dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
+        name = self.get_entity_name(tree, ntype)
+        if len(df) == 0:
+            df = None
+        if len(dt) == 0:
+            dt = None
 
-            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+        graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
-            if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
-                for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
-                    graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
-                    graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
+        if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
+            for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
+                graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
+                graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
 
-            else:
-                for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
-                    graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
-                    graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
-        
+        else:
+            for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
+                graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
+                graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
+    
     def entities_as_nodes(self, graph, tree):
-            node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
-            ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
-            url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
-            df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
-            dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
-            name = self.get_entity_name(tree, ntype)
-            if len(df) == 0:
-                df = None
-            if len(dt) == 0:
-                dt = None
+        node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
+        ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
+        url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
+        df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
+        dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
+        name = self.get_entity_name(tree, ntype)
+        if len(df) == 0:
+            df = None
+        if len(dt) == 0:
+            dt = None
 
+        try:
+            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+        except:
+            return
+
+        related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
+        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)
+        related_publications = 0
+        related_dobjects = 0
+        for r in related_resources:
+            if get(r, 'e:relationEntry', attrib='localType') == "published":
+                related_publications += 1
+            elif get(r, 'e:relationEntry', attrib='localType') == "digitalObject":
+                related_dobjects += 1
+        graph.node[node_id]['relatedEntities'] = related_entities
+        graph.node[node_id]['relatedPublications'] = related_publications
+        graph.node[node_id]['relatedDobjects'] = related_dobjects
+
+
+        neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True)
+        for node in neighbours:
             try:
-                graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
-            except:
-                return
-
-            related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
-            related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)
-            related_publications = 0
-            related_dobjects = 0
-            for r in related_resources:
-                if get(r, 'e:relationEntry', attrib='localType') == "published":
-                    related_publications += 1
-                elif get(r, 'e:relationEntry', attrib='localType') == "digitalObject":
-                    related_dobjects += 1
-            graph.node[node_id]['relatedEntities'] = related_entities
-            graph.node[node_id]['relatedPublications'] = related_publications
-            graph.node[node_id]['relatedDobjects'] = related_dobjects
-
-
-            neighbours = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True)
-            for node in neighbours:
+                neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
+                if neighbour_ref.startswith('http'):
+                    neighbour_ref_local = neighbour_ref.replace(self.source_map['source'], self.source_map['localpath'])
+                else:
+                    # assume it's relative
+                    neighbour_ref_local = "%s/%s" % (self.source_map['localpath'], neighbour_ref)
                 try:
-                    neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
-                    if neighbour_ref.startswith('http'):
-                        neighbour_ref_local = neighbour_ref.replace(self.source_map['source'], self.source_map['localpath'])
-                    else:
-                        # assume it's relative
-                        neighbour_ref_local = "%s/%s" % (self.source_map['localpath'], neighbour_ref)
-                    try:
-                        xml_datafile = get_xml(href=neighbour_ref_local)
-                        if xml_datafile is not None:
-                            if xml_datafile.startswith('http'):
-                                xml_datafile_local = xml_datafile.replace(self.source_map['source'], self.source_map['localpath'])
-                            else:
-                                # assume it's relative
-                                xml_datafile_local = "%s/%s" % (self.source_map['localpath'], xml_datafile)
-                            tree = etree.parse(xml_datafile_local)
+                    xml_datafile = get_xml(href=neighbour_ref_local)
+                    if xml_datafile is not None:
+                        if xml_datafile.startswith('http'):
+                            xml_datafile_local = xml_datafile.replace(self.source_map['source'], self.source_map['localpath'])
                         else:
-                            raise IOError
-                    except IOError:
-                        log.error("No EAC reference to XML source in: %s" % neighbour_ref_local)
-                        continue
-                    except etree.XMLSyntaxError:
-                        log.error("Invalid XML file: %s" % xml_datafile)
-                        continue
-                    except TypeError:
-                        log.error("Some kind of error with: %s" % xml_datafile)
-                        continue
-                    neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
-                    if len(neighbour_id) == 0:
-                        # we've probably read an eac file - try the eac xpath
-                        neighbour_id = get(tree, '/eac/control/id')
-                    graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
-                except KeyError:
-                    pass
-            #print node_id, node_source, node_type
+                            # assume it's relative
+                            xml_datafile_local = "%s/%s" % (self.source_map['localpath'], xml_datafile)
+                        tree = etree.parse(xml_datafile_local)
+                    else:
+                        raise IOError
+                except IOError:
+                    log.error("No EAC reference to XML source in: %s" % neighbour_ref_local)
+                    continue
+                except etree.XMLSyntaxError:
+                    log.error("Invalid XML file: %s" % xml_datafile)
+                    continue
+                except TypeError:
+                    log.error("Some kind of error with: %s" % xml_datafile)
+                    continue
+                neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
+                if len(neighbour_id) == 0:
+                    # we've probably read an eac file - try the eac xpath
+                    neighbour_id = get(tree, '/eac/control/id')
+                graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
+            except KeyError:
+                pass
+        #print node_id, node_source, node_type
 
     def get_entity_name(self, tree, ntype):
         if ntype == 'Person':
