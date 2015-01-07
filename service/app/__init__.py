@@ -28,12 +28,13 @@ def main(global_config, **settings):
     config.registry.app_config = conf.app_config
     config.registry.app_config['mongodb']['client'] = init_mongodb_connection(config.registry.app_config['mongodb'])
 
-    config.add_route('home',           '/')
-    config.add_route('health-check',   '/health-check')
-    config.add_route('network-stats',  '/stats/{code}/{explore}')
-    config.add_route('network-build',  '/network/{code}/{explore}')
-    config.add_route('build-status',   '/network/{code}/{explore}/status')
-    config.add_route('entity_graph',   '/entity/{code}/{id}')
+    config.add_route('home',                    '/')
+    config.add_route('health-check',            '/health-check')
+    config.add_route('network-stats',           '/stats/{code}/{explore}')
+    config.add_route('network-build',           '/network/{code}/{explore}')
+    config.add_route('network-build-status',    '/network/{code}/{explore}/status')
+    config.add_route('entity-build',            '/entity/{code}/{id}')
+    config.add_route('entity-build-status',     '/entity/{code}/{id}/status')
 
     config.scan()
     return config.make_wsgi_app()

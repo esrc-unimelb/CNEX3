@@ -20,6 +20,7 @@ from config import Config
 
 from Helpers import *
 from Network import Network
+from Entity import Entity
 
 from config import Config
 
@@ -37,7 +38,6 @@ def health_check(request):
         return 'OK'
     except:
         raise HTTPInternalServerError
-
 
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
@@ -59,6 +59,46 @@ def network_build(request):
 
     return { 'started': True, 'name': site['name'], 'url': site['url'] }
 
+@view_config(route_name='network-build-status', request_method='GET', renderer='json')
+def network_build_status(request):
+    db = mdb(request)
+    site = request.matchdict['code']
+    graph_type = request.matchdict['explore']
+    claims, site_data = verify_access(request, site=site)
+
+    doc = db.network.find_one({ 'site': site, 'graph_type': graph_type })
+    if doc is not None:
+        graph_data = doc['graph_data']
+        doc = db.network_progress.remove({ 'site': site })
+        return { 'total': None, 'processed': None, 'graph': graph_data }
+    else:
+        doc = db.network_progress.find_one({ 'site': site })
+        return { 'total': doc['total'], 'processed': doc['processed'] }
+
+@view_config(route_name='entity-build-status', request_method='GET', renderer='json')
+def entity_build_status(request):
+    db = mdb(request)
+    site = request.matchdict['code']
+    eid = request.matchdict['id']
+    claims, site_data = verify_access(request, site=site)
+
+    doc = db.entity.find_one({ 'site': site, 'id': eid })
+    if doc is not None:
+        graph_data = doc['graph_data']
+        return { 'status': 'complete', 'graph': graph_data }
+    else:
+        return { 'status': 'working' }
+
+@view_config(route_name='entity-build', request_method='GET', renderer='json')
+def entity_build(request):
+    """ """
+    site = request.matchdict['code']
+    eid = request.matchdict['id']
+    claims, site = verify_access(request, site=site)
+    e = Entity(request)
+    e.build()
+
+    return { 'started': True, 'name': site['name'], 'entity': eid }
 
 @view_config(route_name="network-stats", request_method='GET', renderer='json')
 def network_stats(request):
@@ -74,23 +114,6 @@ def network_stats(request):
         'url': n.url,
         'degree': sum(d) / len(d)
     }
-
-@view_config(route_name='build-status', request_method='GET', renderer='json')
-def build_status(request):
-
-    db = mdb(request)
-    site = request.matchdict['code']
-    graph_type = request.matchdict['explore']
-
-    doc = db.network.find_one({ 'site': site, 'graph_type': graph_type })
-    if doc is not None:
-        claims = verify_access(request)
-        graph_data = doc['graph_data']
-        doc = db.progress.remove({ 'site': site })
-        return { 'total': None, 'processed': None, 'graph': graph_data }
-    else:
-        doc = db.progress.find_one({ 'site': site })
-        return { 'total': doc['total'], 'processed': doc['processed'] }
 
 def bare_tag(tag):
     return tag.rsplit("}", 1)[-1]
