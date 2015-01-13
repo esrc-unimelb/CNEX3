@@ -48,30 +48,11 @@ class Entity:
 
     def build(self) :
         # is the data available? return now; nothing to do
-        doc = self.db.entity.find_one({ 'site': self.site })
+        doc = self.db.entity.find_one({ 'site': self.site, 'id': self.eid  })
         if doc is not None:
             log.debug('Graph already built. No need to build it again')
             return 
         
-        #  store a trace that indicates we're counting
-#        total = len(datafiles.items())
-#        log.debug("Total number of entities in dataset: %s" % total)
-
-        # remove any previous progress traces that might exist
-#        doc = self.db.progress.remove({ 'site': self.site })
-#        self.db.progress.insert({
-#            'processed': 0,
-#            'total': total,
-#            'site': self.site,
-#            'createdAt': datetime.utcnow()
-#        })
-#        data_age = self.request.registry.app_config['general']['data_age']
-#        try:
-#            self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
-#        except OperationFailure:
-#            self.db.progress.drop_index('createdAt_1')
-#            self.db.progress.ensure_index('createdAt', expireAfterSeconds = int(data_age))
-
         j = multiprocessing.Process(target=self.build_graph)
         j.start()
 
@@ -144,7 +125,7 @@ class Entity:
                         else:
                             # assume it's relative
                             xml_datafile_local = "%s/%s" % (self.source_map['localpath'], xml_datafile)
-                        tree = etree.parse(xml_datafile_local)
+                        neighbour_tree = etree.parse(xml_datafile_local)
                     else:
                         raise IOError
                 except IOError:
@@ -156,10 +137,10 @@ class Entity:
                 except TypeError:
                     log.error("Some kind of error with: %s" % xml_datafile)
                     continue
-                neighbour_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
+                neighbour_id = get(neighbour_tree, '/e:eac-cpf/e:control/e:recordId')
                 if len(neighbour_id) == 0:
                     # we've probably read an eac file - try the eac xpath
-                    neighbour_id = get(tree, '/eac/control/id')
+                    neighbour_id = get(neighbour_tree, '/eac/control/id')
 
                 # add node, add edge, call this method on this node
                 graph.add_node(neighbour_id)
@@ -167,7 +148,7 @@ class Entity:
             except KeyError:
                 pass
 
-        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)
+        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
         for node in related_resources:
             # for each node - get the id, type, name and href
             #  add a node to describe it

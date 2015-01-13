@@ -18,7 +18,7 @@ from pyramid.httpexceptions import (
 
 import requests
 
-def get(tree, path, attrib=None, element=None):
+def get(tree, path, attrib=None, element=None, aslist=None):
     """Extract data from an etree tree
 
     Helper to run an xpath against an etree tree. Can extract
@@ -42,7 +42,7 @@ def get(tree, path, attrib=None, element=None):
 
     # return the etree element reference
     if element is not None:
-        if len(result) == 1:
+        if len(result) == 1 and aslist != True:
             return result[0]
         else:
             return result
