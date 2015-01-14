@@ -53,6 +53,13 @@ class Network:
         if doc is not None:
             log.debug('Graph already built. No need to build it again')
             return 
+
+        # are we in the process of building it? return now; nothing to do
+        doc = self.db.network_progress.find_one({ 'site': self.site })
+        print doc
+        if doc is not None:
+            log.debug('Graph currently being built')
+            return
         
         # OTHERWISE:
         # generate the list of datafiles and build the graph
@@ -65,7 +72,6 @@ class Network:
         log.debug("Total number of entities in dataset: %s" % total)
 
         # remove any previous progress traces that might exist
-        doc = self.db.network_progress.remove({ 'site': self.site })
         self.db.network_progress.insert({
             'processed': 0,
             'total': total,
