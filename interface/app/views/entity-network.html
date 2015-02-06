@@ -1,0 +1,85 @@
+<!-- Entity statistics panel -->
+<div class="row">
+    <div ng-style="sidepanelStyle" ng-if="showSidePanel">
+        <div ng-style="statisticsPanelStyle" ng-hide="showInfoPanel">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <h4>
+                        <span style="font-family:monospace;">{{contextNode.id}}</span><br/>
+                        <a href="{{contextNode.url}}">{{contextNode.name}}</a>
+                    </h4>
+                    <hr/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <div class="panel-group" ng-model="panels.activePanel" bs-collapse data-allowMultiple="false" data-animation="">
+                        <div class="panel panel-default" ng-repeat="(k, v) in stats">
+                            <div class="panel-heading" ng-style="{ 'background-color': '{{v.color}}' }">
+                                <h4 class="panel-title">
+                                    <a bs-collapse-toggle>{{k}} ({{v.count}})</a>
+                                </h4>
+                            </div>
+                            <div class="panel-collapse" bs-collapse-target>
+                                <div class="panel-body">
+                                    <ul>
+                                        <li ng-repeat="d in v.entries">
+                                            <span style="font-family:monospace;">{{d.id}}</span>
+                                            <a href="" ng-click="showDetails(d)">{{d.name}}</a><br/>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-style="mainpanelStyle">
+        <div id="entity_graph"></div>
+    </div> 
+</div>
+
+<!-- date view panel -->
+<div ng-style="sidepanelStyle" ng-if="showInfoPanel">
+    <div ng-style="statisticsPanelStyle">
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12 pull-right">
+                <button type="button" class="close" aria-label="Close" ng-click="closeInfoPanel()"><span aria-hidden="true">&times;</span></button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <button class="btn btn-default" ng-click="reset()">Reset</button>
+                <hr/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="panel-group" bs-collapse data-allow-multiple="true" data-start-collapsed="true" data-animation="">
+                    <div class="panel panel-default" ng-repeat="selection in selections">
+                        <div class="panel-heading" ng-style="{ 'background-color': selectionData[selection].color }">
+                           <h4 class="panel-title">
+                                <a bs-collapse-toggle><span style="font-family:monospace;">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span><br/>
+                                {{selectionData[selection].name}}</a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse" bs-collapse-target>
+                            <div class="panel-body">
+                                <span ng-if="selectionData[selection].summnote">
+                                    <h4>Abstract</h4>
+                                    <p ng-bind-html="selectionData[selection].summnote" 
+                                        style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                    <hr/>
+                                </span>
+                                <p ng-bind-html="selectionData[selection].fullnote"
+                                    style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>

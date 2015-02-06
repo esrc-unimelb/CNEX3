@@ -12,6 +12,7 @@ angular.module('interfaceApp', [
   'ngSanitize',
   'ngRoute',
   'ngAnimate',
+  'mgcrea.ngStrap.collapse',
   'MessageCenterModule'
 ])
   .config(function ($routeProvider) {
@@ -23,6 +24,10 @@ angular.module('interfaceApp', [
       .when('/site/:code/:explore', {
           templateUrl: 'views/site.html',
           controller: 'SiteCtrl'
+      })
+      .when('/entity/:code/:entityId', {
+          templateUrl: 'views/entity.html',
+          controller: 'EntityCtrl'
       })
       .when('/play', {
           templateUrl: 'views/play.html',

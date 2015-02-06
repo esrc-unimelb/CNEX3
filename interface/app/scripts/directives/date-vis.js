@@ -56,7 +56,7 @@ angular.module('interfaceApp')
 
               var xScale = d3.time.scale()
                               .domain([t1, t2])
-                              .range([10,scope.width-20]);
+                              .range([0,scope.width]);
 
               var xAxis = d3.svg.axis()
                             .scale(xScale)

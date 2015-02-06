@@ -9,6 +9,15 @@ angular.module('interfaceApp')
       scope: {
       },
       link: function postLink(scope, element, attrs) {
+          var w = angular.element($window);
+          w.bind('resize', function() {
+              scope.$apply(function() {
+                  d3.select('#graph')
+                    .select('svg')
+                    .style('width', element[0].parentElement.clientWidth - 15)
+                    .style('height', $window.innerHeight);
+              })
+          });
 
           scope.$on('reset', function() {
               link.transition()
@@ -35,7 +44,7 @@ angular.module('interfaceApp')
               scope.data[v.id] = v;
           });
 
-          var w = $window.innerWidth;
+          var w = element[0].parentElement.clientWidth;
           var h = $window.innerHeight;
 
           //d3.select('svg').remove();
@@ -92,7 +101,7 @@ angular.module('interfaceApp')
 
           var svg = d3.select('#graph')
                 .append('svg')
-                .attr('width', w - 30)
+                .attr('width', w - 15)
                 .attr('height', h)
                 .attr('viewBox', '0 0 ' + w + ' ' + h)
                 .attr('preserveAspectRatio', 'xMidYMid meet')
@@ -124,7 +133,9 @@ angular.module('interfaceApp')
           // handle the node click event
           node.on('click', function(d) {
               scope.$apply(function() {
-                  D3Service.highlightNodeAndLocalEnvironment(d.id);
+                  console.log(d.id, d.type, d.color);
+                  DataService.getEntityNetwork(d.id);
+                  //D3Service.highlightNodeAndLocalEnvironment(d.id);
               });
           });
 

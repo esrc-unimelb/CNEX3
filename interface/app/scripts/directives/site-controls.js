@@ -1,15 +1,12 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('controls', [ '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
+  .directive('siteControls', [ '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
         function ($window, DataService, configuration, d3s, SolrService) {
     return {
-      templateUrl: 'views/controls.html',
+      templateUrl: 'views/site-controls.html',
       restrict: 'E',
       scope: {
-          site: '@',
-          entity: '@',
-          graph: '@'
       },
       link: function postLink(scope, element, attrs) {
 
@@ -45,10 +42,11 @@ angular.module('interfaceApp')
 
           // populate the controls widget
           scope.$on('graph-data-loaded', function() {
-              scope.siteData = DataService.site;
+              scope.site = DataService.site;
               scope.data = {
                   nodes: DataService.nodes,
                   links: DataService.links,
+                  unConnected: DataService.unConnectedNodes,
                   percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
 
@@ -134,6 +132,10 @@ angular.module('interfaceApp')
           // trigger a reset
           scope.reset = function() {
               d3s.reset();
+          }
+
+          scope.panels = {
+              activePanel: [ 3 ]
           }
 
       }

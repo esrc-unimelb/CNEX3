@@ -23,7 +23,8 @@ angular.module('interfaceApp')
             $scope.progress = false;
             DataService.site = {
                 'name': d.data.name,
-                'url': d.data.url
+                'url': d.data.url,
+                'code': $scope.site
             }
         },
         function() {
@@ -59,6 +60,7 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
+            console.log(d);
             var ns = d.graph.nodes;
             var ls = d.graph.links;
 
@@ -74,11 +76,8 @@ angular.module('interfaceApp')
 
             angular.forEach(ns, function(v, k) {
                 var n = v.id;
-                var c = v.connections;
                 nodeData[n] = v;
-                weightBounds.push(c);
             })
-            weightBounds = [Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)];
 
             // figure out the connectedNodes and associated links
             angular.forEach(ls, function(v, k) {
@@ -107,21 +106,16 @@ angular.module('interfaceApp')
             });
 
             // add some color and the default node radius
-            var color = d3.scale.category20();
-            var weight = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
-            angular.forEach(nodes, function(v, k) {
-                nodes[k].color = color(v.type);
-                nodes[k].r = weight(v.connections);
-            });
+            ns = DataService.processNodeSet(ns);
 
             DataService.nodes = nodes;
             DataService.nodeMap = nodeMap;
             DataService.links = links;
             DataService.unConnectedNodes = unConnectedNodes;
             DataService.weightBounds = weightBounds;
-            $rootScope.$broadcast('graph-data-loaded');
 
             // now instantiate the graph
             $scope.ready = true;
+            $timeout(function() { $rootScope.$broadcast('graph-data-loaded'); }, 100);
         }
   }]);
