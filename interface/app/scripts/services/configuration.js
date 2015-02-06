@@ -8,7 +8,7 @@ angular.module('interfaceApp')
       'solr': 'https://solr.esrc.unimelb.edu.au/ESRC/select',
 
       'fill': {
-          'contextNode': 'green',
+          'contextNode': 'orange',
           'contextNeighbourDefault': 'orange',
           'contextNeighbourHighlight': 'red',
           'default': '#c8c8c8'

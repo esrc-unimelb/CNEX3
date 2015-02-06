@@ -92,12 +92,21 @@ angular.module('interfaceApp')
 
           scope.showDetails = function(d) {
               if (scope.selections.indexOf(d.id) === -1) {
-                  scope.selections.push(d.id);
+                  // highlight the node
                   d3.select('#node_' + d.id)
-                    .attr('stroke', 'yellow')
-                    .attr('stroke-width', 10);
+                    .attr('fill', conf.fill.contextNode);
 
-                  scope.selection = d;
+                  // highlight the relevant links
+                  angular.forEach(scope.selections, function(v, k) {
+                      // we have to try the linkid with source and
+                      //   target flipped
+                      d3.select('#link_' + v + '_' + d.id)
+                        .attr('stroke', conf.fill.contextNode);
+                      d3.select('#link_' + d.id + '_' + v)
+                        .attr('stroke', conf.fill.contextNode);
+                  })
+
+                  scope.selections.push(d.id);
                   scope.showInfoPanel = true;
                   var url = conf[conf.service] + '/entity/' + DataService.site.code + '/data?q=' + encodeURI(d.url);
                   $http.get(url).then(function(resp) {
@@ -109,11 +118,24 @@ angular.module('interfaceApp')
                   });
 
               } else {
-                  d3.select('#node_' + d.id)
-                    .attr('stroke', d.color)
-                    .attr('stroke-width', 1);
                   scope.selections.splice(scope.selections.indexOf(d.id), 1);
                   delete scope.selectionData[d.id];
+
+                  // remove node highlighting
+                  d3.select('#node_' + d.id)
+                    .attr('fill', d.color);
+
+                  // remove link highlight
+                  angular.forEach(scope.selections, function(v, k) {
+                      // we have to try the linkid with source and
+                      //   target flipped
+                      d3.select('#link_' + v + '_' + d.id)
+                        .attr('stroke', conf.stroke.link.unselected)
+                        .attr('stroke-width', 2);
+                      d3.select('#link_' + d.id + '_' + v)
+                        .attr('stroke', conf.stroke.link.unselected)
+                        .attr('stroke-width', 2);
+                  })
                   if (scope.selections.length === 0) {
                     scope.showInfoPanel = false;
                   }
@@ -123,14 +145,33 @@ angular.module('interfaceApp')
               scope.showInfoPanel = false;
           }
           scope.reset = function() {
+              // remove node highlight
               angular.forEach(scope.selectionData, function(v,k) {
                   d3.select('#node_' + v.id)
-                    .attr('stroke', v.color)
-                    .attr('stroke-width', 1);
+                    .attr('fill', v.color);
               })
+           
+              // remove link highlight
+              angular.forEach(scope.selections, function(v, k) {
+                  // we have to try the linkid with source and
+                  //   target flipped
+                  d3.selectAll('.link')
+                    .attr('stroke', conf.stroke.link.unselected);
+              })
+
               scope.selections = [];
               scope.selectionData = {};
               scope.closeInfoPanel();
+          }
+
+          scope.locateNode = function(d) {
+              d3.select('#node_' + d.id)
+                .transition()
+                .attr('r', d.r * 3)
+                .transition()
+                .delay(500)
+                .transition()
+                .attr('r', d.r);
           }
 
           scope.drawGraph = function(d) {
@@ -177,8 +218,11 @@ angular.module('interfaceApp')
               link.enter()
                 .append('line')
                 .attr('class', 'link')
-                .attr('stroke', '#ccc')
-                .attr('stroke-width', 2);
+                .attr('stroke', conf.stroke.link.unselected)
+                .attr('stroke-width', 2)
+                .attr('id', function(d) {
+                    return 'link_' + d.source_id + '_' + d.target_id;
+                });
 
               //draw the nodes
               node.enter()

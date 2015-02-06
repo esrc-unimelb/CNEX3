@@ -67,14 +67,23 @@
                         </div>
                         <div class="panel-collapse" bs-collapse-target>
                             <div class="panel-body">
-                                <span ng-if="selectionData[selection].summnote">
-                                    <h4>Abstract</h4>
-                                    <p ng-bind-html="selectionData[selection].summnote" 
-                                        style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
-                                    <hr/>
-                                </span>
-                                <p ng-bind-html="selectionData[selection].fullnote"
-                                    style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <span ng-if="selectionData[selection].summnote">
+                                            <h4>Abstract</h4>
+                                            <p ng-bind-html="selectionData[selection].summnote" 
+                                                style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                            <hr/>
+                                        </span>
+                                        <p ng-bind-html="selectionData[selection].fullnote"
+                                            style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <button class="btn btn-default" ng-click="locateNode(selectionData[selection])">Locate node</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
