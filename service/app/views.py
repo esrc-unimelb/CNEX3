@@ -107,6 +107,16 @@ def entity_build(request):
 
     return { 'started': True, 'name': site['name'], 'entity': eid }
 
+@view_config(route_name='entity-data', request_method='GET', renderer='json')
+def entity_data(request):
+    """ """
+    site = request.matchdict['code']
+    claims, site = verify_access(request, site=site)
+    e = Entity(request)
+    summnote, fullnote = e.data()
+    return { 'summnote': summnote, 'fullnote': fullnote }
+
+
 @view_config(route_name="network-stats", request_method='GET', renderer='json')
 def network_stats(request):
     site = request.matchdict['code']

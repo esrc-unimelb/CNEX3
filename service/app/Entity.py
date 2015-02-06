@@ -36,8 +36,8 @@ class Entity:
 
         self.request = request
         self.db = mdb(request)
-        self.site = request.matchdict['code']
-        self.eid = request.matchdict['id']
+        self.site = request.matchdict.get('code')
+        self.eid = request.matchdict.get('id')
         claims, site = verify_access(request, site=self.site)
 
         self.eac_path = site['eac']
@@ -60,7 +60,7 @@ class Entity:
         log.debug('Building the graph.')
         t1 = time.time()
 
-        graph = nx.Graph()
+        self.graph = nx.Graph()
         count = 0
         save_counter = 0
         nodes = {}
@@ -70,13 +70,19 @@ class Entity:
             tree = etree.parse(fname)
         except (TypeError, etree.XMLSyntaxError):
             log.error("Invalid XML file: %s. %s." % (fname, sys.exc_info()[1]))
-        self.entities_as_nodes(graph, tree)
+
+        ndegrees = 0
+        self.entities_as_nodes(tree, ndegrees)
+
+        # count the number of connections
+        for n in self.graph:
+            self.graph.node[n]['connections'] = len(self.graph.neighbors(n))
 
         # save the graph
         self.db.entity.insert({
             'site': self.site,
             'id': self.eid,
-            'graph_data': json_graph.node_link_data(graph),
+            'graph_data': json_graph.node_link_data(self.graph),
             'createdAt': datetime.utcnow()
         })
         data_age = self.request.registry.app_config['general']['data_age']
@@ -91,7 +97,7 @@ class Entity:
         log.debug("Time taken to prepare data '/entity': %s" % (t2 - t1))
         return
 
-    def entities_as_nodes(self, graph, tree):
+    def entities_as_nodes(self, tree, ndegrees):
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
         url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
@@ -104,10 +110,35 @@ class Entity:
             dt = None
 
         try:
-            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+            self.graph.node[node_id]['type'] = ntype
+            self.graph.node[node_id]['name'] = name
+            self.graph.node[node_id]['url'] = url 
+            self.graph.node[node_id]['df'] = df
+            self.graph.node[node_id]['dt'] = dt
+
         except:
+            self.graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+
+        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
+        for node in related_resources:
+            # for each node - get the id, type, name and href
+            #  add a node to describe it
+            #  add an edge between this node (context node) and the resource node
+            rurl = node.attrib['{http://www.w3.org/1999/xlink}href']
+            rtype = get(node, 'e:relationEntry', attrib='localType')
+            rname = get(node, 'e:relationEntry')
+            rid = rurl.split('/')[-1:][0].split('.htm')[0]
+
+            if rtype == 'published':
+                rtype = rname.split(':')[0]
+                rname = rname.split(':', 1)[1:][0].strip()
+            self.graph.add_node(rid, { 'type': rtype, 'name': rname, 'url': rurl })
+            self.graph.add_edge(rid, node_id, source_id=rid, target_id=node_id)
+
+        if ndegrees == 1:
             return
 
+        ndegrees += 1
         related_entities = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True)
         for node in related_entities:
             try:
@@ -143,26 +174,11 @@ class Entity:
                     neighbour_id = get(neighbour_tree, '/eac/control/id')
 
                 # add node, add edge, call this method on this node
-                graph.add_node(neighbour_id)
-                graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
+                self.graph.add_node(neighbour_id)
+                self.graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
+                self.entities_as_nodes(neighbour_tree, ndegrees)
             except KeyError:
                 pass
-
-        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
-        for node in related_resources:
-            # for each node - get the id, type, name and href
-            #  add a node to describe it
-            #  add an edge between this node (context node) and the resource node
-            rurl = node.attrib['{http://www.w3.org/1999/xlink}href']
-            rtype = get(node, 'e:relationEntry', attrib='localType')
-            rname = get(node, 'e:relationEntry')
-            rid = rurl.split('/')[-1:][0].split('.htm')[0]
-
-            if rtype == 'published':
-                rtype = rname.split(':')[0]
-                rname = rname.split(':', 1)[1:][0].strip()
-            graph.add_node(rid, { 'type': rtype, 'name': rname, 'url': rurl })
-            graph.add_edge(rid, node_id, source_id=rid, target_id=node_id)
 
     def get_entity_name(self, tree, ntype):
         if ntype == 'Person':
@@ -181,4 +197,40 @@ class Entity:
             if type(fn) == list:
                 return ', '.join(fn)
             return fn
+
+    def data(self):
+        # get the data file url
+        if self.request.GET.get('q') is not None:
+            datafile = self.request.GET.get('q').replace(self.source_map['source'], self.source_map['localpath'])
+        else:
+            return '' 
+
+        # if there's an EAC ref - use it
+        xml = get_xml(self.request.GET.get('q'))
+        if xml is not None:
+            tree = etree.parse(xml)
+
+            summnote = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
+
+            full_note = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist', element=True)
+            for c in full_note.getchildren():
+                if c.tag == '{urn:isbn:1-931666-33-4}abstract':
+                    c.getparent().remove(c)
+
+            full_note = [ etree.tostring(f, method='html') for f in full_note ]
+            fn = []
+            for c in full_note:
+                c = c.replace('<list',  '<ul' )
+                c = c.replace('</list', '</ul')
+                c = c.replace('<item',  '<li' )
+                c = c.replace('</item', '</li')
+                fn.append(c)
+
+            return summnote, ' '.join(fn)
+
+        else:
+            # no EAC datafile
+            tree = html.parse(self.request.GET.get('q'))
+            data = tree.xpath('//dl[@class="content-summary"]')
+            return None, etree.tostring(data[0])
 

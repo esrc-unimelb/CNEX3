@@ -33,6 +33,7 @@ def main(global_config, **settings):
     config.add_route('network-stats',           '/stats/{code}/{explore}')
     config.add_route('network-build',           '/network/{code}/{explore}')
     config.add_route('network-build-status',    '/network/{code}/{explore}/status')
+    config.add_route('entity-data',             '/entity/{code}/data')
     config.add_route('entity-build',            '/entity/{code}/{id}')
     config.add_route('entity-build-status',     '/entity/{code}/{id}/status')
 
