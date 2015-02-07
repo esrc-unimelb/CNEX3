@@ -1,5 +1,5 @@
 <!-- the controls panel -->
-<div>
+<div ng-style="controlsPanelStyle">
     <!-- header -->
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
@@ -37,16 +37,14 @@
     <div class="row">
         <hr/>
         <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel-group" ng-model='panels.activePanel' data-allow-multiple="true" data-animation="" bs-collapse>
+            <div class="panel-group" ng-model='panels.activePanel' data-animation="" bs-collapse>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h5><a bs-collapse-toggle>Dataset Dates</a></h5>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
-                        <div class="panel-body">
-                            <span style="height: 250px">
-                                <date-vis width="{{cls.width - 60}}" height="250"></date-vis>
-                            </span>
+                        <div class="panel-body" id="dateVisContainer">
+                            <date-vis width="{{dateVisWidth}}" height="250"></date-vis>
                         </div>
                     </div>
                 </div>
@@ -99,7 +97,7 @@
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body">
-                            <entity-network height='350'></entity-network>
+                            <entity-network size-to-parent="true"></entity-network>
                         </div>
                     </div>
                 </div>

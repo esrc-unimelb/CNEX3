@@ -18,12 +18,12 @@ angular.module('interfaceApp')
           });
 
           var sizeThePanel = function() {
-              scope.cls = {
-                  'top': 10,
-                  'left': $window.innerWidth - 560,
-                  'width': 550,
-                  'height': $window.innerHeight - 20,
+              var e = angular.element(document.getElementById('dateVisContainer'));
+              scope.controlsPanelStyle = {
+                  'height': $window.innerHeight - 15,
+                  'overflow-y': 'auto'
               }
+              scope.dateVisWidth = e[0].clientWidth - 30;
           }
           sizeThePanel();
           scope.showData = false;
@@ -80,7 +80,6 @@ angular.module('interfaceApp')
               scope.contextNetworkData = sorted;
           });
 
-
           // process the search data
           scope.$on('search-data-ready', function() {
               d3s.highlightById(SolrService.selected);
@@ -135,7 +134,7 @@ angular.module('interfaceApp')
           }
 
           scope.panels = {
-              activePanel: [ 3 ]
+              activePanel: 0
           }
 
       }
