@@ -11,6 +11,9 @@ angular.module('interfaceApp')
       },
       link: function postLink(scope, element, attrs) {
 
+          scope.$watch('width', function() {
+              scope.$broadcast('graph-data-loaded');
+          });
           scope.$on('reset', function() {
               var dateRange = d3.selectAll('.dateRange');
               dateRange.attr('fill', function(d) { return d.color; })
@@ -55,8 +58,8 @@ angular.module('interfaceApp')
               var t2 = Date.parse(d3.max(dates));
 
               var xScale = d3.time.scale()
-                              .domain([t1, t2])
-                              .range([0,scope.width]);
+                             .domain([t1, t2])
+                             .range([0,scope.width]);
 
               var xAxis = d3.svg.axis()
                             .scale(xScale)
