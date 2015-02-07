@@ -16,7 +16,6 @@ angular.module('interfaceApp')
         $scope.processed = 0;
 
         var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph;
-        console.log(url);
         $http.get(url).then(function(d) {
             // kick off the progress update in a moment; needs time to get going..
             $timeout(function() { $scope.update(); }, 200);
@@ -60,7 +59,6 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
-            console.log(d);
             var ns = d.graph.nodes;
             var ls = d.graph.links;
 
