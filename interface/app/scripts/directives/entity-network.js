@@ -28,8 +28,8 @@ angular.module('interfaceApp')
                   scope.sidepanelStyle = {
                       'position': 'fixed',
                       'top': '0px',
-                      'left': '0px',
-                      'width': scope.w * 0.3 + 'px',
+                      'left': scope.w * 0.6 + 'px',
+                      'width': scope.w * 0.4 + 'px',
                       'height': scope.h + 'px',
                       'padding': '0px 10px',
                       'background-color': 'white'
@@ -37,12 +37,13 @@ angular.module('interfaceApp')
                   scope.mainpanelStyle = {
                       'position': 'fixed',
                       'top': '0px',
-                      'left': scope.w * 0.3 + 'px',
-                      'width': scope.w * 0.7 + 'px',
+                      'left': '0px',
+                      'width': scope.w * 0.6 + 'px',
                       'height': scope.h + 'px',
-                      'background-color': 'white'
+                      'background-color': 'white',
+                      'padding': '0px 0px 0px 15px'
                   }
-                  scope.svgWidth = scope.w * 0.7 - 10;
+                  scope.svgWidth = scope.w * 0.6 - 15;
               } else {
                   scope.showSidePanel = false;
                   scope.mainpanelStyle = {
