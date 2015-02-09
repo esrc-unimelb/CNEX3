@@ -10,6 +10,13 @@ angular.module('interfaceApp')
      * @function: highlightNodeAndLocalEnvironment
      */
     function highlightNodeAndLocalEnvironment(contextNode) {
+        if (DataService.contextNode === contextNode) {
+            DataService.contextNode === undefined;
+            d3s.reset();
+            return;
+        }
+        DataService.contextNode = contextNode;
+
         var nodes = DataService.nodes;
         var links = DataService.links;
         var neighbours = [];

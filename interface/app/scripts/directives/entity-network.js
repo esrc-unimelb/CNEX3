@@ -7,16 +7,22 @@ angular.module('interfaceApp')
       templateUrl: 'views/entity-network.html',
       restrict: 'E',
       scope: {
-          height: '@',
-          width: '@'
+          sizeToParent: '@',
+          destroyEntityNetwork: '&'
       },
       link: function postLink(scope, element, attrs) {
           scope.selections = [];
           scope.selectionData = {};
 
           var sizeThePanels = function() {
-              scope.w = scope.width === undefined ? $window.innerWidth : scope.width;
-              scope.h = scope.height === undefined ? $window.innerHeight : scope.height;
+              if (scope.sizeToParent === "true") {
+                  var e = angular.element(element[0].parentNode);
+                  scope.w = e[0].clientWidth;
+                  scope.h = scope.w * 0.6;
+              } else {
+                  scope.w = $window.innerWidth;
+                  scope.h = $window.innerHeight;
+              }
               if (scope.w === $window.innerWidth && scope.h === $window.innerHeight) {
                   scope.showSidePanel = true;
                   scope.sidepanelStyle = {
@@ -25,7 +31,8 @@ angular.module('interfaceApp')
                       'left': '0px',
                       'width': scope.w * 0.3 + 'px',
                       'height': scope.h + 'px',
-                      'padding': '0px 10px'
+                      'padding': '0px 10px',
+                      'background-color': 'white'
                   }
                   scope.mainpanelStyle = {
                       'position': 'fixed',
@@ -33,14 +40,12 @@ angular.module('interfaceApp')
                       'left': scope.w * 0.3 + 'px',
                       'width': scope.w * 0.7 + 'px',
                       'height': scope.h + 'px',
+                      'background-color': 'white'
                   }
                   scope.svgWidth = scope.w * 0.7 - 10;
               } else {
                   scope.showSidePanel = false;
                   scope.mainpanelStyle = {
-                      'position': 'fixed',
-                      'top': '0px',
-                      'left': '0px',
                       'width': scope.w + 'px',
                       'height': scope.h + 'px',
                   }
@@ -250,6 +255,10 @@ angular.module('interfaceApp')
               graphStatistics(d);
               scope.drawGraph(d);
           })
+
+          scope.close = function() {
+              scope.destroyEntityNetwork();
+          }
       }
     };
   }]);

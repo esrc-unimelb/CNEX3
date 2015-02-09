@@ -4,6 +4,11 @@
         <div ng-style="statisticsPanelStyle" ng-hide="showInfoPanel">
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
+                    <button type="button" class="close" aria-label="Close" ng-click="close()"><span aria-hidden="true">&times;</span></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12">
                     <h4>
                         <span style="font-family:monospace;">{{contextNode.id}}</span><br/>
                         <a href="{{contextNode.url}}">{{contextNode.name}}</a>
@@ -41,7 +46,7 @@
     </div> 
 </div>
 
-<!-- date view panel -->
+<!-- data view panel -->
 <div ng-style="sidepanelStyle" ng-if="showInfoPanel">
     <div ng-style="statisticsPanelStyle">
         <div class="row">

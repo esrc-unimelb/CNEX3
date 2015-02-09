@@ -35,6 +35,9 @@ angular.module('interfaceApp')
         $scope.$on('graph-ready', function() {
             $scope.showControls = true;
         })
+        $scope.$on('draw-entity-graph', function() {
+            $scope.showEntityNetwork = true;
+        })
 
         $scope.update = function() {
             var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status';
@@ -115,5 +118,9 @@ angular.module('interfaceApp')
             // now instantiate the graph
             $scope.ready = true;
             $timeout(function() { $rootScope.$broadcast('graph-data-loaded'); }, 100);
+        }
+
+        $scope.destroyEntityNetwork = function() {
+            $scope.showEntityNetwork  = false;
         }
   }]);

@@ -27,12 +27,17 @@
     </div>
 </div>
 
+<div ng-hide="showEntityNetwork">
+    <div class="row" style="background-color: white;">
+        <div class="col-md-7 col-lg-7" ng-if="!progress && !datasetError && ready" style="padding-right: 0px;">
+            <force-network-graph></force-network-graph>
+        </div>
+        <div class="col-md-5 col-lg-5" ng-if="!progress && !datasetError && ready">
+            <site-controls></site-controls>
+        </div>
+    </div>
+</div>
 
-<div class="row" style="background-color: white;">
-    <div class="col-md-7 col-lg-7" ng-if="!progress && !datasetError && ready" style="padding-right: 0px;">
-        <force-network-graph></force-network-graph>
-    </div>
-    <div class="col-md-5 col-lg-5" ng-if="!progress && !datasetError && ready">
-        <site-controls></site-controls>
-    </div>
+<div ng-show="showEntityNetwork">
+    <entity-network destroy-entity-network="destroyEntityNetwork()"></entity-network>
 </div>
