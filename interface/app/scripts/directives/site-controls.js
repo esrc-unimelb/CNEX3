@@ -133,9 +133,12 @@ angular.module('interfaceApp')
               d3s.reset();
           }
 
-          scope.panels = {
-              activePanel: 0
+          // open up the entity network
+          scope.viewEntityNetwork = function(id) {
+              DataService.getEntityNetwork(id);
           }
+
+          scope.panels = { 'activePanel': [0, 2] }
 
       }
     };

@@ -1,46 +1,21 @@
 <!-- the controls panel -->
-<div ng-style="controlsPanelStyle">
+<div ng-style="controlsPanelStyle" style="padding: 15px;">
     <!-- header -->
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
             <h4 style="">
                 <span style="color: #3d4343;">{{site.name}} ({{site.code}})</span>
             </h4>
+            <hr/>
         </div>
     </div>
-
-    <!-- control buttons -->
+   
     <div class="row">
-        <hr/>
-        <div class="col-sm-10 col-md-10 col-lg-10">
-            <button class="btn btn-sm btn-default" ng-click="sizeNodesEvenly()" ng-if="!nodesSizedEvenly">Size nodes evenly</button>
-            <button class="btn btn-sm btn-default" ng-click="resetNodeDimensions()" ng-if="nodesSizedEvenly">Reset node sizes</button>
-            <button class="btn btn-sm btn-default" ng-click="showData = !showData">
-                <span ng-hide='showData'>View the Data</span>
-                <span ng-show='showData'>Show Controls</span>
-            </button>
-        </div>
-        <div class="col-sm-2 col-md-2 col-lg-2">
-            <button class="btn btn-sm btn-default" ng-click="reset()">Reset</button>
-        </div>
-     </div>
-     <br/>
-     <div class="row">
-        <div class="col-sm-4 col-md-4 col-lg-4">
-            Fade background:
-        </div>
-        <div class="col-sm-8 col-md-8 col-lg-8">
-            <input type="range" min="0" max="1" step="0.01" value="0.5" ng-model="fade" slider fade-background="fadeBackground()">
-        </div>
-    </div>
-    
-    <div class="row">
-        <hr/>
         <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel-group" ng-model='panels.activePanel' data-animation="" bs-collapse>
+            <div class="panel-group" ng-model='panels.activePanel' data-animation="" data-allow-multiple="true" bs-collapse>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Dataset Dates</a></h5>
+                        <h5><a bs-collapse-toggle>Dates</a></h5>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body" id="dateVisContainer">
@@ -50,17 +25,7 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Highlight Nodes by Search</a></h5>
-                    </div>
-                    <div class="panel-collapse" bs-collapse-target>
-                        <div class="panel-body">
-                            <search-form search-type="keyword"></search-form>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Dataset Statistics</a></h5>
+                        <h5><a bs-collapse-toggle>Statistics and Entity Types</a></h5>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body">
@@ -88,6 +53,25 @@
                                      {{data.links.length}}
                                 </div>
                             </div>
+                            <!-- dataset type statistics -->
+                            <div class="row">
+                                <hr/>
+                                <span ng-repeat="(type, typeData) in data.types">
+                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                        {{type}}
+                                    </div>
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        {{typeData.count}}
+                                    </div>
+                                    <div class="col-sm-2 col-md-2 col-lg-2 text-center" style="background-color: {{typeData.color}}">
+                                        <span class="form-inline">
+                                            <span class="checkbox">
+                                                <input type="checkbox" ng-click="highlightByType(type)" ng-checked="typeData.checked">
+                                            </span>
+                                        </span>
+                                    </div>
+                                </span>
+                            </div> 
                         </div>
                     </div>
                 </div>
@@ -97,87 +81,79 @@
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body">
-                            <entity-network size-to-parent="true"></entity-network>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <span ng-show="contextNodeData.url">
+                                        <strong>{{contextNodeData.type}}:</strong> 
+                                        <a href="" ng-click="viewEntityNetwork(contextNodeData.id)">
+                                            ({{contextNodeData.id}}) {{contextNodeData.name}} ({{contextNodeData.df | date:'yyyy'}} - {{contextNodeData.dt | date:'yyyy'}})
+                                        </a>
+                                    </span>
+                                    <hr/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="(type, data) in contextNetworkData">
+                                    <span class="form-inline">
+                                        <span class="checkbox"><input type="checkbox" ng-click="selectAll(type)"></span>
+                                        <strong>{{type}} ({{data.length}})</strong><br/>
+                                    </span>
+                                    <span ng-repeat="d in data">
+                                        <span class="form-inline">
+                                            <span class="checkbox"><input type="checkbox" ng-click="highlight(d.id)" ng-checked="d.checked"></span>
+                                            <span ng-if="d.url">
+                                                <a href="" ng-click="viewEntityNetwork(d.id)">({{d.id}}) {{d.name}} ({{d.df | date:'yyyy'}} - {{d.dt | date:'yyyy'}})</a>
+                                            </span>
+                                            <span ng-if="!d.url">
+                                                {{d.name}}
+                                            </span>
+                                            <br/>
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5><a bs-collapse-toggle>Highlight Nodes by Search</a></h5>
+                    </div>
+                    <div class="panel-collapse" bs-collapse-target>
+                        <div class="panel-body">
+                            <search-form search-type="keyword"></search-form>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5><a bs-collapse-toggle>Controls</a></h5>
+                    </div>
+                    <div class="panel-collapse" bs-collapse-target>
+                        <div class="panel-body">
+                            <!-- control buttons -->
+                            <div class="row">
+                                <div class="col-sm-10 col-md-10 col-lg-10">
+                                    <button class="btn btn-sm btn-default" ng-click="sizeNodesEvenly()" ng-if="!nodesSizedEvenly">Size nodes evenly</button>
+                                    <button class="btn btn-sm btn-default" ng-click="resetNodeDimensions()" ng-if="nodesSizedEvenly">Reset node sizes</button>
+                                </div>
+                                <div class="col-sm-2 col-md-2 col-lg-2">
+                                    <button class="btn btn-sm btn-default" ng-click="reset()">Reset</button>
+                                </div>
+                             </div>
+                             <br/>
+                             <div class="row">
+                                <div class="col-sm-4 col-md-4 col-lg-4">
+                                    Fade background:
+                                </div>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <input type="range" min="0" max="1" step="0.01" value="0.5" ng-model="fade" slider fade-background="fadeBackground()">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- dataset stats 
-    <span ng-show="!showData" class="contextNodeData">
-        <br/>
-        <div class="row">
-            <div class="col-sm-8 col-md-8 col-lg-8">
-                 Dataset % nodes unconnected (not shown)
-            </div>
-            <div class="col-sm-4 col-md-4 col-lg-4">
-                 {{data.percentUnConnected | number:0}}
-            </div>
-        </div>
-        <div class="row">
-            <hr/>
-        </div>
-
-        dataset type statistics 
-        <div class="row">
-            <hr/>
-            <span ng-repeat="(type, typeData) in data.types">
-                <div class="col-sm-6 col-md-6 col-lg-6">
-                    {{type}}
-                </div>
-                <div class="col-sm-4 col-md-4 col-lg-4">
-                    {{typeData.count}}
-                </div>
-                <div class="col-sm-2 col-md-2 col-lg-2 text-center" style="background-color: {{typeData.color}}">
-                    <span class="form-inline">
-                        <span class="checkbox">
-                            <input type="checkbox" ng-click="highlightByType(type)" ng-checked="typeData.checked">
-                        </span>
-                    </span>
-                </div>
-            </span>
-        </div> 
-    </span> --> 
-
-    <!-- ############################################## 
-    <span ng-show="showData" class="contextNodeData">
-        <div class="row" ng-show="contextNodeData">
-            <hr/>
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <span ng-show="contextNodeData.url">
-                    <strong>{{contextNodeData.type}}:</strong> 
-                    <a href="{{contextNodeData.url}}" target="_blank">
-                        ({{contextNodeData.id}}) {{contextNodeData.name}} ({{contextNodeData.df | date:'yyyy'}} - {{contextNodeData.dt | date:'yyyy'}})
-                    </a>
-                </span>
-                <span ng-show="!contextNodeData.url">
-                    <strong>Function:</strong> 
-                    {{contextNodeData.id}}
-                </span>
-            </div>
-        </div>
-        <div class="row">
-            <hr/>
-            <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="(type, data) in contextNetworkData">
-                <span class="form-inline">
-                    <span class="checkbox"><input type="checkbox" ng-click="selectAll(type)"></span>
-                    <strong>{{type}} ({{data.length}})</strong><br/>
-                </span>
-                <span ng-repeat="d in data">
-                    <span class="form-inline">
-                        <span class="checkbox"><input type="checkbox" ng-click="highlight(d.id)" ng-checked="d.checked"></span>
-                        <span ng-if="d.url">
-                            <a href="{{d.url}}" target="_blank">({{d.id}}) {{d.name}} ({{d.df | date:'yyyy'}} - {{d.dt | date:'yyyy'}})</a><br/>
-                        </span>
-                        <span ng-if="!d.url">
-                            {{d.name}}<br/>
-                        </span>
-                    </span>
-                </span>
-            </div>
-        </div>
-    </span>
-    -->
 </div>
