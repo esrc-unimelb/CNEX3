@@ -1,12 +1,13 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', 'configuration', 'DataService', 
-    function($rootScope, $scope, $routeParams, $http, $timeout, configuration, DataService) {
+  .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', '$location', 'configuration', 'DataService', 
+    function($rootScope, $scope, $routeParams, $http, $timeout, $location, configuration, DataService) {
 
         $scope.site = $routeParams.code; 
         $scope.graph = $routeParams.explore;
         $scope.service = configuration[configuration.service];
+        $scope.showEntityNetwork = false;
 
         $scope.initting = true;
         $scope.progress = false;
@@ -123,4 +124,12 @@ angular.module('interfaceApp')
         $scope.destroyEntityNetwork = function() {
             $scope.showEntityNetwork  = false;
         }
+
+        $rootScope.$on('$locationChangeStart', function(e, n, o) {
+            if (o.match(/^.*\/site\/.*\/byEntity$/) && $scope.showEntityNetwork === true) {
+                $scope.destroyEntityNetwork();
+                e.preventDefault();
+            }
+        });
+
   }]);
