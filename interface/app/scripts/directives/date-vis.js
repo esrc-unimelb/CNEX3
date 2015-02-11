@@ -111,7 +111,11 @@ angular.module('interfaceApp')
                   .attr('height', configuration.height.default)
                   .attr('fill', function(d) { return d.color; })
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
-                  .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
+                  .on('click', function(d) { 
+                      scope.$apply(function() {
+                          D3Service.highlightNodeAndLocalEnvironment(d.id); 
+                      })
+                  });
 
 
               yScale.domain([0, scope.points.length]);
@@ -133,7 +137,11 @@ angular.module('interfaceApp')
                   .attr('r', configuration.radius.date.default)
                   .attr('fill', function(d) { return d.color; })
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
-                  .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
+                  .on('click', function(d) { 
+                      scope.$apply(function() {
+                          D3Service.highlightNodeAndLocalEnvironment(d.id); 
+                      })
+                  });
           });
       }
     };
