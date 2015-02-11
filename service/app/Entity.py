@@ -134,6 +134,8 @@ class Entity:
             if core_type == 'published':
                 rtype = rname.split(':')[0]
                 rname = rname.split(':', 1)[1:][0].strip()
+            else:
+                rtype = core_type
             self.graph.add_node(rid, { 'type': rtype, 'coreType': core_type, 'name': rname, 'url': rurl })
             self.graph.add_edge(rid, node_id, source_id=rid, target_id=node_id)
 
