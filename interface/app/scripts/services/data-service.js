@@ -2,7 +2,7 @@
 
 angular.module('interfaceApp')
   .service('DataService', [ '$rootScope', '$http', '$timeout', 'configuration',
-         function ForceData($rootScope, $http, $timeout, configuration) {
+         function ForceData($rootScope, $http, $timeout, conf) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     //
 
@@ -16,7 +16,7 @@ angular.module('interfaceApp')
         // store the ID of the current entity network we're viewing
         DataService.currentEntity = entityId;
 
-        var service = configuration[configuration.service];
+        var service = conf[conf.service];
         var url = service + '/entity/' + DataService.site.code + '/' + entityId;
         $http.get(url).then(function(resp) {
             $timeout(function() { getData(); }, 100);
@@ -41,7 +41,6 @@ angular.module('interfaceApp')
     }
 
     function processNodeSet(nodes) {
-
         // determine the lowest and highest neighbour counts
         var weightBounds = [];
         angular.forEach(nodes, function(v, k) {
@@ -49,14 +48,10 @@ angular.module('interfaceApp')
         })
         weightBounds = [Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)];
 
-        var color = d3.scale.category20();
         var weight = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBounds), Math.max.apply(null, weightBounds)]);
 
         angular.forEach(nodes, function(v,k) {
-            if (DataService.nodeColorByType[v.type] === undefined) {
-                DataService.nodeColorByType[v.type] = color(v.type);
-            }
-            nodes[k].color = DataService.nodeColorByType[v.type];
+            nodes[k].color = conf.colours[v.coreType.toLowerCase()];
             nodes[k].r = weight(v.connections);
         })
         return nodes;
