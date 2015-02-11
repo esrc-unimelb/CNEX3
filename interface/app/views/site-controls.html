@@ -57,10 +57,10 @@
                             <div class="row">
                                 <hr/>
                                 <span ng-repeat="(type, typeData) in data.types">
-                                    <div class="col-sm-6 col-md-6 col-lg-6">
-                                        {{type}}
+                                    <div class="col-sm-8 col-md-8 col-lg-8">
+                                        {{type}} ({{typeData.coreType}})
                                     </div>
-                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                    <div class="col-sm-2 col-md-2 col-lg-2">
                                         {{typeData.count}}
                                     </div>
                                     <div class="col-sm-2 col-md-2 col-lg-2 text-center" style="background-color: {{typeData.color}}">
