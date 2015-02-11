@@ -100,6 +100,7 @@ class Entity:
     def entities_as_nodes(self, tree, ndegrees):
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
+        core_type = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityType")
         url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
         df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
         dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
@@ -111,13 +112,14 @@ class Entity:
 
         try:
             self.graph.node[node_id]['type'] = ntype
+            self.graph.node[node_id]['coreType'] = core_type
             self.graph.node[node_id]['name'] = name
             self.graph.node[node_id]['url'] = url 
             self.graph.node[node_id]['df'] = df
             self.graph.node[node_id]['dt'] = dt
 
         except:
-            self.graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+            self.graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
         for node in related_resources:
@@ -125,14 +127,14 @@ class Entity:
             #  add a node to describe it
             #  add an edge between this node (context node) and the resource node
             rurl = node.attrib['{http://www.w3.org/1999/xlink}href']
-            rtype = get(node, 'e:relationEntry', attrib='localType')
+            core_type = get(node, 'e:relationEntry', attrib='localType')
             rname = get(node, 'e:relationEntry')
             rid = rurl.split('/')[-1:][0].split('.htm')[0]
 
-            if rtype == 'published':
+            if core_type == 'published':
                 rtype = rname.split(':')[0]
                 rname = rname.split(':', 1)[1:][0].strip()
-            self.graph.add_node(rid, { 'type': rtype, 'name': rname, 'url': rurl })
+            self.graph.add_node(rid, { 'type': rtype, 'coreType': core_type, 'name': rname, 'url': rurl })
             self.graph.add_edge(rid, node_id, source_id=rid, target_id=node_id)
 
         if ndegrees == 1:

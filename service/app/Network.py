@@ -171,6 +171,7 @@ class Network:
     def entities_as_nodes(self, graph, tree):
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
+        core_type = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityType")
         url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
         df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
         dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
@@ -181,7 +182,7 @@ class Network:
             dt = None
 
         try:
-            graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+            graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
         except:
             return
 
