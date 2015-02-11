@@ -53,7 +53,7 @@ angular.module('interfaceApp')
               var types = {};
               angular.forEach(scope.data.nodes, function(v,k) { 
                   if (types[v.type] === undefined) {
-                      types[v.type] = { 'count': 1, 'checked': false, 'color': v.color };
+                      types[v.type] = { 'count': 1, 'checked': false, 'color': v.color, 'coreType': v.coreType };
                   } else {
                       types[v.type].count += 1;
                   }
