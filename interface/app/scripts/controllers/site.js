@@ -125,6 +125,9 @@ angular.module('interfaceApp')
             $scope.showEntityNetwork  = false;
         }
 
+        // When the back button is pressed whilst viewing the entity network,
+        //  intercept the location change event, cancel it, and destroy the 
+        //  entity network
         $rootScope.$on('$locationChangeStart', function(e, n, o) {
             if (o.match(/^.*\/site\/.*\/byEntity$/) && $scope.showEntityNetwork === true) {
                 $scope.destroyEntityNetwork();
