@@ -23,13 +23,11 @@ angular.module('interfaceApp')
               dateRange.attr('fill', function(d) { return d.color; })
                   .attr('opacity', configuration.opacity.default)
                   .attr('height', configuration.height.default) 
-                  .attr('stroke', configuration.stroke.date.default);
 
               var circle = d3.selectAll('.datePoint');
               circle.attr('fill', function(d) { return d.color; })
                     .attr('opacity', configuration.opacity.default)
                     .attr('r', configuration.radius.date.default)
-                    .attr('stroke', configuration.stroke.date.default);
           });
 
           scope.$on('graph-data-loaded', function() {
