@@ -133,7 +133,6 @@ angular.module('interfaceApp')
           // handle the node click event
           node.on('click', function(d) {
               scope.$apply(function() {
-                  //DataService.getEntityNetwork(d.id);
                   D3Service.highlightNodeAndLocalEnvironment(d.id);
               });
           });
