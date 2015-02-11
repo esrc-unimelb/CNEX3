@@ -11,6 +11,10 @@ angular.module('interfaceApp')
       },
       link: function postLink(scope, element, attrs) {
 
+          scope.dates = [];
+          scope.points = [];
+          scope.ranges = [];
+
           scope.$watch('width', function() {
               scope.$broadcast('graph-data-loaded');
           });
@@ -33,33 +37,39 @@ angular.module('interfaceApp')
               //  still one there
               d3.select('#datevis').select('svg').remove();
 
-              var nodes = DataService.nodes;
-              var points = [], ranges = [], dates = [];
+              if (scope.ranges.length === 0 || scope.points.length === 0 || scope.dates.length === 0) {
+                  var nodes = DataService.nodes;
+                  var points = [], ranges = [], dates = [];
 
-              // split the dataset into those nodes with both start and end
-              //  dates and those with either of start or end date
-              angular.forEach(nodes, function(v,k) {
-                  if (v.df !== null && v.dt !== null) {
-                      dates.push(v.df);
-                      dates.push(v.dt);
-                      ranges.push(v);
-                  } else {
-                      if (v.df !== null) {
+                  // split the dataset into those nodes with both start and end
+                  //  dates and those with either of start or end date
+                  angular.forEach(nodes, function(v,k) {
+                      if (v.df !== null && v.dt !== null) {
                           dates.push(v.df);
-                          points.push(v);
-                      } else if (v.dt !== null) {
                           dates.push(v.dt);
-                          points.push(v);
+                          ranges.push(v);
+                      } else {
+                          if (v.df !== null) {
+                              dates.push(v.df);
+                              points.push(v);
+                          } else if (v.dt !== null) {
+                              dates.push(v.dt);
+                              points.push(v);
+                          }
                       }
-                  }
-              });
+                  });
+                  scope.ranges = _.sortBy(ranges, 'df').reverse();
+                  points = _.sortBy(points, 'df');
+                  scope.points = _.sortBy(points, 'dt').reverse();
+                  scope.dates = dates;
+              }
 
-              var t1 = Date.parse(d3.min(dates));
-              var t2 = Date.parse(d3.max(dates));
+              var t1 = Date.parse(d3.min(scope.dates));
+              var t2 = Date.parse(d3.max(scope.dates));
 
               var xScale = d3.time.scale()
                              .domain([t1, t2])
-                             .range([0,scope.width]);
+                             .range([10,scope.width - 10]);
 
               var xAxis = d3.svg.axis()
                             .scale(xScale)
@@ -79,10 +89,10 @@ angular.module('interfaceApp')
                           .call(xAxis);
 
               var yScale = d3.scale.linear()
-                             .domain([0, ranges.length])
-                             .range([10, (scope.height-40)]);
+                             .domain([0, scope.ranges.length])
+                             .range([10, (scope.height - 40)]);
 
-              var dateRange = svg.selectAll('.dateRange').data(ranges);
+              var dateRange = svg.selectAll('.dateRange').data(scope.ranges);
               dateRange.enter()
                   .append('rect')
                   .attr('class', 'dateRange')
@@ -104,8 +114,8 @@ angular.module('interfaceApp')
                   .on('click', function(d) { D3Service.highlightNodeAndLocalEnvironment(d.id); });
 
 
-              yScale.domain([0, points.length]);
-              var circle = svg.selectAll('datePoint').data(points);
+              yScale.domain([0, scope.points.length]);
+              var circle = svg.selectAll('datePoint').data(scope.points);
               circle.enter()
                   .append('circle')
                   .attr('class', 'datePoint')
