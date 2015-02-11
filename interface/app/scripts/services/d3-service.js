@@ -2,7 +2,7 @@
 
 angular.module('interfaceApp')
   .service('D3Service', [ '$rootScope', 'configuration', 'DataService', 
-    function D3Service($rootScope, configuration, DataService) {
+    function D3Service($rootScope, conf, DataService) {
 
     // AngularJS will instantiate a singleton by calling "new" on this function
     
@@ -37,16 +37,13 @@ angular.module('interfaceApp')
             // we want to select the links of first degree neighbours WITHOUT
             //  the links between first degree neighbours
             if (v.source.id === contextNode && neighbours.indexOf(v.target.id) !== -1) {
-                d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.selected;
-                d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.default;
+                d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.default;
             } else if (v.target.id === contextNode && neighbours.indexOf(v.source.id) !== -1) {
-                d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.selected;
-                d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.default;
+                d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.default;
             } else {
                 // every link that is not between the context node and a first degree neighbour
                 //  should fade into the background
-                d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.unselected;
-                d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
+                d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.unselected;
             }
 
         });
@@ -54,29 +51,25 @@ angular.module('interfaceApp')
         angular.forEach(nodes, function(v,k) {
             if (v.id === contextNode) {
                 // set the properties of the focus node
-                d3s.fill[v.id] = configuration.fill.contextNode;
-                d3s.opacity[v.id] = configuration.opacity.default;
-                d3s.stroke[v.id] = configuration.stroke.date.selected;
-                d3s.height[v.id] = configuration.height.selected;
+                d3s.opacity[v.id] = conf.opacity.default;
+                d3s.fill[v.id] = v.color;
+                d3s.height[v.id] = conf.height.selected;
             } else if (neighbours.indexOf(v.id) !== -1) {
                 // set the properties of the neighbours
-                d3s.fill[v.id] = configuration.fill.contextNeighbourDefault;
-                d3s.opacity[v.id] = configuration.opacity.default;
-                d3s.stroke[v.id] = configuration.stroke.date.selected;
-                d3s.height[v.id] = configuration.height.selected;
+                d3s.opacity[v.id] = conf.opacity.default;
+                d3s.height[v.id] = conf.height.selected;
+                d3s.fill[v.id] = v.color;
             } else {
                 // set the properties of the other nodes
-                d3s.fill[v.id] = configuration.fill.default;
-                d3s.opacity[v.id] = configuration.opacity.unselected;
-                d3s.stroke[v.id] = configuration.stroke.date.unselected;
-                d3s.height[v.id] = configuration.height.default;
+                d3s.opacity[v.id] = conf.opacity.unselected;
+                d3s.height[v.id] = conf.height.default;
+                d3s.fill[v.id] = '#ccc';
             }
         });
 
         d3s.highlightNodes();
         d3s.highlightLinks();
-        d3s.highlightDateRange();
-        d3s.highlightPoints();
+        d3s.highlightDates();
 
         DataService.getNodeData(neighbours, contextNode);
     }
@@ -106,28 +99,22 @@ angular.module('interfaceApp')
         var selectedNodes = [];
         angular.forEach(nodes, function(v,k) {
             if (types.indexOf(v.type) !== -1) {
-                d3s.fill[v.id] = v.color;
-                d3s.opacity[v.id] = configuration.opacity.default;
-                d3s.height[v.id] = configuration.height.selected;
-                d3s.stroke[v.id] = configuration.stroke.date.selected;
+                d3s.opacity[v.id] = conf.opacity.default;
+                d3s.height[v.id] = conf.height.selected;
                 selectedNodes.push(v.id);
             } else {
-                d3s.fill[v.id] = configuration.fill.default 
-                d3s.opacity[v.id] = configuration.opacity.unselected;
-                d3s.height[v.id] = configuration.height.default;
-                d3s.stroke[v.id] = configuration.stroke.date.unselected;
+                d3s.opacity[v.id] = conf.opacity.unselected;
+                d3s.height[v.id] = conf.height.default;
             }
         })
  
         angular.forEach(links, function(v,k) {
-            d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.unselected;
-            d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
+            d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.unselected;
         })
 
         d3s.highlightNodes();
         d3s.highlightLinks();
-        d3s.highlightDateRange();
-        d3s.highlightPoints();
+        d3s.highlightDates();
         d3s.highlightedTypes = types;
 
         DataService.getNodeData(selectedNodes, undefined);
@@ -143,28 +130,22 @@ angular.module('interfaceApp')
         var selectedNodes = [];
         angular.forEach(nodes, function(v,k) {
             if (ids.indexOf(v.id) !== -1) {
-                d3s.fill[v.id] = v.color;
-                d3s.opacity[v.id] = configuration.opacity.default;
-                d3s.height[v.id] = configuration.height.selected;
-                d3s.stroke[v.id] = configuration.stroke.date.selected;
+                d3s.opacity[v.id] = conf.opacity.default;
+                d3s.height[v.id] = conf.height.selected;
                 selectedNodes.push(v.id);
             } else {
-                d3s.fill[v.id] = configuration.fill.default 
-                d3s.opacity[v.id] = configuration.opacity.unselected;
-                d3s.height[v.id] = configuration.height.default;
-                d3s.stroke[v.id] = configuration.stroke.date.unselected;
+                d3s.opacity[v.id] = conf.opacity.unselected;
+                d3s.height[v.id] = conf.height.default;
             }
         })
 
         angular.forEach(links, function(v,k) {
-            d3s.linkStroke[v.source.id + '-' + v.target.id] = configuration.stroke.link.unselected;
-            d3s.linkOpacity[v.source.id + '-' + v.target.id] = configuration.opacity.unselected;
+            d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.unselected;
         })
 
         d3s.highlightNodes();
         d3s.highlightLinks();
-        d3s.highlightDateRange();
-        d3s.highlightPoints();
+        d3s.highlightDates();
 
         DataService.getNodeData(selectedNodes, undefined);
  
@@ -176,33 +157,31 @@ angular.module('interfaceApp')
     function highlightNode(id) {
         var nodeDefaultColor, dateDefaultColor;
         if (DataService.contextNode !== undefined) {
-            nodeDefaultColor = configuration.fill.contextNeighbourDefault;
-            dateDefaultColor = configuration.fill.contextNeighbourDefault;
+            nodeDefaultColor = conf.fill.contextNeighbourDefault;
+            dateDefaultColor = conf.fill.contextNeighbourDefault;
         } else {
             nodeDefaultColor = DataService.nodeMap[id].color;
             dateDefaultColor = DataService.nodeMap[id].color;
         }
 
         var n = d3.select('#' + d3s.sanitize(id) + '_node');
-        if (n.attr('fill') === configuration.fill.contextNeighbourHighlight) {
-            n.attr('fill', nodeDefaultColor);
-        } else {
-            n.attr('fill', configuration.fill.contextNeighbourHighlight)
-            .transition()
-            .attr('r', configuration.radius.node.unselected * 5)
-            .transition()
-            .attr('r', configuration.radius.node.unselected);
-        }
+        n.transition()
+        .attr('r', function(d) {
+            return d.r * 3
+        })
+        .transition()
+        .delay(1000)
+        .attr('r', function(d) {
+            return d.r
+        });
 
         var d = d3.select('#' + d3s.sanitize(id) + '_date');
-        try {
-            if (d.attr('fill') === configuration.fill.contextNeighbourHighlight) {
-                d.attr('fill', dateDefaultColor);
-            } else {
-                d.attr('fill', configuration.fill.contextNeighbourHighlight);
-            }
-        } catch (e) {
-            // not all nodes have dates
+        if (d[0] !== null) {
+            d.transition()
+             .attr('height', conf.height.selected)
+             .transition()
+             .delay(1000)
+             .attr('height', conf.height.unselected);
         }
     }
 
@@ -215,11 +194,11 @@ angular.module('interfaceApp')
 
         if (highlight === true) {
             node.transition()
-                .attr('fill',    function(d) { return d3s.fill[d.id]; })
+                .attr('fill', function(d) { return d3s.fill[d.id]; })
                 .attr('opacity', function(d) { return d3s.opacity[d.id]; })
                 .transition()
                 .attr('r', function(d) { 
-                    if (d3s.fill[d.id] !== configuration.fill.default) {
+                    if (d3s.fill[d.id] !== conf.fill.default) {
                         return d.r * 5; 
                     } else {
                         return d.r;
@@ -232,7 +211,7 @@ angular.module('interfaceApp')
                 });
         } else {
             node.transition()
-                .attr('fill',    function(d) { return d3s.fill[d.id]; })
+                .attr('fill', function(d) { return d3s.fill[d.id]; })
                 .attr('opacity', function(d) { return d3s.opacity[d.id]; });
         }
     }
@@ -243,31 +222,23 @@ angular.module('interfaceApp')
     function highlightLinks() {
         // get a handle to the relevant elements
         var link = d3.selectAll('.link');
-        link.attr('stroke',  function(d) { return d3s.linkStroke[d.source.id + '-' + d.target.id]; })
-            .attr('opacity', function(d) { return d3s.linkOpacity[d.source.id + '-' + d.target.id]; });
+        link.attr('opacity', function(d) { return d3s.opacity[d.source.id + '-' + d.target.id]; });
     }
 
     /*
-     * @function: highlightDateRange
+     * @function: highlightDates
      */
-    function highlightDateRange() {
+    function highlightDates() {
         // get a handle to the relevant elements
-        var dateRange = d3.selectAll('.dateRange');
-        dateRange.attr('fill',    function(d) { return d3s.fill[d.id]; })
-            .attr('opacity', function(d) { return d3s.opacity[d.id]; })
-            .attr('height',  function(d) { return d3s.height[d.id]; })
-            .attr('stroke',  function(d) { return d3s.stroke[d.id]; });
-    }
-
-    /*
-     * @function: highlightPoints
-     */
-    function highlightPoints() {
+        d3.selectAll('.dateRange')
+          .attr('fill', function(d) { return d3s.fill[d.id]; })
+          .attr('opacity', function(d) { return d3s.opacity[d.id]; })
+          .attr('height',  function(d) { return d3s.height[d.id]; });
+        
         // get a handle to the relevant elements
-        var pnts = d3.selectAll('.datePoint');
-        pnts.attr('fill',    function(d) { return d3s.fill[d.id]; })
-            .attr('opacity', function(d) { return d3s.opacity[d.id]; })
-            .attr('stroke',  function(d) { return d3s.stroke[d.id]; });
+        d3.selectAll('.datePoint')
+          .attr('fill', function(d) { return d3s.fill[d.id]; })
+          .attr('opacity', function(d) { return d3s.opacity[d.id]; });
     }
 
     /*
@@ -276,7 +247,7 @@ angular.module('interfaceApp')
     function sizeNodesEvenly() {
         d3.selectAll('.node')
           .transition()
-          .attr('r', configuration.radius.node.unselected);
+          .attr('r', '10');
     }
 
     /*
@@ -303,7 +274,7 @@ angular.module('interfaceApp')
         var t;
         nodes.attr('opacity', function(d, i, n) { 
             t = d3.select(this); 
-            if (t.attr('fill') === configuration.fill.default) {
+            if (t.attr('fill') === conf.fill.default) {
                 return value;
             } else {
                 return d3s.opacity[d.id];
@@ -312,16 +283,16 @@ angular.module('interfaceApp')
         var link = d3.selectAll('.link');
         link.attr('opacity', function(d) { 
             t = d3.select(this); 
-            if (t.attr('stroke') === configuration.stroke.link.unselected) {
+            if (t.attr('stroke') === conf.stroke.link.unselected) {
                 return value;
             } else {
-                d3s.linkOpacity[d.source.id + '-' + d.target.id];
+                d3s.opacity[d.source.id + '-' + d.target.id];
             }
         });
         var pnts = d3.selectAll('.datePoint');
         pnts.attr('opacity', function(d) {
             t = d3.select(this); 
-            if (t.attr('fill') === configuration.fill.default) {
+            if (t.attr('fill') === conf.fill.default) {
                 return value;
             } else {
                 return d3s.opacity[d.id];
@@ -331,7 +302,7 @@ angular.module('interfaceApp')
         var dateRange = d3.selectAll('.dateRange');
         dateRange.attr('opacity', function(d) {
             t = d3.select(this); 
-            if (t.attr('fill') === configuration.fill.default) {
+            if (t.attr('fill') === conf.fill.default) {
                 return value;
             } else {
                 d3s.opacity[d.id];
@@ -362,8 +333,7 @@ angular.module('interfaceApp')
         highlightNodes: highlightNodes,
         highlightNode: highlightNode,
         highlightLinks: highlightLinks,
-        highlightDateRange: highlightDateRange,
-        highlightPoints: highlightPoints, 
+        highlightDates: highlightDates,
         highlightByType: highlightByType,
         highlightById: highlightById,
         sizeNodesEvenly: sizeNodesEvenly,
@@ -375,9 +345,8 @@ angular.module('interfaceApp')
     d3s.fill = {};
     d3s.opacity = {};
     d3s.stroke = {};
+    d3s.strokeWidth = {};
     d3s.height = {};
-    d3s.linkStroke = {};
-    d3s.linkOpacity = {};
     return d3s;
 
   }]);
