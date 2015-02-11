@@ -20,42 +20,20 @@ angular.module('interfaceApp')
 
       },
 
-      'fill': {
-          'contextNode': 'green',
-          'contextNeighbourDefault': 'orange',
-          'contextNeighbourHighlight': 'red',
-          'default': '#c8c8c8'
-      },
-
       'opacity': {
           'default': '1',
           'unselected': '0.3'
       },
 
-      'stroke': {
-          'link': {
-              'selected': 'orange',
-              'unselected': '#c8c8c8'
-          },
-          'date': {
-              'selected': 'black',
-              'unselected': '#c8c8c8'
-          }
-      },
 
       'height': {
-          'selected': '10',
-          'default': '3'
+          'selected': '15',
+          'default': '5'
       },
 
       'radius': {
-          'node': {
-              'selected': '30',
-              'unselected': '10'
-          },
           'date': {
-              'selected': '6',
-              'default': '3'
+              'default': '5'
           }
       }
   });
