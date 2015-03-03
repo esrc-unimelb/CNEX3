@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('entityNetwork', [ '$window', '$http', 'DataService', 'configuration',
-        function ($window, $http, DataService, conf) {
+  .directive('entityNetwork', [ '$window', '$http', '$location', 'DataService', 'D3Service', 'configuration',
+        function ($window, $http, $location, DataService, d3s, conf) {
     return {
       templateUrl: 'views/entity-network.html',
       restrict: 'E',
@@ -94,23 +94,53 @@ angular.module('interfaceApp')
                       scope.stats[v.type].entries.push(v);
                   }
               })
+              scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id);
           }
 
           scope.showDetails = function(d) {
               if (scope.selections.indexOf(d.id) === -1) {
                   // highlight the node
                   d3.select('#node_' + d.id)
-                    .attr('fill', conf.fill.contextNode);
+                    .attr('stroke', 'black')
+                    .attr('fill', d.color);
 
                   // highlight the relevant links
                   angular.forEach(scope.selections, function(v, k) {
                       // we have to try the linkid with source and
                       //   target flipped
                       d3.select('#link_' + v + '_' + d.id)
-                        .attr('stroke', conf.fill.contextNode);
+                        .style('stroke', 'black');
                       d3.select('#link_' + d.id + '_' + v)
-                        .attr('stroke', conf.fill.contextNode);
+                        .style('stroke', 'black');
                   })
+
+                  var w = d3.select('#entity_graph').select('svg').attr('width');
+                  var h = d3.select('#entity_graph').select('svg').attr('height');
+
+                  // where is the node located relative to the underlying svg
+                  var nx, ny;
+                  var qx = d.px / w;
+                  var qy = d.py / h;
+                  if (qx < 0.5 && qy < 0.5) {
+                     nx = d.px + d.r;
+                     ny = d.py - d.r;
+                  } else if (qx < 0.5 && qy > 0.5) {
+                     nx = d.px + d.r;
+                     ny = d.py + d.r;
+                  } else if (qx > 0.5 && qy < 0.5) {
+                     nx = d.px + d.r;
+                     ny = d.py - d.r;
+                  } else {
+                     nx = d.px + d.r;
+                     ny = d.py + d.r;
+                  }
+                  d3.select('#entity_graph').select('svg').select('g').append('text')
+                      .attr('x', nx)
+                      .attr('y', ny)
+                      .attr('id', 'text_' + d.id)
+                      .attr('class', 'text')
+                      .attr('font-size', '35px')
+                      .text(d.id);
 
                   scope.selections.push(d.id);
                   scope.showInfoPanel = true;
@@ -127,24 +157,66 @@ angular.module('interfaceApp')
                   scope.selections.splice(scope.selections.indexOf(d.id), 1);
                   delete scope.selectionData[d.id];
 
+                  // remove the id label
+                  d3.select('#text_' + d.id).remove();
+
                   // remove node highlighting
                   d3.select('#node_' + d.id)
-                    .attr('fill', d.color);
+                    .attr('stroke', d.color);
 
                   // remove link highlight
                   angular.forEach(scope.selections, function(v, k) {
                       // we have to try the linkid with source and
                       //   target flipped
                       d3.select('#link_' + v + '_' + d.id)
-                        .attr('stroke', conf.stroke.link.unselected)
-                        .attr('stroke-width', 2);
+                        .attr('stroke', '#ccc');
                       d3.select('#link_' + d.id + '_' + v)
-                        .attr('stroke', conf.stroke.link.unselected)
-                        .attr('stroke-width', 2);
+                        .attr('stroke', '#ccc');
                   })
-                  if (scope.selections.length === 0) {
-                    scope.showInfoPanel = false;
-                  }
+              }
+
+              if (scope.selections.length === 0) {
+                  scope.reset();
+              } else {
+                  
+                  d3.selectAll('.link')
+                    .filter(function(d) {
+                        if (d3.select(this).style('stroke') === 'rgb(0, 0, 0)') {
+                            var id = d3.select(this).attr('id').split('link_')[1];
+                            var s = id.split('_')[0];
+                            var t = id.split('_')[1];
+                            if (scope.selections.indexOf(s) === -1 || scope.selections.indexOf(t) === -1) {
+                                return true;
+                            }
+                        }
+                    })
+                    .style('stroke', '#ccc')
+                    .style('opacity', conf.opacity.unselected);
+                    
+                  
+                  // fade out unselected nodes
+                  d3.selectAll('.node')
+                    .style('opacity', function(d) {
+                        if (scope.selections.indexOf(d.id) !== -1) {
+                            return conf.opacity.default;
+                        } else {
+                            return conf.opacity.unselected;
+                        }
+                    });
+
+                  // fade out links not between selected nodes
+                  d3.selectAll('.link')
+                    .style('opacity', function(d) {
+                        if (d3.select(this).style('stroke') === 'rgb(0, 0, 0)') {
+                            return conf.opacity.default;
+                        } else {
+                            return conf.opacity.unselected;
+                        }
+                    });
+              }
+
+              scope.multiplePanels = {
+                  'activePanels': [ scope.selections.length - 1 ]
               }
           }
           scope.closeInfoPanel = function() {
@@ -152,42 +224,38 @@ angular.module('interfaceApp')
           }
           scope.reset = function() {
               // remove node highlight
-              angular.forEach(scope.selectionData, function(v,k) {
-                  d3.select('#node_' + v.id)
-                    .attr('fill', v.color);
-              })
+              d3.selectAll('.node')
+                .attr('fill', function(d) { return d.color; })
+                .style('stroke', function(d) { return d.color; })
+                .style('opacity', conf.opacity.default);
            
               // remove link highlight
-              angular.forEach(scope.selections, function(v, k) {
-                  // we have to try the linkid with source and
-                  //   target flipped
-                  d3.selectAll('.link')
-                    .attr('stroke', conf.stroke.link.unselected);
-              })
+              d3.selectAll('.link')
+                .style('stroke', '#ccc')
+                .style('opacity', conf.opacity.default);
+
+              // remove all labels
+              d3.selectAll('.text').remove();
 
               scope.selections = [];
               scope.selectionData = {};
               scope.closeInfoPanel();
           }
 
-          scope.locateNode = function(d) {
-              d3.select('#node_' + d.id)
-                .transition()
-                .attr('r', d.r * 3)
-                .transition()
-                .delay(500)
-                .transition()
-                .attr('r', d.r);
-          }
-
           scope.drawGraph = function(d) {
               d3.select('#entity_graph').select('svg').remove();
               var tick = function() {
-                  link.attr('x1', function(d) { return d.source.x; })
-                      .attr('y1', function(d) { return d.source.y; })
-                      .attr('x2', function(d) { return d.target.x; })
-                      .attr('y2', function(d) { return d.target.y; });
-
+                  path.attr("d", function(d) {
+                    var dx = d.target.x - d.source.x,
+                        dy = d.target.y - d.source.y,
+                        dr = Math.sqrt(dx * dx + dy * dy);
+                    return "M" +
+                        d.source.x + "," +
+                        d.source.y + "A" +
+                        dr + "," + dr + " 0 0,1 " +
+                        d.target.x + "," +
+                        d.target.y;
+                  });
                   node.attr('transform', function(d) {
                     return 'translate(' + d.x + ',' + d.y + ')';
                   });
@@ -201,8 +269,8 @@ angular.module('interfaceApp')
               var force = d3.layout.force()
                 .nodes(d.nodes)
                 .links(d.links)
-                .charge(-1000)
-                .linkDistance(100)
+                .charge(-2000)
+                .linkDistance(200)
                 .linkStrength(1)
                 .size([scope.svgWidth, scope.h])
                 .on('tick', tick)
@@ -212,23 +280,22 @@ angular.module('interfaceApp')
                 .append('svg')
                 .attr('width', scope.svgWidth)
                 .attr('height', scope.h)
+                .attr('class', 'svg')
                 .attr('viewBox', '0 0 ' + scope.w + ' ' + scope.h)
                 .attr('preserveAspectRatio', 'xMidYMid meet')
                 .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
                 .append('g');
 
-              var link = svg.selectAll('.link').data(force.links());
+              var path = svg.selectAll('.link').data(force.links());
               var node = svg.selectAll('.node').data(force.nodes());
 
-              // draw the links
-              link.enter()
-                .append('line')
-                .attr('class', 'link')
-                .attr('stroke', conf.stroke.link.unselected)
-                .attr('stroke-width', 2)
-                .attr('id', function(d) {
+              // add the links
+              path.enter()
+                  .append("svg:path")
+                  .attr("class", "link")
+                  .attr('id', function(d) {
                     return 'link_' + d.source_id + '_' + d.target_id;
-                });
+                  });
 
               //draw the nodes
               node.enter()
@@ -248,7 +315,6 @@ angular.module('interfaceApp')
                       scope.showDetails(d);
                     })
                 });
-                //.attr('id', function(d) { return D3Service.sanitize(d.id) + '_node'; });
           }
 
           scope.$on('draw-entity-graph', function() {
