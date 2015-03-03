@@ -6,12 +6,6 @@ angular.module('interfaceApp')
     // AngularJS will instantiate a singleton by calling "new" on this function
     //
 
-    function getNodeData(nodes, contextNode) {
-        DataService.selected = nodes;
-        DataService.contextNode = contextNode;
-        $rootScope.$broadcast('node-data-ready');
-    }
-
     function getEntityNetwork(entityId) {
         // store the ID of the current entity network we're viewing
         DataService.currentEntity = entityId;
@@ -68,7 +62,6 @@ angular.module('interfaceApp')
         links: [],
 
         nodeColorByType: {},
-        getNodeData: getNodeData,
         getEntityNetwork: getEntityNetwork,
         processNodeSet: processNodeSet
     }

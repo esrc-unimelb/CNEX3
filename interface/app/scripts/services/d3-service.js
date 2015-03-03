@@ -10,235 +10,159 @@ angular.module('interfaceApp')
      * @function: highlightNodeAndLocalEnvironment
      */
     function highlightNodeAndLocalEnvironment(contextNode) {
-        if (DataService.contextNode === contextNode) {
-            DataService.contextNode === undefined;
+        var selections = [];
+        if (d3s.contextNode === contextNode) {
+            d3s.contextNode = undefined;
             d3s.reset();
             return;
         }
+        d3s.contextNode = contextNode;
+        selections.push(contextNode);
+
+        d3.selectAll('.link')
+          .each(function(d) {
+            if (d.source.id === contextNode) {
+              selections.push(d.target.id);
+            } else if (d.target.id === contextNode) {
+              selections.push(d.source.id);
+            }
+          })
+
+        d3s.highlight(selections);
+
+        var contextNode = selections[0];
+        d3s.highlightLinks(contextNode, selections);
         DataService.contextNode = contextNode;
-
-        var nodes = DataService.nodes;
-        var links = DataService.links;
-        var neighbours = [];
-
-        // figure out all the focus nodes' neighbours
-        angular.forEach(links, function(v,k) {
-            var sn = v.source.id;
-            var tn = v.target.id;
-            if (sn === contextNode || tn === contextNode) {
-                if (neighbours.indexOf(sn) === -1) {
-                    neighbours.push(sn);
-                }
-                if (neighbours.indexOf(tn) === -1) {
-                    neighbours.push(tn);
-                }
-            }
-
-            // we want to select the links of first degree neighbours WITHOUT
-            //  the links between first degree neighbours
-            if (v.source.id === contextNode && neighbours.indexOf(v.target.id) !== -1) {
-                d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.default;
-            } else if (v.target.id === contextNode && neighbours.indexOf(v.source.id) !== -1) {
-                d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.default;
-            } else {
-                // every link that is not between the context node and a first degree neighbour
-                //  should fade into the background
-                d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.unselected;
-            }
-
-        });
-
-        angular.forEach(nodes, function(v,k) {
-            if (v.id === contextNode) {
-                // set the properties of the focus node
-                d3s.opacity[v.id] = conf.opacity.default;
-                d3s.fill[v.id] = v.color;
-                d3s.height[v.id] = conf.height.selected;
-            } else if (neighbours.indexOf(v.id) !== -1) {
-                // set the properties of the neighbours
-                d3s.opacity[v.id] = conf.opacity.default;
-                d3s.height[v.id] = conf.height.selected;
-                d3s.fill[v.id] = v.color;
-            } else {
-                // set the properties of the other nodes
-                d3s.opacity[v.id] = conf.opacity.unselected;
-                d3s.height[v.id] = conf.height.default;
-                d3s.fill[v.id] = '#ccc';
-            }
-        });
-
-        d3s.highlightNodes();
-        d3s.highlightLinks();
-        d3s.highlightDates();
-
-        DataService.getNodeData(neighbours, contextNode);
+        DataService.selected = selections;
+        $rootScope.$broadcast('node-data-ready');
     }
 
     /*
      * @function: highlightByType
      */
     function highlightByType(type) {
-        var types = d3s.highlightedTypes;
-        var nodes = DataService.nodes;
-        var links = DataService.links;
-
-        // add / remove the type as required
-        var index = types.indexOf(type);
-        if (index === -1) {
-            types.push(type);
-        } else {
-            types.splice(index, 1)
-        }
-
-        if (types.length === 0) {
-            d3s.highlightedTypes = types;
+        if (d3s.type.indexOf(type) !== -1) {
+            d3s.type.splice(d3s.type.indexOf(type), 1);
             d3s.reset();
-            return;
-        }
-
-        var selectedNodes = [];
-        angular.forEach(nodes, function(v,k) {
-            if (types.indexOf(v.type) !== -1) {
-                d3s.opacity[v.id] = conf.opacity.default;
-                d3s.height[v.id] = conf.height.selected;
-                selectedNodes.push(v.id);
-            } else {
-                d3s.opacity[v.id] = conf.opacity.unselected;
-                d3s.height[v.id] = conf.height.default;
-            }
-        })
- 
-        angular.forEach(links, function(v,k) {
-            d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.unselected;
-        })
-
-        d3s.highlightNodes();
-        d3s.highlightLinks();
-        d3s.highlightDates();
-        d3s.highlightedTypes = types;
-
-        DataService.getNodeData(selectedNodes, undefined);
-    }
-
-    /*
-     * @function: highlightById
-     */
-    function highlightById(ids) {
-        var nodes = DataService.nodes;
-        var links = DataService.links;
-
-        var selectedNodes = [];
-        angular.forEach(nodes, function(v,k) {
-            if (ids.indexOf(v.id) !== -1) {
-                d3s.opacity[v.id] = conf.opacity.default;
-                d3s.height[v.id] = conf.height.selected;
-                selectedNodes.push(v.id);
-            } else {
-                d3s.opacity[v.id] = conf.opacity.unselected;
-                d3s.height[v.id] = conf.height.default;
-            }
-        })
-
-        angular.forEach(links, function(v,k) {
-            d3s.opacity[v.source.id + '-' + v.target.id] = conf.opacity.unselected;
-        })
-
-        d3s.highlightNodes();
-        d3s.highlightLinks();
-        d3s.highlightDates();
-
-        DataService.getNodeData(selectedNodes, undefined);
- 
-    }
-
-    /*
-     * @function: highlightNode
-     */
-    function highlightNode(id) {
-        var nodeDefaultColor, dateDefaultColor;
-        if (DataService.contextNode !== undefined) {
-            nodeDefaultColor = conf.fill.contextNeighbourDefault;
-            dateDefaultColor = conf.fill.contextNeighbourDefault;
+            if (d3s.type.length === 0) { return; }
         } else {
-            nodeDefaultColor = DataService.nodeMap[id].color;
-            dateDefaultColor = DataService.nodeMap[id].color;
+            d3s.type.push(type);
         }
 
-        var n = d3.select('#' + d3s.sanitize(id) + '_node');
-        n.transition()
-        .attr('r', function(d) {
-            return d.r * 3
-        })
-        .transition()
-        .delay(1000)
-        .attr('r', function(d) {
-            return d.r
-        });
+        var selections = [];
+        d3.selectAll('.node')
+          .each(function(d) {
+              if (d3s.type.indexOf(d.type) !== -1) {
+                  selections.push(d.id);
+              }
+           });
 
-        var d = d3.select('#' + d3s.sanitize(id) + '_date');
-        if (d[0] !== null) {
-            d.transition()
-             .attr('height', conf.height.selected)
-             .transition()
-             .delay(1000)
-             .attr('height', conf.height.unselected);
-        }
-    }
+        d3s.highlight(selections);
+        d3.selectAll('.link')
+          .attr('opacity', conf.opacity.unselected);
 
-    /* 
-     * @function: highlightNodes
-     */
-    function highlightNodes(highlight) {
-        // get a handle to all nodes
-        var node = d3.selectAll('.node');
-
-        if (highlight === true) {
-            node.transition()
-                .attr('fill', function(d) { return d3s.fill[d.id]; })
-                .attr('opacity', function(d) { return d3s.opacity[d.id]; })
-                .transition()
-                .attr('r', function(d) { 
-                    if (d3s.fill[d.id] !== conf.fill.default) {
-                        return d.r * 5; 
-                    } else {
-                        return d.r;
-                    }
-                })
-                .transition()
-                .delay(2000)
-                .attr('r', function(d) { 
-                    return d.r; 
-                });
-        } else {
-            node.transition()
-                .attr('fill', function(d) { return d3s.fill[d.id]; })
-                .attr('opacity', function(d) { return d3s.opacity[d.id]; });
-        }
+        DataService.contextNode = undefined;
+        DataService.selected = selections;
+        $rootScope.$broadcast('node-data-ready');
     }
 
     /*
-     * @function: highlightLinks
+     * highlight
      */
-    function highlightLinks() {
-        // get a handle to the relevant elements
-        var link = d3.selectAll('.link');
-        link.attr('opacity', function(d) { return d3s.opacity[d.source.id + '-' + d.target.id]; });
+    function highlight(selections) {
+        d3.selectAll('.node')
+          .attr('fill', function(d) {
+              if (selections.indexOf(d.id) !== -1) {
+                  return d.color;
+              } else {
+                  return '#ccc';
+              }
+          })
+          /*
+          .style('stroke', function(d) {
+              if (selections.indexOf(d.id) !== -1) {
+                  return 'black';
+              } else {
+                  return '#ccc';
+              }
+          })
+          */
+          .attr('opacity', function(d) {
+              if (selections.indexOf(d.id) !== -1) {
+                  return conf.opacity.default;
+              } else {
+                  return conf.opacity.unselected;
+              }
+          });
+
+        d3.selectAll('.date')
+          .attr('opacity', function(d) {
+              if (selections.indexOf(d.id) === -1) {
+                  return 0;
+              }
+          });
+          /*
+          .attr('stroke', function(d) {
+              if (selections.indexOf(d.id) !== -1) {
+                  return 'black';
+              }
+          });
+          */
     }
 
     /*
-     * @function: highlightDates
+     * highlightLinks
      */
-    function highlightDates() {
-        // get a handle to the relevant elements
-        d3.selectAll('.dateRange')
-          .attr('fill', function(d) { return d3s.fill[d.id]; })
-          .attr('opacity', function(d) { return d3s.opacity[d.id]; })
-          .attr('height',  function(d) { return d3s.height[d.id]; });
-        
-        // get a handle to the relevant elements
-        d3.selectAll('.datePoint')
-          .attr('fill', function(d) { return d3s.fill[d.id]; })
-          .attr('opacity', function(d) { return d3s.opacity[d.id]; });
+    function highlightLinks(contextNode, selections) {
+        d3.selectAll('.link')
+          .attr('stroke', function(d) {
+              if (selections.indexOf(d.source.id) !== -1 && d.target.id === contextNode) {
+                  return 'black';
+              } else if (selections.indexOf(d.target.id) !== -1 && d.source.id === contextNode) {
+                  return 'black';
+              } else {
+                  return '#ccc';
+              }
+          })
+          .attr('opacity', function(d) {
+              if (selections.indexOf(d.source.id) !== -1 && d.target.id === contextNode) {
+                  return conf.opacity.default;
+              } else if (selections.indexOf(d.target.id) !== -1 && d.source.id === contextNode) {
+                  return conf.opacity.default;
+              } else {
+                  return conf.opacity.unselected;
+              }
+          });
+    }
+
+    /*
+     * @function: reset
+     */
+    function reset() {
+        d3.selectAll('.node')
+          .attr('fill', function(d) {
+              return d.color;
+          })
+          /*
+          .style('stroke', function(d) {
+              return d.color;
+          })
+          */
+          .attr('opacity', function(d) {
+              return conf.opacity.default;
+          });
+        d3.selectAll('.link')
+          .attr('stroke', '#ccc')
+          .attr('opacity', conf.opacity.default);
+
+        d3.selectAll('.date') 
+          .attr('opacity', conf.opacity.default);
+          /*
+          .attr('stroke', function(d) {
+              return d.color;
+          })
+          */
+
     }
 
     /*
@@ -260,65 +184,6 @@ angular.module('interfaceApp')
     }
 
     /*
-     * @function: fadeBackground
-     *
-     * @params:
-     * - value
-     */
-    function fadeBackground(value) {
-        if (DataService.selected === undefined) {
-            return;
-        }
-        // iterate over all of the elements fading those not selected
-        var nodes = d3.selectAll('.node');
-        var t;
-        nodes.attr('opacity', function(d, i, n) { 
-            t = d3.select(this); 
-            if (t.attr('fill') === conf.fill.default) {
-                return value;
-            } else {
-                return d3s.opacity[d.id];
-            }
-        });
-        var link = d3.selectAll('.link');
-        link.attr('opacity', function(d) { 
-            t = d3.select(this); 
-            if (t.attr('stroke') === conf.stroke.link.unselected) {
-                return value;
-            } else {
-                d3s.opacity[d.source.id + '-' + d.target.id];
-            }
-        });
-        var pnts = d3.selectAll('.datePoint');
-        pnts.attr('opacity', function(d) {
-            t = d3.select(this); 
-            if (t.attr('fill') === conf.fill.default) {
-                return value;
-            } else {
-                return d3s.opacity[d.id];
-            }
-        })
-
-        var dateRange = d3.selectAll('.dateRange');
-        dateRange.attr('opacity', function(d) {
-            t = d3.select(this); 
-            if (t.attr('fill') === conf.fill.default) {
-                return value;
-            } else {
-                d3s.opacity[d.id];
-            }
-        })
-    }
-
-    /*
-     * @function: reset
-     */
-    function reset() {
-        d3s.highlightedTypes = [];
-        $rootScope.$broadcast('reset');
-    }
-
-    /*
      * @function: sanitize
      */
     function sanitize(selector) {
@@ -330,15 +195,12 @@ angular.module('interfaceApp')
         highlightedTypes: [],
         colors: d3.scale.category20(),
         highlightNodeAndLocalEnvironment: highlightNodeAndLocalEnvironment,
-        highlightNodes: highlightNodes,
-        highlightNode: highlightNode,
-        highlightLinks: highlightLinks,
-        highlightDates: highlightDates,
         highlightByType: highlightByType,
-        highlightById: highlightById,
+        highlight: highlight,
+        highlightLinks: highlightLinks,
         sizeNodesEvenly: sizeNodesEvenly,
         resetNodeDimensions: resetNodeDimensions,
-        fadeBackground: fadeBackground,
+
         reset: reset,
         sanitize: sanitize
     }
@@ -347,6 +209,8 @@ angular.module('interfaceApp')
     d3s.stroke = {};
     d3s.strokeWidth = {};
     d3s.height = {};
+    d3s.contextNode = undefined;
+    d3s.type = [];
     return d3s;
 
   }]);
