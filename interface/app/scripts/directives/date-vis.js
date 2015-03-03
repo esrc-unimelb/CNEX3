@@ -1,13 +1,12 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('dateVis', [ '$rootScope', 'configuration', 'DataService', 'D3Service', function ($rootScope, configuration, DataService, D3Service) {
+  .directive('dateVis', [ '$rootScope', '$window', 'configuration', 'DataService', 'D3Service', 
+        function ($rootScope, $window, configuration, DataService, D3Service) {
     return {
       templateUrl: 'views/date-vis.html',
       restrict: 'E',
       scope: {
-          'width': '@',
-          'height': '@'
       },
       link: function postLink(scope, element, attrs) {
 
@@ -15,9 +14,14 @@ angular.module('interfaceApp')
           scope.points = [];
           scope.ranges = [];
 
-          scope.$watch('width', function() {
-              scope.$broadcast('graph-data-loaded');
+
+          var w = angular.element($window);
+          w.bind('resize', function() {
+              scope.$apply(function() {
+                  scope.drawDateVis();
+              })
           });
+
           scope.$on('reset', function() {
               var dateRange = d3.selectAll('.dateRange');
               dateRange.attr('fill', function(d) { return d.color; })
@@ -30,10 +34,13 @@ angular.module('interfaceApp')
                     .attr('r', configuration.radius.date.default)
           });
 
-          scope.$on('graph-data-loaded', function() {
+          scope.drawDateVis = function() {
               // ditch any previous svg though I'm not sure why there's
               //  still one there
               d3.select('#datevis').select('svg').remove();
+
+              scope.width = element.parent()[0].clientWidth - 30;
+              scope.height = scope.width * 0.55;
 
               if (scope.ranges.length === 0 || scope.points.length === 0 || scope.dates.length === 0) {
                   var nodes = DataService.nodes;
@@ -93,7 +100,7 @@ angular.module('interfaceApp')
               var dateRange = svg.selectAll('.dateRange').data(scope.ranges);
               dateRange.enter()
                   .append('rect')
-                  .attr('class', 'dateRange')
+                  .attr('class', 'date')
                   .attr('x', function(d) {
                       var date = Date.parse(d.df);
                       return xScale(date);
@@ -120,7 +127,7 @@ angular.module('interfaceApp')
               var circle = svg.selectAll('datePoint').data(scope.points);
               circle.enter()
                   .append('circle')
-                  .attr('class', 'datePoint')
+                  .attr('class', 'date')
                   .attr('cx', function(d) {
                       if (d.df !== null) {
                           var date = Date.parse(d.df);
@@ -140,7 +147,8 @@ angular.module('interfaceApp')
                           D3Service.highlightNodeAndLocalEnvironment(d.id); 
                       })
                   });
-          });
+          };
+          scope.drawDateVis();
       }
     };
   }]);

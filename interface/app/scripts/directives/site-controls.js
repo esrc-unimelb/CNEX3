@@ -23,7 +23,6 @@ angular.module('interfaceApp')
                   'height': $window.innerHeight - 15,
                   'overflow-y': 'auto'
               }
-              scope.dateVisWidth = e[0].clientWidth - 30;
           }
           sizeThePanel();
           scope.showData = false;
