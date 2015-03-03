@@ -2,7 +2,7 @@
 
 angular.module('interfaceApp')
   .directive('forceNetworkGraph', [ '$rootScope', '$window', '$routeParams', 'configuration', 'DataService', 'D3Service',
-    function ($rootScope, $window, $routeParams, configuration, DataService, D3Service) {
+    function ($rootScope, $window, $routeParams, configuration, DataService, d3s) {
     return {
       templateUrl: 'views/force-network-graph.html',
       restrict: 'E',
@@ -44,6 +44,7 @@ angular.module('interfaceApp')
               scope.data[v.id] = v;
           });
 
+          // figure out the dimensions of the svg
           var w = element[0].parentElement.clientWidth;
           var h = $window.innerHeight;
 
@@ -51,13 +52,19 @@ angular.module('interfaceApp')
           scope.unConnectedNodes = [];
 
           // redraw the view when zooming
-          var redraw = function() {
+          scope.redraw = function() {
               svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
           }
 
+          scope.zoom = d3.behavior
+                       .zoom()
+                       .scale([0.3])
+                       .translate([w/5, h/6])
+                       .scaleExtent([0,8]).on('zoom', scope.redraw);
+
           // calculate node / link positions during the simulation
           scope.tickCounter = 0;
-          var tick = function() {
+          scope.tick = function() {
               link.attr('x1', function(d) { return d.source.x; })
                   .attr('y1', function(d) { return d.source.y; })
                   .attr('x2', function(d) { return d.target.x; })
@@ -75,28 +82,28 @@ angular.module('interfaceApp')
                   scope.tickCounter = 0;
                   scope.$apply(function() {
                       scope.total = 0.1;
-                      scope.processed = force.alpha();
+                      scope.processed = scope.force.alpha();
                   });
               }
 
               // we ditch the cooling bar indicator as the
               //   simulation doesn't seem to get to 0 thus triggering
               //   the 'end' event
-              if (force.alpha() < 0.0055) {
+              if (scope.force.alpha() < 0.0055) {
                   scope.$apply(function() {
                       scope.relaxed = true;
                   })
               }
           }
 
-          var force = d3.layout.force()
+          scope.force = d3.layout.force()
                 .nodes(scope.nodes)
                 .links(scope.links)
-                .charge(-1000)
+                .charge(-2000)
                 .linkDistance(100)
                 .linkStrength(1)
                 .size([w, h])
-                .on('tick', tick)
+                .on('tick', scope.tick)
                 .start();
 
           var svg = d3.select('#graph')
@@ -105,15 +112,19 @@ angular.module('interfaceApp')
                 .attr('height', h)
                 .attr('viewBox', '0 0 ' + w + ' ' + h)
                 .attr('preserveAspectRatio', 'xMidYMid meet')
-                .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
-                .append('g');
+                .call(scope.zoom)
+                .append('g')
+                .attr('transform','translate(' + w/5 + ',' + h/6 + ')scale(.3,.3)');
 
-          var link = svg.selectAll('.link').data(force.links());
-          var node = svg.selectAll('.node').data(force.nodes());
+          var link = svg.selectAll('.link').data(scope.force.links());
+          var node = svg.selectAll('.node').data(scope.force.nodes());
 
           // draw the links
           link.enter()
               .append('line')
+              .attr('id', function(d) {
+                  return 'link_' + d3s.sanitize(d.source.id) + '_' + d3s.sanitize(d.target.id);
+              })
               .attr('class', 'link')
               .attr('stroke', '#ccc')
               .attr('stroke-width', 2);
@@ -122,22 +133,24 @@ angular.module('interfaceApp')
           //draw the nodes
           node.enter()
               .append('circle')
+              .attr('id', function(d) { 
+                  return 'node_' + d3s.sanitize(d.id); 
+              })
               .attr('class', 'node')
               .attr('r', function(d) { return d.r; })
               .attr('fill', function(d) { 
                   return d.color; 
-              })
-              .attr('id', function(d) { return D3Service.sanitize(d.id) + '_node'; });
+              });
           node.exit().remove();
 
           // handle the node click event
           node.on('click', function(d) {
               scope.$apply(function() {
-                  D3Service.highlightNodeAndLocalEnvironment(d.id);
+                  d3s.highlightNodeAndLocalEnvironment(d.id);
               });
           });
 
-          force.start();
+          scope.force.start();
 
       }
     };
