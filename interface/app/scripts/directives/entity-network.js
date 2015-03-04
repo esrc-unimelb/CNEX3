@@ -100,17 +100,21 @@ angular.module('interfaceApp')
           scope.showDetails = function(d) {
               if (scope.selections.indexOf(d.id) === -1) {
                   // highlight the node
-                  d3.select('#node_' + d.id)
+                  d3.select('#entity_graph')
+                    .select('#node_' + d.id)
                     .attr('stroke', 'black')
                     .attr('fill', d.color);
 
                   // highlight the relevant links
                   angular.forEach(scope.selections, function(v, k) {
-                      // we have to try the linkid with source and
+                      //
+                      //we have to try the linkid with source and
                       //   target flipped
-                      d3.select('#link_' + v + '_' + d.id)
+                      d3.select('#entity_graph')
+                        .select('#link_' + v + '_' + d.id)
                         .style('stroke', 'black');
-                      d3.select('#link_' + d.id + '_' + v)
+                      d3.select('#entity_graph')
+                        .select('#link_' + d.id + '_' + v)
                         .style('stroke', 'black');
                   })
 
@@ -158,19 +162,24 @@ angular.module('interfaceApp')
                   delete scope.selectionData[d.id];
 
                   // remove the id label
-                  d3.select('#text_' + d.id).remove();
+                  d3.select('#entity_graph')
+                    .select('#text_' + d.id)
+                    .remove();
 
                   // remove node highlighting
-                  d3.select('#node_' + d.id)
+                  d3.select('#entity_graph')
+                    .select('#node_' + d.id)
                     .attr('stroke', d.color);
 
                   // remove link highlight
                   angular.forEach(scope.selections, function(v, k) {
                       // we have to try the linkid with source and
                       //   target flipped
-                      d3.select('#link_' + v + '_' + d.id)
+                      d3.select('#entity_graph')
+                        .select('#link_' + v + '_' + d.id)
                         .attr('stroke', '#ccc');
-                      d3.select('#link_' + d.id + '_' + v)
+                      d3.select('#entity_graph')
+                        .select('#link_' + d.id + '_' + v)
                         .attr('stroke', '#ccc');
                   })
               }
@@ -179,7 +188,8 @@ angular.module('interfaceApp')
                   scope.reset();
               } else {
                   
-                  d3.selectAll('.link')
+                  d3.select('#entity_graph')
+                    .selectAll('.link')
                     .filter(function(d) {
                         if (d3.select(this).style('stroke') === 'rgb(0, 0, 0)') {
                             var id = d3.select(this).attr('id').split('link_')[1];
@@ -195,7 +205,8 @@ angular.module('interfaceApp')
                     
                   
                   // fade out unselected nodes
-                  d3.selectAll('.node')
+                  d3.select('#entity_graph')
+                    .selectAll('.node')
                     .style('opacity', function(d) {
                         if (scope.selections.indexOf(d.id) !== -1) {
                             return conf.opacity.default;
@@ -205,7 +216,8 @@ angular.module('interfaceApp')
                     });
 
                   // fade out links not between selected nodes
-                  d3.selectAll('.link')
+                  d3.select('#entity_graph')
+                    .selectAll('.link')
                     .style('opacity', function(d) {
                         if (d3.select(this).style('stroke') === 'rgb(0, 0, 0)') {
                             return conf.opacity.default;
@@ -224,18 +236,21 @@ angular.module('interfaceApp')
           }
           scope.reset = function() {
               // remove node highlight
-              d3.selectAll('.node')
+              d3.select('#entity_graph')
+                .selectAll('.node')
                 .attr('fill', function(d) { return d.color; })
                 .style('stroke', function(d) { return d.color; })
                 .style('opacity', conf.opacity.default);
            
               // remove link highlight
-              d3.selectAll('.link')
+              d3.select('#entity_graph')
+                .selectAll('.link')
                 .style('stroke', '#ccc')
                 .style('opacity', conf.opacity.default);
 
               // remove all labels
-              d3.selectAll('.text').remove();
+              d3.select('#entity_graph')
+                .selectAll('.text').remove();
 
               scope.selections = [];
               scope.selectionData = {};
@@ -243,6 +258,9 @@ angular.module('interfaceApp')
           }
 
           scope.drawGraph = function(d) {
+              scope.selections = [];
+              scope.selectionData = {};
+
               d3.select('#entity_graph').select('svg').remove();
               var tick = function() {
                   path.attr("d", function(d) {

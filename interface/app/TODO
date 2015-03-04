@@ -1,0 +1,14 @@
+- label landmarks
+     - site graph: label largest 10% nodes
+     - entity graph: label context node
+
+- entity graph vary node markers by type
+
+- access control 
+    - at least by esrc group if not specific user accounts
+
+- bugs and kinks
+    - selecting on date graph highlights main graph but doesn't update the data view
+    - if graph generating and second generation requested, service starting another
+    instead of returning the data associated with the first graph
+

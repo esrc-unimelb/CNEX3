@@ -22,7 +22,7 @@ angular.module('interfaceApp')
 
       'opacity': {
           'default': '1',
-          'unselected': '0.3'
+          'unselected': '0.5'
       },
 
 
