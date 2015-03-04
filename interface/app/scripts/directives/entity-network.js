@@ -1,14 +1,13 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('entityNetwork', [ '$window', '$http', '$location', 'DataService', 'D3Service', 'configuration',
-        function ($window, $http, $location, DataService, d3s, conf) {
+  .directive('entityNetwork', [ '$window', '$http', '$location', '$rootScope', 'DataService', 'D3Service', 'configuration',
+        function ($window, $http, $location, $rootScope, DataService, d3s, conf) {
     return {
       templateUrl: 'views/entity-network.html',
       restrict: 'E',
       scope: {
-          sizeToParent: '@',
-          destroyEntityNetwork: '&'
+          sizeToParent: '@'
       },
       link: function postLink(scope, element, attrs) {
           scope.selections = [];
@@ -342,7 +341,7 @@ angular.module('interfaceApp')
           })
 
           scope.close = function() {
-              scope.destroyEntityNetwork();
+              $rootScope.$broadcast('destroy-entity-network-view');
           }
       }
     };
