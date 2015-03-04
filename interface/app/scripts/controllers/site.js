@@ -36,9 +36,22 @@ angular.module('interfaceApp')
         $scope.$on('graph-ready', function() {
             $scope.showControls = true;
         })
-        $scope.$on('draw-entity-graph', function() {
+        $scope.$on('load-entity-network-view', function() {
             $scope.showEntityNetwork = true;
         })
+        $scope.$on('destroy-entity-network-view', function() {
+            $scope.showEntityNetwork  = false;
+        })
+
+        // When the back button is pressed whilst viewing the entity network,
+        //  intercept the location change event, cancel it, and destroy the 
+        //  entity network
+        $scope.$on('$locationChangeStart', function(e, n, o) {
+            if (o.match(/^.*\/site\/.*\/byEntity$/) && $scope.showEntityNetwork === true) {
+                $scope.showEntityNetwork  = false;
+                e.preventDefault();
+            }
+        });
 
         $scope.update = function() {
             var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status';
@@ -121,18 +134,5 @@ angular.module('interfaceApp')
             $timeout(function() { $rootScope.$broadcast('graph-data-loaded'); }, 100);
         }
 
-        $scope.destroyEntityNetwork = function() {
-            $scope.showEntityNetwork  = false;
-        }
-
-        // When the back button is pressed whilst viewing the entity network,
-        //  intercept the location change event, cancel it, and destroy the 
-        //  entity network
-        $rootScope.$on('$locationChangeStart', function(e, n, o) {
-            if (o.match(/^.*\/site\/.*\/byEntity$/) && $scope.showEntityNetwork === true) {
-                $scope.destroyEntityNetwork();
-                e.preventDefault();
-            }
-        });
 
   }]);
