@@ -37,7 +37,7 @@ angular.module('interfaceApp')
           scope.drawDateVis = function() {
               // ditch any previous svg though I'm not sure why there's
               //  still one there
-              d3.select('#datevis').select('svg').remove();
+              d3.select('#date_vis').select('svg').remove();
 
               scope.width = element.parent()[0].clientWidth - 30;
               scope.height = scope.width * 0.55;
@@ -82,7 +82,7 @@ angular.module('interfaceApp')
                             .ticks(6)
                             .orient("bottom");
 
-              var svg = d3.select('#datevis')
+              var svg = d3.select('#date_vis')
                           .append('svg')
                           .attr('width', scope.width)
                           .attr('height', scope.height)
@@ -118,7 +118,7 @@ angular.module('interfaceApp')
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
                   .on('click', function(d) { 
                       scope.$apply(function() {
-                          D3Service.highlightNodeAndLocalEnvironment(d.id); 
+                          D3Service.highlightNodeAndLocalEnvironment(d.id, '#site_graph'); 
                       })
                   });
 
@@ -144,7 +144,7 @@ angular.module('interfaceApp')
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
                   .on('click', function(d) { 
                       scope.$apply(function() {
-                          D3Service.highlightNodeAndLocalEnvironment(d.id); 
+                          D3Service.highlightNodeAndLocalEnvironment(d.id, '#site_graph'); 
                       })
                   });
           };

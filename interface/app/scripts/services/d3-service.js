@@ -30,7 +30,7 @@ angular.module('interfaceApp')
           })
 
         d3s.highlight(selections);
-        d3s.highlightLinks(contextNode, selections);
+        d3s.highlightLinks(selections[0], selections);
 
         DataService.contextNode = selections[0];
         DataService.selected = selections;
