@@ -29,8 +29,8 @@ angular.module('interfaceApp')
             }
           })
 
-        d3s.highlight(selections);
-        d3s.highlightLinks(selections[0], selections);
+        d3s.highlight(contextNode, selections);
+        d3s.highlightLinks(contextNode, selections);
 
         DataService.contextNode = selections[0];
         DataService.selected = selections;
@@ -57,7 +57,7 @@ angular.module('interfaceApp')
               }
            });
 
-        d3s.highlight(selections);
+        d3s.highlight(undefined, selections);
         d3.selectAll('.link')
           .attr('opacity', conf.opacity.unselected);
 
@@ -69,7 +69,7 @@ angular.module('interfaceApp')
     /*
      * highlight
      */
-    function highlight(selections) {
+    function highlight(contextNode, selections) {
         d3.selectAll('.node')
           .attr('fill', function(d) {
               if (selections.indexOf(d.id) !== -1) {
@@ -78,15 +78,15 @@ angular.module('interfaceApp')
                   return '#ccc';
               }
           })
-          /*
           .style('stroke', function(d) {
-              if (selections.indexOf(d.id) !== -1) {
-                  return 'black';
+              if (d.id === contextNode) {
+                  return 'black'
+              } else if (selections.indexOf(d.id) !== -1) {
+                  return d.color; 
               } else {
                   return '#ccc';
               }
           })
-          */
           .attr('opacity', function(d) {
               if (selections.indexOf(d.id) !== -1) {
                   return conf.opacity.default;
@@ -100,14 +100,16 @@ angular.module('interfaceApp')
               if (selections.indexOf(d.id) === -1) {
                   return 0;
               }
-          });
-          /*
-          .attr('stroke', function(d) {
-              if (selections.indexOf(d.id) !== -1) {
-                  return 'black';
+          })
+          .style('stroke', function(d) {
+              if (d.id === contextNode) {
+                  return 'black'
+              } else if (selections.indexOf(d.id) !== -1) {
+                  return d.color;
+              } else {
+                  return '#ccc';
               }
           });
-          */
     }
 
     /*
@@ -115,7 +117,7 @@ angular.module('interfaceApp')
      */
     function highlightLinks(contextNode, selections) {
         d3.selectAll('.link')
-          .attr('stroke', function(d) {
+          .style('stroke', function(d) {
               if (selections.indexOf(d.source.id) !== -1 && d.target.id === contextNode) {
                   return 'black';
               } else if (selections.indexOf(d.target.id) !== -1 && d.source.id === contextNode) {
@@ -143,25 +145,25 @@ angular.module('interfaceApp')
           .attr('fill', function(d) {
               return d.color;
           })
-          /*
           .style('stroke', function(d) {
               return d.color;
           })
-          */
           .attr('opacity', function(d) {
               return conf.opacity.default;
           });
         d3.selectAll('.link')
-          .attr('stroke', '#ccc')
+          .style('stroke', '#ccc')
           .attr('opacity', conf.opacity.default);
 
         d3.selectAll('.date') 
-          .attr('opacity', conf.opacity.default);
-          /*
+          .attr('opacity', conf.opacity.default)
           .attr('stroke', function(d) {
               return d.color;
-          })
-          */
+          });
+
+        DataService.contextNode = undefined;
+        DataService.selected = [];
+        $rootScope.$broadcast('node-data-ready');
 
     }
 
