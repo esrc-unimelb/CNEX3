@@ -106,7 +106,7 @@ angular.module('interfaceApp')
                 .on('tick', scope.tick)
                 .start();
 
-          var svg = d3.select('#graph')
+          var svg = d3.select('#site_graph')
                 .append('svg')
                 .attr('width', w - 15)
                 .attr('height', h)
@@ -116,8 +116,10 @@ angular.module('interfaceApp')
                 .append('g')
                 .attr('transform','translate(' + w/5 + ',' + h/6 + ')scale(.3,.3)');
 
-          var link = svg.selectAll('.link').data(scope.force.links());
-          var node = svg.selectAll('.node').data(scope.force.nodes());
+          var link = svg.selectAll('.link')
+                        .data(scope.force.links());
+          var node = svg.selectAll('.node')
+                        .data(scope.force.nodes());
 
           // draw the links
           link.enter()
@@ -146,7 +148,7 @@ angular.module('interfaceApp')
           // handle the node click event
           node.on('click', function(d) {
               scope.$apply(function() {
-                  d3s.highlightNodeAndLocalEnvironment(d.id);
+                  d3s.highlightNodeAndLocalEnvironment(d.id, '#site_graph');
               });
           });
 
