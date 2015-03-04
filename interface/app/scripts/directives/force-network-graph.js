@@ -12,9 +12,9 @@ angular.module('interfaceApp')
           var w = angular.element($window);
           w.bind('resize', function() {
               scope.$apply(function() {
-                  d3.select('#graph')
+                  d3.select('#site_graph')
                     .select('svg')
-                    .style('width', element[0].parentElement.clientWidth - 15)
+                    .style('width', element[0].parentElement.clientWidth)
                     .style('height', $window.innerHeight);
               })
           });
