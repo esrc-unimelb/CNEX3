@@ -7,6 +7,9 @@ angular.module('interfaceApp')
     //
 
     function getEntityNetwork(entityId) {
+        // tell the panel to load
+        $rootScope.$broadcast('load-entity-network-view');
+
         // store the ID of the current entity network we're viewing
         DataService.currentEntity = entityId;
 
