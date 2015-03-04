@@ -9,7 +9,7 @@ angular.module('interfaceApp')
     /* 
      * @function: highlightNodeAndLocalEnvironment
      */
-    function highlightNodeAndLocalEnvironment(contextNode) {
+    function highlightNodeAndLocalEnvironment(contextNode, graphSelector) {
         var selections = [];
         if (d3s.contextNode === contextNode) {
             d3s.contextNode = undefined;
@@ -19,7 +19,8 @@ angular.module('interfaceApp')
         d3s.contextNode = contextNode;
         selections.push(contextNode);
 
-        d3.selectAll('.link')
+        d3.select(graphSelector)
+          .selectAll('.link')
           .each(function(d) {
             if (d.source.id === contextNode) {
               selections.push(d.target.id);
@@ -29,10 +30,9 @@ angular.module('interfaceApp')
           })
 
         d3s.highlight(selections);
-
-        var contextNode = selections[0];
         d3s.highlightLinks(contextNode, selections);
-        DataService.contextNode = contextNode;
+
+        DataService.contextNode = selections[0];
         DataService.selected = selections;
         $rootScope.$broadcast('node-data-ready');
     }
