@@ -38,6 +38,6 @@
     </div>
 </div>
 
-<div ng-show="showEntityNetwork" class="animate-show">
-    <entity-network destroy-entity-network="destroyEntityNetwork()"></entity-network>
+<div ng-if="showEntityNetwork" class="animate-if">
+    <entity-network></entity-network>
 </div>

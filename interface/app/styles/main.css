@@ -44,3 +44,13 @@ path.link {
 }
 .animate-show.ng-hide-remove.ng-hide-remove-active { 
 }
+
+.animate-if.ng-enter {
+      animation: fadeIn 1s;
+} 
+.animate-if.ng-leave {
+      animation: fadeOut 0.5s;
+}
+
+
+
