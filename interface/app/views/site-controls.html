@@ -15,6 +15,28 @@
             <div class="panel-group" ng-model='panels.activePanel' data-animation="" data-allow-multiple="true" bs-collapse>
                 <div class="panel panel-default">
                     <div class="panel-heading">
+                        <h5 style="display: inline-block;"><a bs-collapse-toggle>Controls</a></h5>
+                        <button class="pull-right btn btn-sm btn-default" ng-click="reset()">Reset</button>
+                    </div>
+                    <div class="panel-collapse" bs-collapse-target>
+                        <div class="panel-body">
+                            <!-- control buttons -->
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <strong>Size nodes</strong>
+                                    <div class="btn-group text-center" role="group" aria-label="...">
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[1]" ng-click="sizeNodesBy('entities')">by related entities</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[2]" ng-click="sizeNodesBy('publications')">by related publications</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[3]" ng-click="sizeNodesBy('objects')">by related objects</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[0]" ng-click="sizeNodesBy('evenly')">evenly</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
                         <h5><a bs-collapse-toggle>Dates</a></h5>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
@@ -140,22 +162,13 @@
                         </div>
                     </div>
                 </div>
+                <!--
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h5><a bs-collapse-toggle>Controls</a></h5>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body">
-                            <!-- control buttons -->
-                            <div class="row">
-                                <div class="col-sm-10 col-md-10 col-lg-10">
-                                    <button class="btn btn-sm btn-default" ng-click="sizeNodesEvenly()" ng-if="!nodesSizedEvenly">Size nodes evenly</button>
-                                    <button class="btn btn-sm btn-default" ng-click="resetNodeDimensions()" ng-if="nodesSizedEvenly">Reset node sizes</button>
-                                </div>
-                                <div class="col-sm-2 col-md-2 col-lg-2">
-                                    <button class="btn btn-sm btn-default" ng-click="reset()">Reset</button>
-                                </div>
-                             </div>
                              <br/>
                              <div class="row">
                                 <div class="col-sm-4 col-md-4 col-lg-4">
@@ -168,6 +181,7 @@
                         </div>
                     </div>
                 </div>
+                -->
             </div>
         </div>
     </div>

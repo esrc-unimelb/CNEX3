@@ -13,6 +13,7 @@ angular.module('interfaceApp', [
   'ngRoute',
   'ngAnimate',
   'mgcrea.ngStrap.collapse',
+  'mgcrea.ngStrap.dropdown',
   'MessageCenterModule'
 ])
   .config(function ($routeProvider) {

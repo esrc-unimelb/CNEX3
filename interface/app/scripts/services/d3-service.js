@@ -168,12 +168,24 @@ angular.module('interfaceApp')
     }
 
     /*
-     * @function: sizeNodesEvenly
+     * @function: sizeNodesBy
      */
-    function sizeNodesEvenly() {
-        d3.selectAll('.node')
+    function sizeNodesBy(by, graphSelector) {
+        d3.select(graphSelector)
+          .selectAll('.node')
           .transition()
-          .attr('r', '10');
+          .duration([750])
+          .attr('r', function(d) {
+              if (by === 'evenly') {
+                  return '10';
+              } else if (by === 'entities') {
+                  return d.rByEntity;
+              } else if (by === 'publications') {
+                  return d.rByPublication;
+              } else if (by === 'objects') {
+                  return d.rByDobject;
+              }
+          });
     }
 
     /*
@@ -200,7 +212,7 @@ angular.module('interfaceApp')
         highlightByType: highlightByType,
         highlight: highlight,
         highlightLinks: highlightLinks,
-        sizeNodesEvenly: sizeNodesEvenly,
+        sizeNodesBy: sizeNodesBy,
         resetNodeDimensions: resetNodeDimensions,
 
         reset: reset,

@@ -111,17 +111,6 @@ angular.module('interfaceApp')
               d3s.highlightByType(type);
           }
 
-          // handle the trigger to set the same size for all nodes
-          scope.sizeNodesEvenly = function() {
-              d3s.sizeNodesEvenly();
-              scope.nodesSizedEvenly = true;
-          }
-
-          // handle the trigger to reset the node dimensions based on n connections
-          scope.resetNodeDimensions = function() {
-              d3s.resetNodeDimensions();
-              scope.nodesSizedEvenly = false;
-          }
           
           scope.fadeBackground = function() {
               d3s.fadeBackground(scope.fade);
@@ -129,6 +118,7 @@ angular.module('interfaceApp')
 
           // trigger a reset
           scope.reset = function() {
+              scope.sizeNodesBy('entities');
               d3s.reset();
           }
 
@@ -136,8 +126,26 @@ angular.module('interfaceApp')
           scope.viewEntityNetwork = function(id) {
               DataService.getEntityNetwork(id);
           }
+          
+          // resize the nodes
+          scope.sizeNodesBy = function(by) {
+              if (by === 'evenly') {
+                  scope.sizeBy = [ "active", "", "", "" ];
+              } else if (by === 'entities') {
+                  scope.sizeBy = [ "", "active", "", "" ];
+              } else if (by === 'publications') {
+                  scope.sizeBy = [ "", "", "active", "" ];
+              } else if (by === 'objects') {
+                  scope.sizeBy = [ "", "", "", "active" ];
+              }
+              d3s.sizeNodesBy(by, '#site_graph');
+          }
 
-          scope.panels = { 'activePanel': [0, 1] }
+          // panels to open in the accordion
+          scope.panels = { 'activePanel': [0,1,2] }
+        
+          // tag node sizing selected
+          scope.sizeBy = [ "", "active", "", "" ];
 
       }
     };
