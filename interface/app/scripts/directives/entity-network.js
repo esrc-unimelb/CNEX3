@@ -236,6 +236,8 @@ angular.module('interfaceApp')
           scope.reset = function() {
               // remove node highlight
               d3.select('#entity_graph')
+                .transition()
+                .duration(250)
                 .selectAll('.node')
                 .attr('fill', function(d) { return d.color; })
                 .style('stroke', function(d) { return d.color; })
@@ -243,12 +245,16 @@ angular.module('interfaceApp')
            
               // remove link highlight
               d3.select('#entity_graph')
+                .transition()
+                .duration(250)
                 .selectAll('.link')
                 .style('stroke', '#ccc')
                 .style('opacity', conf.opacity.default);
 
               // remove all labels
               d3.select('#entity_graph')
+                .transition()
+                .duration(250)
                 .selectAll('.text').remove();
 
               scope.selections = [];
