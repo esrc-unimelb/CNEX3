@@ -71,6 +71,8 @@ angular.module('interfaceApp')
      */
     function highlight(contextNode, selections) {
         d3.selectAll('.node')
+          .transition()
+          .duration(500)
           .attr('fill', function(d) {
               if (selections.indexOf(d.id) !== -1) {
                   return d.color;
@@ -96,6 +98,8 @@ angular.module('interfaceApp')
           });
 
         d3.selectAll('.date')
+          .transition()
+          .duration(500)
           .attr('opacity', function(d) {
               if (selections.indexOf(d.id) === -1) {
                   return 0;
@@ -117,6 +121,8 @@ angular.module('interfaceApp')
      */
     function highlightLinks(contextNode, selections) {
         d3.selectAll('.link')
+          .transition()
+          .duration(500)
           .style('stroke', function(d) {
               if (selections.indexOf(d.source.id) !== -1 && d.target.id === contextNode) {
                   return 'black';
@@ -142,6 +148,8 @@ angular.module('interfaceApp')
      */
     function reset() {
         d3.selectAll('.node')
+          .transition()
+          .duration(500)
           .attr('fill', function(d) {
               return d.color;
           })
@@ -152,12 +160,16 @@ angular.module('interfaceApp')
               return conf.opacity.default;
           });
         d3.selectAll('.link')
+          .transition()
+          .duration(500)
           .style('stroke', '#ccc')
           .attr('opacity', conf.opacity.default);
 
         d3.selectAll('.date') 
+          .transition()
+          .duration(500)
           .attr('opacity', conf.opacity.default)
-          .attr('stroke', function(d) {
+          .style('stroke', function(d) {
               return d.color;
           });
 
