@@ -137,7 +137,7 @@ angular.module('interfaceApp')
               DataService.getEntityNetwork(id);
           }
 
-          scope.panels = { 'activePanel': [0, 2] }
+          scope.panels = { 'activePanel': [0, 1] }
 
       }
     };
