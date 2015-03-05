@@ -118,8 +118,8 @@ angular.module('interfaceApp')
 
           // trigger a reset
           scope.reset = function() {
-              scope.sizeNodesBy('entities');
               d3s.reset();
+              scope.sizeBy = [ "", "active", "", "" ];
           }
 
           // open up the entity network

@@ -150,6 +150,9 @@ angular.module('interfaceApp')
         d3.selectAll('.node')
           .transition()
           .duration(500)
+          .attr('r', function(d) {
+              return d.r;
+          })
           .attr('fill', function(d) {
               return d.color;
           })
