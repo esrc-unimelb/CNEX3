@@ -69,33 +69,6 @@ angular.module('interfaceApp')
           }
           sizeThePanels();
 
-          var determineLabelPosition = function(x, y, r) {
-              var w = d3.select('#entity_graph').select('svg').attr('width');
-              var h = d3.select('#entity_graph').select('svg').attr('height');
-
-              // where is the node located relative to the underlying svg
-              var nx, ny;
-              var qx = x / w;
-              var qy = y / h;
-              if (qx < 0.5 && qy < 0.5) {
-                 nx = x + r;
-                 ny = y - r;
-              } else if (qx < 0.5 && qy > 0.5) {
-                 nx = x + r;
-                 ny = y + r;
-              } else if (qx > 0.5 && qy < 0.5) {
-                 nx = x + r;
-                 ny = y - r;
-              } else {
-                 nx = x + r;
-                 ny = y + r;
-              }
-              return {
-                  'x': nx,
-                  'y': ny
-              }
-          }
-
           var w = angular.element($window);
           w.bind('resize', function() {
               scope.$apply(function() {
@@ -150,14 +123,14 @@ angular.module('interfaceApp')
                   })
 
                   // where is the node located relative to the underlying svg
-                  var coords = determineLabelPosition(d.px, d.py, d.r);
+                  var coords = DataService.determineLabelPosition('#entity_graph', d);
 
                   d3.select('#entity_graph').select('svg').select('g').append('text')
                       .attr('x', coords.x)
                       .attr('y', coords.y)
                       .attr('id', 'text_' + d.id)
                       .attr('class', 'text')
-                      .attr('font-size', '35px')
+                      .attr('font-size', '20px')
                       .text(d.id);
 
                   scope.selections.push(d.id);
@@ -246,36 +219,6 @@ angular.module('interfaceApp')
               }
           }
 
-          scope.labelContextEntities = function() {
-              if (scope.force.alpha() > 0.004) {
-                  $timeout(function(d) {
-                      scope.labelContextEntities();
-                  }, 500);
-                  
-              } else {
-                  // where is the node located relative to the underlying svg
-                  d3.select('#entity_graph')
-                    .selectAll('.node')
-                    .each(function(d) {
-                      if (d.coreType !== 'published' && d.coreType !== 'digitalObject') {
-                          var c = determineLabelPosition(d.px, d.py, d.r);
-                          d3.select('#entity_graph')
-                              .select('svg')
-                              .select('g')
-                              .append('text')
-                              .transition()
-                              .duration(750)
-                              .attr('x', c.x)
-                              .attr('y', c.y)
-                              .attr('id', d.id)
-                              .attr('class', 'text_landmark')
-                              .attr('font-size', '20px')
-                              .text(d.name);
-                      }
-                  });
-              }
-
-          }
           scope.closeInfoPanel = function() {
               scope.showInfoPanel = false;
           }
@@ -307,8 +250,18 @@ angular.module('interfaceApp')
               scope.selectionData = {};
               scope.closeInfoPanel();
 
-              scope.labelContextEntities();
+              scope.labelMainEntities();
           }
+
+        scope.labelMainEntities = function() {
+            if (scope.force.alpha() > 0.004) {
+                $timeout(function(d) {
+                    scope.labelMainEntities();
+                }, 500);
+            } else {
+                DataService.labelMainEntities('#entity_graph');
+            }
+        }
 
           scope.drawGraph = function(d) {
               scope.selections = [];
@@ -387,8 +340,7 @@ angular.module('interfaceApp')
                     })
                 });
 
-
-                scope.labelContextEntities();
+                scope.labelMainEntities();
           }
 
 

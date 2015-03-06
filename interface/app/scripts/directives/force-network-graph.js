@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('forceNetworkGraph', [ '$rootScope', '$window', '$routeParams', 'configuration', 'DataService', 'D3Service',
-    function ($rootScope, $window, $routeParams, configuration, DataService, d3s) {
+  .directive('forceNetworkGraph', [ '$rootScope', '$window', '$routeParams', '$timeout', 'configuration', 'DataService', 'D3Service',
+    function ($rootScope, $window, $routeParams, $timeout, configuration, DataService, d3s) {
     return {
       templateUrl: 'views/force-network-graph.html',
       restrict: 'E',
@@ -50,6 +50,16 @@ angular.module('interfaceApp')
 
           //d3.select('svg').remove();
           scope.unConnectedNodes = [];
+
+          scope.labelMainEntities = function() {
+              if (scope.force.alpha() > 0.004) {
+                  $timeout(function(d) {
+                      scope.labelMainEntities();
+                  }, 500);
+              } else {
+                  DataService.labelMainEntities('#site_graph');
+              }
+          }
 
           // redraw the view when zooming
           scope.redraw = function() {
@@ -152,7 +162,7 @@ angular.module('interfaceApp')
               });
           });
 
-          scope.force.start();
+          scope.labelMainEntities('#site_graph');
 
       }
     };

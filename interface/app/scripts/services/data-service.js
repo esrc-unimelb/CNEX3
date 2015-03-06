@@ -74,6 +74,71 @@ angular.module('interfaceApp')
         return nodes;
     }
 
+    function determineLabelPosition(graphSelector, d) {
+        var w = d3.select(graphSelector).select('svg').attr('width');
+        var h = d3.select(graphSelector).select('svg').attr('height');
+
+        // where is the node located relative to the underlying svg
+        var nx, ny;
+        var qx = d.x / w;
+        var qy = d.y / h;
+        if (qx < 0.5 && qy < 0.5) {
+             nx = d.x + d.r / 2;
+             ny = d.y - d.r / 2;
+        } else if (qx < 0.5 && qy > 0.5) {
+             nx = d.x + d.r / 2;
+             ny = d.y + d.r / 2;
+        } else if (qx > 0.5 && qy < 0.5) {
+             nx = d.x + d.r / 2;
+             ny = d.y - d.r / 2;
+        } else {
+             nx = d.x + d.r / 2;
+             ny = d.y + d.r / 2;
+        }
+        return {
+            'x': nx,
+            'y': ny
+        }
+    }
+
+    function labelMainEntities(graphSelector, number) {
+        if (number === undefined) {
+            number = 5
+        }
+
+        // where is the node located relative to the underlying svg
+        var i = 0;
+        d3.select(graphSelector)
+          .selectAll('.node')
+          .sort(function(a,b) {
+              if (a.r < b.r) {
+                  return 1;
+              } else if (a.r > b.r) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+          })
+          .each(function(d) {
+            if (d.coreType !== 'published' && d.coreType !== 'digitalObject' && i < number) {
+                i++;
+                var c = DataService.determineLabelPosition(graphSelector, d);
+                d3.select(graphSelector)
+                    .select('svg')
+                    .select('g')
+                    .append('text')
+                    .transition()
+                    .duration(750)
+                    .attr('x', c.x)
+                    .attr('y', c.y)
+                    .attr('id', d.id)
+                    .attr('class', 'text_landmark')
+                    .attr('font-size', '20px')
+                    .text(d.name);
+            }
+        });
+    }
+
     var DataService = {
         // connected nodes
         nodes: [],
@@ -86,7 +151,9 @@ angular.module('interfaceApp')
 
         nodeColorByType: {},
         getEntityNetwork: getEntityNetwork,
-        processNodeSet: processNodeSet
+        processNodeSet: processNodeSet,
+        determineLabelPosition: determineLabelPosition,
+        labelMainEntities: labelMainEntities
     }
 
     return DataService;
