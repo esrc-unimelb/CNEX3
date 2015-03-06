@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('entityNetwork', [ '$window', '$http', '$location', '$rootScope', 'DataService', 'D3Service', 'configuration',
-        function ($window, $http, $location, $rootScope, DataService, d3s, conf) {
+  .directive('entityNetwork', [ '$window', '$http', '$location', '$rootScope', '$timeout', 'DataService', 'D3Service', 'configuration',
+        function ($window, $http, $location, $rootScope, $timeout, DataService, d3s, conf) {
     return {
       templateUrl: 'views/entity-network.html',
       restrict: 'E',
@@ -69,6 +69,33 @@ angular.module('interfaceApp')
           }
           sizeThePanels();
 
+          var determineLabelPosition = function(x, y, r) {
+              var w = d3.select('#entity_graph').select('svg').attr('width');
+              var h = d3.select('#entity_graph').select('svg').attr('height');
+
+              // where is the node located relative to the underlying svg
+              var nx, ny;
+              var qx = x / w;
+              var qy = y / h;
+              if (qx < 0.5 && qy < 0.5) {
+                 nx = x + r;
+                 ny = y - r;
+              } else if (qx < 0.5 && qy > 0.5) {
+                 nx = x + r;
+                 ny = y + r;
+              } else if (qx > 0.5 && qy < 0.5) {
+                 nx = x + r;
+                 ny = y - r;
+              } else {
+                 nx = x + r;
+                 ny = y + r;
+              }
+              return {
+                  'x': nx,
+                  'y': ny
+              }
+          }
+
           var w = angular.element($window);
           w.bind('resize', function() {
               scope.$apply(function() {
@@ -98,6 +125,11 @@ angular.module('interfaceApp')
 
           scope.showDetails = function(d) {
               if (scope.selections.indexOf(d.id) === -1) {
+                  // remove all landmark labels
+                  d3.select('#entity_graph')
+                    .selectAll('.text_landmark')
+                    .remove();
+
                   // highlight the node
                   d3.select('#entity_graph')
                     .select('#node_' + d.id)
@@ -117,29 +149,12 @@ angular.module('interfaceApp')
                         .style('stroke', 'black');
                   })
 
-                  var w = d3.select('#entity_graph').select('svg').attr('width');
-                  var h = d3.select('#entity_graph').select('svg').attr('height');
-
                   // where is the node located relative to the underlying svg
-                  var nx, ny;
-                  var qx = d.px / w;
-                  var qy = d.py / h;
-                  if (qx < 0.5 && qy < 0.5) {
-                     nx = d.px + d.r;
-                     ny = d.py - d.r;
-                  } else if (qx < 0.5 && qy > 0.5) {
-                     nx = d.px + d.r;
-                     ny = d.py + d.r;
-                  } else if (qx > 0.5 && qy < 0.5) {
-                     nx = d.px + d.r;
-                     ny = d.py - d.r;
-                  } else {
-                     nx = d.px + d.r;
-                     ny = d.py + d.r;
-                  }
+                  var coords = determineLabelPosition(d.px, d.py, d.r);
+
                   d3.select('#entity_graph').select('svg').select('g').append('text')
-                      .attr('x', nx)
-                      .attr('y', ny)
+                      .attr('x', coords.x)
+                      .attr('y', coords.y)
                       .attr('id', 'text_' + d.id)
                       .attr('class', 'text')
                       .attr('font-size', '35px')
@@ -230,6 +245,37 @@ angular.module('interfaceApp')
                   'activePanels': [ scope.selections.length - 1 ]
               }
           }
+
+          scope.labelContextEntities = function() {
+              if (scope.force.alpha() > 0.004) {
+                  $timeout(function(d) {
+                      scope.labelContextEntities();
+                  }, 500);
+                  
+              } else {
+                  // where is the node located relative to the underlying svg
+                  d3.select('#entity_graph')
+                    .selectAll('.node')
+                    .each(function(d) {
+                      if (d.coreType !== 'published' && d.coreType !== 'digitalObject') {
+                          var c = determineLabelPosition(d.px, d.py, d.r);
+                          d3.select('#entity_graph')
+                              .select('svg')
+                              .select('g')
+                              .append('text')
+                              .transition()
+                              .duration(750)
+                              .attr('x', c.x)
+                              .attr('y', c.y)
+                              .attr('id', d.id)
+                              .attr('class', 'text_landmark')
+                              .attr('font-size', '20px')
+                              .text(d.name);
+                      }
+                  });
+              }
+
+          }
           scope.closeInfoPanel = function() {
               scope.showInfoPanel = false;
           }
@@ -260,6 +306,8 @@ angular.module('interfaceApp')
               scope.selections = [];
               scope.selectionData = {};
               scope.closeInfoPanel();
+
+              scope.labelContextEntities();
           }
 
           scope.drawGraph = function(d) {
@@ -289,7 +337,7 @@ angular.module('interfaceApp')
                   svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
               }
 
-              var force = d3.layout.force()
+              scope.force = d3.layout.force()
                 .nodes(d.nodes)
                 .links(d.links)
                 .charge(-2000)
@@ -309,8 +357,8 @@ angular.module('interfaceApp')
                 .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
                 .append('g');
 
-              var path = svg.selectAll('.link').data(force.links());
-              var node = svg.selectAll('.node').data(force.nodes());
+              var path = svg.selectAll('.link').data(scope.force.links());
+              var node = svg.selectAll('.node').data(scope.force.nodes());
 
               // add the links
               path.enter()
@@ -338,7 +386,11 @@ angular.module('interfaceApp')
                       scope.showDetails(d);
                     })
                 });
+
+
+                scope.labelContextEntities();
           }
+
 
           scope.$on('draw-entity-graph', function() {
               var d = DataService.entityNetwork;
