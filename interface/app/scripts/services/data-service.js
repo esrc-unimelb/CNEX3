@@ -101,12 +101,12 @@ angular.module('interfaceApp')
         }
     }
 
-    function labelMainEntities(graphSelector, by) {
+    function labelMainEntities(graphSelector, by, selections) {
         // how many to label;
         var total = 5;
 
         if (by === undefined) {
-            by = 'rbyEntity';
+            by = 'r';
         }
 
         // ditch any previous labels;

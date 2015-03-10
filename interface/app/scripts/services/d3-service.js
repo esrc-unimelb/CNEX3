@@ -132,7 +132,7 @@ angular.module('interfaceApp')
     }
 
     /*
-     * @function: labelNodes
+     * @function: labelSelections
      */
     function labelSelections(graphSelector, selections) {
         d3.select(graphSelector)
@@ -140,19 +140,19 @@ angular.module('interfaceApp')
           .remove();
 
         angular.forEach(selections, function(v,k) {
-            var d = d3.select(graphSelector)
-               .select('#node_' + v)
-               .each(function(d) {
-                   var coords = DataService.determineLabelPosition(graphSelector, d);
-                   d3.select(graphSelector).select('svg').select('g').append('text')
+            d3.select(graphSelector)
+              .select('#node_' + v)
+              .each(function(d) {
+                  var coords = DataService.determineLabelPosition(graphSelector, d);
+                  d3.select(graphSelector).select('svg').select('g').append('text')
                      .attr('x', coords.x)
                      .attr('y', coords.y)
                      .attr('id', 'text_' + d.id)
                      .attr('class', 'text')
                      .attr('font-size', '20px')
                      .text(d.id);
-               });
-            })
+              });
+        })
     }
 
     /*
