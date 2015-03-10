@@ -9,6 +9,7 @@ angular.module('interfaceApp')
       scope: {
       },
       link: function postLink(scope, element, attrs) {
+          scope.labelsVisible = true;
 
           var w = angular.element($window);
           w.bind('resize', function() {
@@ -77,7 +78,6 @@ angular.module('interfaceApp')
                   }
               });
               scope.contextNetworkData = sorted;
-
           });
 
           // process the search data
@@ -115,6 +115,23 @@ angular.module('interfaceApp')
           // open up the entity network
           scope.viewEntityNetwork = function(id) {
               DataService.getEntityNetwork(id);
+          }
+          
+          // toggle node labels
+          scope.toggleLabels = function() {
+              console.log('here');
+              if (scope.labelsVisible === true) {
+                  d3.select('#site_graph')
+                    .selectAll('text')
+                    .attr('class', 'hidden');
+                  scope.labelsVisible = false;
+              } else {
+                  d3.select('#site_graph')
+                    .selectAll('text')
+                    .classed({ 'hidden': false });
+                  scope.labelsVisible = true;
+              }
+
           }
           
           // resize the nodes
