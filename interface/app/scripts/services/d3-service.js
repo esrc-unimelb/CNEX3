@@ -37,7 +37,7 @@ angular.module('interfaceApp')
 
         d3s.highlight(contextNode, selections);
         d3s.highlightLinks(contextNode, selections);
-        d3s.labelSelections(graphSelector, selections);
+        d3s.labelSelections(graphSelector, selections, 5);
 
         DataService.contextNode = selections[0];
         DataService.selected = selections;
@@ -134,14 +134,35 @@ angular.module('interfaceApp')
     /*
      * @function: labelSelections
      */
-    function labelSelections(graphSelector, selections) {
+    function labelSelections(graphSelector, selections, total) {
+        // if the total to label is undefined, label all nodes
+        if (total === undefined) {
+            total = selections.length; 
+        }
+
+        // remove any text elements
         d3.select(graphSelector)
           .selectAll('text')
           .remove();
 
+        // in order to sort these we need to build a new array
+        //  of data objects first. /sigh
+        var s2 = [];
         angular.forEach(selections, function(v,k) {
             d3.select(graphSelector)
               .select('#node_' + v)
+              .each(function(d) {
+                  s2.push(d);
+              });
+        })
+        s2 = _.sortBy(s2, function(d) { return d.r; });
+        s2 = s2.reverse();
+
+        // iterate over the selections and label as required
+        var i = 0;
+        angular.forEach(s2.slice(0, total), function(v,k) {
+            d3.select(graphSelector)
+              .select('#node_' + v.id)
               .each(function(d) {
                   var coords = DataService.determineLabelPosition(graphSelector, d);
                   d3.select(graphSelector).select('svg').select('g').append('text')
@@ -150,7 +171,7 @@ angular.module('interfaceApp')
                      .attr('id', 'text_' + d.id)
                      .attr('class', 'text')
                      .attr('font-size', '20px')
-                     .text(d.id);
+                     .text(d.name);
               });
         })
     }
