@@ -95,23 +95,10 @@ angular.module('interfaceApp')
              d3s.highlightNode(nodeid);
           }
 
-          // handle select all by type
-          scope.selectAll = function(type) {
-              angular.forEach(scope.contextNetworkData, function(v,k) {
-                  if (k === type) { 
-                      angular.forEach(v, function(v,k) {
-                          v.checked = !v.checked;
-                          d3s.highlightNode(v.id);
-                      });
-                  }
-              })
-          }
-
           scope.highlightByType = function(type) {
               scope.data.types[type].checked = !scope.data.types[type].checked;
               d3s.highlightByType('#site_graph', type);
           }
-
           
           scope.fadeBackground = function() {
               d3s.fadeBackground(scope.fade);
