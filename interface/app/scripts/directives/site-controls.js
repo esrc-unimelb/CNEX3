@@ -77,6 +77,7 @@ angular.module('interfaceApp')
                   }
               });
               scope.contextNetworkData = sorted;
+
           });
 
           // process the search data
@@ -108,7 +109,7 @@ angular.module('interfaceApp')
 
           scope.highlightByType = function(type) {
               scope.data.types[type].checked = !scope.data.types[type].checked;
-              d3s.highlightByType(type);
+              d3s.highlightByType('#site_graph', type);
           }
 
           
@@ -118,7 +119,9 @@ angular.module('interfaceApp')
 
           // trigger a reset
           scope.reset = function() {
-              d3s.reset();
+              d3s.reset('#site_graph');
+
+              // tag node sizing selected
               scope.sizeBy = [ "", "active", "", "" ];
           }
 
@@ -131,12 +134,16 @@ angular.module('interfaceApp')
           scope.sizeNodesBy = function(by) {
               if (by === 'evenly') {
                   scope.sizeBy = [ "active", "", "", "" ];
+                  DataService.labelMainEntities('#site_graph', 'rByEntity');
               } else if (by === 'entities') {
                   scope.sizeBy = [ "", "active", "", "" ];
+                  DataService.labelMainEntities('#site_graph', 'rByEntity');
               } else if (by === 'publications') {
                   scope.sizeBy = [ "", "", "active", "" ];
+                  DataService.labelMainEntities('#site_graph', 'rByPublication');
               } else if (by === 'objects') {
                   scope.sizeBy = [ "", "", "", "active" ];
+                  DataService.labelMainEntities('#site_graph', 'rByDobject');
               }
               d3s.sizeNodesBy(by, '#site_graph');
           }

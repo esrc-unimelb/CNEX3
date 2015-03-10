@@ -101,26 +101,34 @@ angular.module('interfaceApp')
         }
     }
 
-    function labelMainEntities(graphSelector, number) {
-        if (number === undefined) {
-            number = 5
+    function labelMainEntities(graphSelector, by) {
+        // how many to label;
+        var total = 5;
+
+        if (by === undefined) {
+            by = 'rbyEntity';
         }
+
+        // ditch any previous labels;
+        d3.select(graphSelector)
+          .selectAll('text')
+          .remove();
 
         // where is the node located relative to the underlying svg
         var i = 0;
         d3.select(graphSelector)
           .selectAll('.node')
           .sort(function(a,b) {
-              if (a.r < b.r) {
+              if (a[by] < b[by]) {
                   return 1;
-              } else if (a.r > b.r) {
+              } else if (a[by] > b[by]) {
                   return -1;
               } else {
                   return 0;
               }
           })
           .each(function(d) {
-            if (d.coreType !== 'published' && d.coreType !== 'digitalObject' && i < number) {
+            if (i < total) {
                 i++;
                 var c = DataService.determineLabelPosition(graphSelector, d);
                 d3.select(graphSelector)

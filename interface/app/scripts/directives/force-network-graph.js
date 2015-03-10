@@ -57,7 +57,7 @@ angular.module('interfaceApp')
                       scope.labelMainEntities();
                   }, 500);
               } else {
-                  DataService.labelMainEntities('#site_graph');
+                  DataService.labelMainEntities('#site_graph', 'rByEntity');
               }
           }
 
@@ -118,7 +118,7 @@ angular.module('interfaceApp')
 
           var svg = d3.select('#site_graph')
                 .append('svg')
-                .attr('width', w - 15)
+                .attr('width', w)
                 .attr('height', h)
                 .attr('viewBox', '0 0 ' + w + ' ' + h)
                 .attr('preserveAspectRatio', 'xMidYMid meet')

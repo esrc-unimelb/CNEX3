@@ -43,36 +43,13 @@ angular.module('interfaceApp')
         DataService.selected = selections;
         $rootScope.$broadcast('node-data-ready');
     }
-
-    /*
-     * @function: labelNodes
-     */
-    function labelSelections(graphSelector, selections) {
-        angular.forEach(selections, function(v,k) {
-            var d = d3.select(graphSelector)
-               .select('#node_' + v)
-               .each(function(d) {
-                   var coords = DataService.determineLabelPosition(graphSelector, d);
-                   d3.select(graphSelector).select('svg').select('g').append('text')
-                     .attr('x', coords.x)
-                     .attr('y', coords.y)
-                     .attr('id', 'text_' + d.id)
-                     .attr('class', 'text')
-                     .attr('font-size', '20px')
-                     .text(d.id);
-               });
-            })
-
-
-    }
-
     /*
      * @function: highlightByType
      */
-    function highlightByType(type) {
+    function highlightByType(graphSelector, type) {
         if (d3s.type.indexOf(type) !== -1) {
             d3s.type.splice(d3s.type.indexOf(type), 1);
-            d3s.reset();
+            d3s.reset(graphSelector);
             if (d3s.type.length === 0) { return; }
         } else {
             d3s.type.push(type);
@@ -89,6 +66,7 @@ angular.module('interfaceApp')
         d3s.highlight(undefined, selections);
         d3.selectAll('.link')
           .attr('opacity', conf.opacity.unselected);
+        d3s.labelSelections(graphSelector, selections);
 
         DataService.contextNode = undefined;
         DataService.selected = selections;
@@ -146,6 +124,30 @@ angular.module('interfaceApp')
     }
 
     /*
+     * @function: labelNodes
+     */
+    function labelSelections(graphSelector, selections) {
+        d3.select(graphSelector)
+          .selectAll('text')
+          .remove();
+
+        angular.forEach(selections, function(v,k) {
+            var d = d3.select(graphSelector)
+               .select('#node_' + v)
+               .each(function(d) {
+                   var coords = DataService.determineLabelPosition(graphSelector, d);
+                   d3.select(graphSelector).select('svg').select('g').append('text')
+                     .attr('x', coords.x)
+                     .attr('y', coords.y)
+                     .attr('id', 'text_' + d.id)
+                     .attr('class', 'text')
+                     .attr('font-size', '20px')
+                     .text(d.id);
+               });
+            })
+    }
+
+    /*
      * highlightLinks
      */
     function highlightLinks(contextNode, selections) {
@@ -177,10 +179,6 @@ angular.module('interfaceApp')
      */
     function reset(graphSelector) {
         d3.select(graphSelector)
-          .selectAll('text')
-          .remove();
-
-        d3.select(graphSelector)
           .selectAll('.node')
           .transition()
           .duration(500)
@@ -203,8 +201,7 @@ angular.module('interfaceApp')
           .style('stroke', '#ccc')
           .attr('opacity', conf.opacity.default);
 
-        d3.select(graphSelector)
-          .selectAll('.date') 
+        d3.selectAll('.date') 
           .transition()
           .duration(500)
           .attr('opacity', conf.opacity.default)
@@ -212,7 +209,7 @@ angular.module('interfaceApp')
               return d.color;
           });
 
-        DataService.labelMainEntities(graphSelector);
+        DataService.labelMainEntities(graphSelector, 'rByEntity');
         DataService.contextNode = undefined;
         DataService.selected = [];
         $rootScope.$broadcast('node-data-ready');
