@@ -73,6 +73,14 @@ angular.module('interfaceApp')
         $rootScope.$broadcast('node-data-ready');
     }
 
+    /* 
+     * highlightById
+     */
+    function highlightById(graphSelector, selections) {
+        d3s.highlight(undefined, selections);
+        d3s.labelSelections(graphSelector, selections);
+    }
+
     /*
      * highlight
      */
@@ -213,7 +221,6 @@ angular.module('interfaceApp')
         DataService.contextNode = undefined;
         DataService.selected = [];
         $rootScope.$broadcast('node-data-ready');
-
     }
 
     /*
@@ -259,6 +266,7 @@ angular.module('interfaceApp')
         colors: d3.scale.category20(),
         highlightNodeAndLocalEnvironment: highlightNodeAndLocalEnvironment,
         highlightByType: highlightByType,
+        highlightById: highlightById,
         highlight: highlight,
         highlightLinks: highlightLinks,
         sizeNodesBy: sizeNodesBy,

@@ -82,7 +82,7 @@ angular.module('interfaceApp')
 
           // process the search data
           scope.$on('search-data-ready', function() {
-              d3s.highlightById(SolrService.selected);
+              d3s.highlightById('#site_graph', SolrService.selected);
           })
 
           // handle node selection - highlight connected neighbours
