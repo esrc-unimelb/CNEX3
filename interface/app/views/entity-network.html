@@ -2,7 +2,7 @@
 <div class="row">
     <div ng-style="sidepanelStyle" ng-if="showSidePanel">
         <div ng-style="statisticsPanelStyle" ng-hide="showInfoPanel">
-            <div class="row">
+            <div class="row" ng-hide="removeClose">
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <button type="button" class="close" aria-label="Close" ng-click="close()"><span aria-hidden="true">&times;</span></button>
                 </div>
@@ -13,7 +13,12 @@
                         <span style="font-family:monospace;">{{contextNode.id}}</span><br/>
                         <a href="{{contextNode.url}}">{{contextNode.name}}</a>
                     </h4>
-                    <p>Link to this graph: <a href="{{graphLink}}">{{graphLink}}</a></p>
+                    <span ng-hide="hideLinks">
+                        <p>Link to this graph: <a href="{{graphLink}}">{{graphLink}}</a></p>
+                        <p>Embed this graph in your page.
+                            <div class="well">{{iframeCode}}</div>
+                        </p>
+                    </span>
                     <hr/>
                 </div>
             </div>

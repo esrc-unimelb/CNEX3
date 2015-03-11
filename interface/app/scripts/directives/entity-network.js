@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('entityNetwork', [ '$window', '$http', '$location', '$rootScope', '$timeout', 'DataService', 'D3Service', 'configuration',
-        function ($window, $http, $location, $rootScope, $timeout, DataService, d3s, conf) {
+  .directive('entityNetwork', [ '$window', '$http', '$location', '$rootScope', '$timeout', '$routeParams', 'DataService', 'D3Service', 'configuration',
+        function ($window, $http, $location, $rootScope, $timeout, $routeParams, DataService, d3s, conf) {
     return {
       templateUrl: 'views/entity-network.html',
       restrict: 'E',
@@ -10,8 +10,17 @@ angular.module('interfaceApp')
           sizeToParent: '@'
       },
       link: function postLink(scope, element, attrs) {
+          // do we hide or show the embed links?
+          //  if link=false we assume it's loading in an iframe
+          //   or is linked to from some other site.
+          scope.removeClose = false;
+          if ($routeParams.link === "false") {
+              scope.hideLinks = true;
+              scope.removeClose = true;
+          }
           scope.selections = [];
           scope.selectionData = {};
+          scope.showIframeCode = false;
 
           var sizeThePanels = function() {
               if (scope.sizeToParent === "true") {
@@ -93,7 +102,8 @@ angular.module('interfaceApp')
                       scope.stats[v.type].entries.push(v);
                   }
               })
-              scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id);
+              scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id) + '?link=false';
+              scope.iframeCode = "<iframe src='" + scope.graphLink + "' style='border:0; width: 1024; height: 90%;' seamless='true' ></iframe>";
           }
 
           scope.showDetails = function(d) {
@@ -257,7 +267,7 @@ angular.module('interfaceApp')
             if (scope.force.alpha() > 0.004) {
                 $timeout(function(d) {
                     scope.labelMainEntities();
-                }, 500);
+                }, 200);
             } else {
                 DataService.labelMainEntities('#entity_graph');
             }
