@@ -2,20 +2,33 @@
 
 angular.module('interfaceApp')
   .service('SolrService', [ '$http', '$rootScope', '$routeParams', 'configuration', 'DataService',
-    function SolrService($http, $rootScope, $routeParams, configuration, DataService) {
+    function SolrService($http, $rootScope, $routeParams, conf, DataService) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     //
-    var solr = configuration.solr;
+    var solr = conf.solr;
     var search = function(what) {
         if (what !== undefined) {
-            //console.log(what, $routeParams.code);
-            var q;
-            if (SolrService.searchType === 'keyword') {
-                what = what.replace(/ /gi, ' AND ');
-                q = 'name:(' + what + ') OR altname:(' + what + ') OR locality:(' + what + ') OR text:(' + what + ')';
+            var q = [];
+
+            var searchFields = [];
+            angular.forEach(conf.searchWhat, function(v,k) {
+                searchFields.push({ 'name': conf.searchFields[v].fieldName, 'weight': conf.searchFields[v].weight });
+
+            });
+            // are we doing a wildcard search? or a single term search fuzzy search?
+           if (SolrService.searchType === 'keyword') {
+              what = what.replace(/ /gi, ' ' + SolrService.keywordUnion + ' ');
+              angular.forEach(searchFields, function(v, k) {
+                  q.push(v.name + ':(' + what + ')');
+              })
+
             } else {
-                q = 'name:"' + what + '" OR altname:"' + what + '" OR locality:"' + what + '" OR text:"' + what + '"';
-            }
+                angular.forEach(searchFields, function(v, k) {
+                    q.push(v.name + ':"' + what + '"');
+                })
+             }
+            q = q.join(' OR ');
+
             q = {
                 'url': solr,
                 'params': {
@@ -37,7 +50,9 @@ angular.module('interfaceApp')
                     // search succeeded
                     var matchingRecords = [];
                     angular.forEach(resp.data.response.docs, function(v, k) {
-                        matchingRecords.push(v.record_id);
+                        if (v.record_id !== undefined) {
+                            matchingRecords.push(v.record_id);
+                        }
                     });
                     SolrService.selected = matchingRecords;
                     $rootScope.$broadcast('search-data-ready');

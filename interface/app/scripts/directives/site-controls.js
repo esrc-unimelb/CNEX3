@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('siteControls', [ '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
-        function ($window, DataService, configuration, d3s, SolrService) {
+  .directive('siteControls', [ '$rootScope', '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
+        function ($rootScope, $window, DataService, configuration, d3s, SolrService) {
     return {
       templateUrl: 'views/site-controls.html',
       restrict: 'E',
@@ -28,18 +28,6 @@ angular.module('interfaceApp')
           sizeThePanel();
           scope.showData = false;
 
-          // handle the reset call
-          scope.$on('reset', function() {
-              angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k].checked = false;
-              })
-              scope.contextNodeData = undefined;
-              scope.contextNetworkData = undefined;
-              DataService.selected = undefined;
-              DataService.contextNode = undefined;
-              scope.showData = false;
-          })
-
           // populate the controls widget
           scope.$on('graph-data-loaded', function() {
               scope.site = DataService.site;
@@ -64,52 +52,55 @@ angular.module('interfaceApp')
           // process the data when it's available
           scope.$on('node-data-ready', function() {
               var sorted = {};
-              if (DataService.contextNode === undefined) {
-                  scope.contextNodeData = undefined;
+              scope.contextNodeData = DataService.contextNode;
+              if (DataService.contextNode !== undefined) {
+                  scope.contextNodeData = DataService.nodeMap[DataService.selected.shift()];
+                  scope.clearTypes();
               }
-              angular.forEach(DataService.selected, function(v,k) {
-                  if (v === DataService.contextNode) {
-                      scope.contextNodeData = DataService.nodeMap[v];
-                  } else {
-                      var d = DataService.nodeMap[v];
-                      if (sorted[d.type] === undefined) { sorted[d.type] = []; }
-                      d.checked = false;
-                      sorted[d.type].push(d);
-                  }
+              var s = [];
+              var cndata = _.groupBy(DataService.selected, function(d) { return d.type; });
+              scope.contextNetworkData = {};
+              angular.forEach(cndata, function(v, k) {
+                  scope.contextNetworkData[k] = _.sortBy(v, function(d) { return d.name; });
               });
-              scope.contextNetworkData = sorted;
           });
 
           // process the search data
           scope.$on('search-data-ready', function() {
+                  angular.forEach(scope.data.types, function(v,k) {
+                      scope.data.types[k].checked = false;
+                  })
               d3s.highlightById('#site_graph', SolrService.selected);
           })
 
-          // handle node selection - highlight connected neighbours
-         scope.highlight = function(nodeid) {
-             angular.forEach(scope.contextNetworkData, function(v, k) {
-                 if (v.id === nodeid) {
-                     v.checked = !v.checked;
-                 }
-             })
-             d3s.highlightNode(nodeid);
+          scope.clearTypes = function() {
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k].checked = false;
+              })
           }
-
           scope.highlightByType = function(type) {
               scope.data.types[type].checked = !scope.data.types[type].checked;
               d3s.highlightByType('#site_graph', type);
           }
           
-          scope.fadeBackground = function() {
-              d3s.fadeBackground(scope.fade);
-          }
-
           // trigger a reset
           scope.reset = function() {
+              // clear local state
+              scope.clearTypes();
+              scope.contextNodeData = undefined;
+              scope.contextNetworkData = undefined;
+              DataService.selected = undefined;
+              DataService.contextNode = undefined;
+              scope.showData = false;
+
+              // reset the graph
               d3s.reset('#site_graph');
 
               // tag node sizing selected
               scope.sizeBy = [ "", "active", "", "" ];
+
+              // tell search to clear
+              $rootScope.$broadcast('reset-search');
           }
 
           // open up the entity network
@@ -119,7 +110,6 @@ angular.module('interfaceApp')
           
           // toggle node labels
           scope.toggleLabels = function() {
-              console.log('here');
               if (scope.labelsVisible === true) {
                   d3.select('#site_graph')
                     .selectAll('text')
@@ -153,11 +143,10 @@ angular.module('interfaceApp')
           }
 
           // panels to open in the accordion
-          scope.panels = { 'activePanel': [0,1,2] }
+          scope.panels = { 'activePanel': [2,3] }
         
           // tag node sizing selected
           scope.sizeBy = [ "", "active", "", "" ];
-
       }
     };
   }]);

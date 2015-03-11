@@ -7,6 +7,14 @@ angular.module('interfaceApp')
       'service': 'development',
       'solr': 'https://solr.esrc.unimelb.edu.au/ESRC/select',
 
+      'searchFields': {
+          '0': { 'fieldName': 'name',          'displayName': 'Name',           'weight': '1' },
+          '1': { 'fieldName': 'altname',       'displayName': 'Alternate Name', 'weight': '1' },
+          '2': { 'fieldName': 'binomial_name', 'displayName': 'Binomial Name',  'weight': '1' },
+          '3': { 'fieldName': 'text',          'displayName': 'Content',        'weight': '1' },
+      },
+      'searchWhat': [ '0', '1', '2', '3' ],
+
       'colours': {
           'person': '#d62728',
           'corporatebody': '#ffbb78',

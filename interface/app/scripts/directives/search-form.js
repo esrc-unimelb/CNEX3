@@ -12,7 +12,7 @@ angular.module('interfaceApp')
       link: function postLink(scope, element, attrs) {
 
           // handle app reset 
-          scope.$on('reset', function() {
+          scope.$on('reset-search', function() {
               scope.nSearchMatches = undefined;
               scope.searchBox = undefined;
           });

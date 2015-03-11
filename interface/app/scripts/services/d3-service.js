@@ -11,6 +11,10 @@ angular.module('interfaceApp')
      */
     function highlightNodeAndLocalEnvironment(contextNode, graphSelector) {
         var selections = [];
+
+        // whenever we highlight by node - types are off
+        d3s.type = [];
+
         if (d3s.contextNode === contextNode) {
             d3s.contextNode = undefined;
             d3s.reset(graphSelector);
@@ -40,8 +44,13 @@ angular.module('interfaceApp')
         d3s.labelSelections(graphSelector, selections, 5);
 
         DataService.contextNode = selections[0];
-        DataService.selected = selections;
+        DataService.selected = createDataStructure(graphSelector, selections);
+
+        // notify the site controls
         $rootScope.$broadcast('node-data-ready');
+
+        // tell search to clear
+        $rootScope.$broadcast('reset-search');
     }
     /*
      * @function: highlightByType
@@ -49,8 +58,10 @@ angular.module('interfaceApp')
     function highlightByType(graphSelector, type) {
         if (d3s.type.indexOf(type) !== -1) {
             d3s.type.splice(d3s.type.indexOf(type), 1);
-            d3s.reset(graphSelector);
-            if (d3s.type.length === 0) { return; }
+            if (d3s.type.length === 0) { 
+                d3s.reset(graphSelector);
+                return; 
+            }
         } else {
             d3s.type.push(type);
         }
@@ -63,22 +74,33 @@ angular.module('interfaceApp')
               }
            });
 
-        d3s.highlight(undefined, selections);
         d3.selectAll('.link')
+          .style('stroke', '#ccc')
           .attr('opacity', conf.opacity.unselected);
+        d3s.highlight(undefined, selections);
         d3s.labelSelections(graphSelector, selections);
 
         DataService.contextNode = undefined;
-        DataService.selected = selections;
+        DataService.selected = createDataStructure(graphSelector, selections);
+
+        // notify the site controls
         $rootScope.$broadcast('node-data-ready');
+
+        // tell search to clear
+        $rootScope.$broadcast('reset-search');
     }
 
     /* 
      * highlightById
      */
     function highlightById(graphSelector, selections) {
+        d3s.reset(graphSelector);
         d3s.highlight(undefined, selections);
         d3s.labelSelections(graphSelector, selections);
+
+        DataService.contextNode = undefined;
+        DataService.selected = createDataStructure(graphSelector, selections);
+        $rootScope.$broadcast('node-data-ready');
     }
 
     /*
@@ -131,6 +153,25 @@ angular.module('interfaceApp')
           });
     }
 
+
+    /*
+     * createDataStructure
+     */
+    function createDataStructure(graphSelector, selections) {
+        // in order to sort these we need to build a new array
+        //  of data objects first. /sigh
+        var s2 = [];
+        angular.forEach(selections, function(v,k) {
+            d3.select(graphSelector)
+              .select('#node_' + v)
+              .each(function(d) {
+                  s2.push(d);
+              });
+        })
+        s2 = _.sortBy(s2, function(d) { return d.r; });
+        return s2;
+    }
+
     /*
      * @function: labelSelections
      */
@@ -145,22 +186,12 @@ angular.module('interfaceApp')
           .selectAll('text')
           .remove();
 
-        // in order to sort these we need to build a new array
-        //  of data objects first. /sigh
-        var s2 = [];
-        angular.forEach(selections, function(v,k) {
-            d3.select(graphSelector)
-              .select('#node_' + v)
-              .each(function(d) {
-                  s2.push(d);
-              });
-        })
-        s2 = _.sortBy(s2, function(d) { return d.r; });
-        s2 = s2.reverse();
+        selections = createDataStructure(graphSelector, selections);
+        selections = selections.reverse();
 
         // iterate over the selections and label as required
         var i = 0;
-        angular.forEach(s2.slice(0, total), function(v,k) {
+        angular.forEach(selections.slice(0, total), function(v,k) {
             d3.select(graphSelector)
               .select('#node_' + v.id)
               .each(function(d) {
@@ -238,6 +269,7 @@ angular.module('interfaceApp')
               return d.color;
           });
 
+        d3s.type = [];
         DataService.labelMainEntities(graphSelector, 'rByEntity');
         DataService.contextNode = undefined;
         DataService.selected = [];
