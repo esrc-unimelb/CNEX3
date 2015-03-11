@@ -126,21 +126,20 @@
                                         <strong>{{type}} ({{data.length}})</strong><br/>
                                     </span>
                                     <ul>
-                                        
-                                    <span ng-repeat="d in data">
-                                        <span class="form-inline">
-                                            <span ng-if="d.url">
-                                                <li>
-                                                    <a href="" ng-click="viewEntityNetwork(d.id)">({{d.id}}) {{d.name}} ({{d.df | date:'yyyy'}} - {{d.dt | date:'yyyy'}})</a>
-                                                </li>
-                                            </span>
-                                            <span ng-if="!d.url">
-                                                <li>
-                                                    {{d.name}}
-                                                </li>
+                                        <span ng-repeat="d in data">
+                                            <span class="form-inline">
+                                                <span ng-if="d.url">
+                                                    <li>
+                                                        <a href="" ng-click="viewEntityNetwork(d.id)">({{d.id}}) {{d.name}} ({{d.df | date:'yyyy'}} - {{d.dt | date:'yyyy'}})</a>
+                                                    </li>
+                                                </span>
+                                                <span ng-if="!d.url">
+                                                    <li>
+                                                        {{d.name}}
+                                                    </li>
+                                                </span>
                                             </span>
                                         </span>
-                                    </span>
                                     </ul>
                                 </div>
                             </div>
@@ -152,13 +151,31 @@
                         <h5><a bs-collapse-toggle>Inspect Unconnected Nodes</a></h5>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
-                        <ul>
-                            <li ng-repeat="n in data.unConnected">
-                                <a href="" ng-click="viewEntityNetwork(n.id)">
-                                    ({{n.id}}) {{n.name}} ({{n.df | date:'yyyy'}} - {{n.dt | date:'yyyy'}})
-                                </a>
-                            </li>
-                        </ul>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="(type, data) in data.unConnected">
+                                    <span class="form-inline">
+                                        <strong>{{type}} ({{data.length}})</strong><br/>
+                                    </span>
+                                    <ul>
+                                        <span ng-repeat="d in data">
+                                            <span class="form-inline">
+                                                <span ng-if="d.url">
+                                                    <li>
+                                                        <a href="" ng-click="viewEntityNetwork(d.id)">({{d.id}}) {{d.name}} ({{d.df | date:'yyyy'}} - {{d.dt | date:'yyyy'}})</a>
+                                                    </li>
+                                                </span>
+                                                <span ng-if="!d.url">
+                                                    <li>
+                                                        {{d.name}}
+                                                    </li>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

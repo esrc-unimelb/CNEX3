@@ -126,7 +126,11 @@ angular.module('interfaceApp')
             DataService.nodes = nodes;
             DataService.nodeMap = nodeMap;
             DataService.links = links;
-            DataService.unConnectedNodes = _.sortBy(unConnectedNodes, function(d) { return d.name; });
+            DataService.unConnectedNodes = {};
+            var undata = _.groupBy(unConnectedNodes, function(d) { return d.type; });
+            angular.forEach(undata, function(v, k) {
+                DataService.unConnectedNodes[k] = _.sortBy(v, function(d) { return d.name; });
+            });
             DataService.weightBounds = weightBounds;
 
             // now instantiate the graph
