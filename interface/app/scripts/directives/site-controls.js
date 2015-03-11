@@ -38,6 +38,14 @@ angular.module('interfaceApp')
                   percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
 
+              // if there are unconnected nodes - enable the download button
+              if (DataService.unConnectedNodes === undefined) {
+                  scope.unconnectedDownload = false;
+              } else {
+                  scope.construct('unconnected');
+                  scope.unconnectedDownload = true;
+              }
+
               var types = {};
               angular.forEach(scope.data.nodes, function(v,k) { 
                   if (types[v.type] === undefined) {
@@ -51,18 +59,38 @@ angular.module('interfaceApp')
 
           // process the data when it's available
           scope.$on('node-data-ready', function() {
-              var sorted = {};
+              var cndata;
               scope.contextNodeData = DataService.contextNode;
               if (DataService.contextNode !== undefined) {
-                  scope.contextNodeData = DataService.nodeMap[DataService.selected.shift()];
+                  // ensure no types are stored as we're in clicky node land
                   scope.clearTypes();
+
+                  // get the context node data and extract the node from the selected array
+                  scope.contextNodeData = DataService.nodeMap[DataService.contextNode];
+                  cndata = _.reject(DataService.selected, function(d) { return d.id === DataService.contextNode });
+              } else {
+                  cndata = DataService.selected;
               }
-              var s = [];
-              var cndata = _.groupBy(DataService.selected, function(d) { return d.type; });
+
+              // group by type
+              cndata = _.groupBy(cndata, function(d) { return d.type; });
+
+              // construct a list of sorted arrays in an object keyed on type
               scope.contextNetworkData = {};
               angular.forEach(cndata, function(v, k) {
                   scope.contextNetworkData[k] = _.sortBy(v, function(d) { return d.name; });
               });
+
+              // construct the array for csv download
+              if (DataService.selected !== undefined) {
+                  scope.construct('selected');
+                  scope.selectionsDownload = true;
+              } else {
+                  // nothing selected so wipe it
+                  console.log('here');
+                  scope.selectedNodesData = undefined;
+                  scope.selectionsDownload = false;
+              }
           });
 
           // process the search data
@@ -121,7 +149,6 @@ angular.module('interfaceApp')
                     .classed({ 'hidden': false });
                   scope.labelsVisible = true;
               }
-
           }
           
           // resize the nodes
@@ -147,6 +174,24 @@ angular.module('interfaceApp')
         
           // tag node sizing selected
           scope.sizeBy = [ "", "active", "", "" ];
+
+          // assemble the CSV
+          scope.construct = function(what) {
+              var d = [];
+              if (what === 'selected') {
+                  angular.forEach(DataService.selected, function(v,k) {
+                      d.push([v.id, v.type, v.name, v.url]);
+                  });
+                  scope.selectedNodesData = d;
+              } else if (what === 'unconnected') {
+                  angular.forEach(scope.data.unConnected, function(v,k) {
+                      angular.forEach(v, function(i, j) {
+                        d.push([i.id, i.type, i.name, i.url]);
+                      })
+                  });
+                  scope.unConnectedNodesData = d;
+              }
+          }
       }
     };
   }]);

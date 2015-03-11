@@ -105,7 +105,9 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Inspect Selected Node Network</a></h5>
+                        <h5 style="display: inline-block;"><a bs-collapse-toggle>Inspect Selected Node Network</a></h5>
+                        <button class="pull-right btn btn-sm btn-default" ng-if="selectionsDownload" 
+                            ng-csv="selectedNodesData" field-separator="||" filename="selections.csv">Download</button>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body">
@@ -148,7 +150,9 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Inspect Unconnected Nodes</a></h5>
+                        <h5 style="display: inline-block;"><a bs-collapse-toggle>Inspect Unconnected Nodes</a></h5>
+                        <button class="pull-right btn btn-sm btn-default" ng-if="unconnectedDownload" 
+                            ng-csv="unConnectedNodesData" field-separator="||" filename="unconnected-nodes.csv">Download</button>
                     </div>
                     <div class="panel-collapse" bs-collapse-target>
                         <div class="panel-body">

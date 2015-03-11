@@ -14,7 +14,8 @@ angular.module('interfaceApp', [
   'ngAnimate',
   'mgcrea.ngStrap.collapse',
   'mgcrea.ngStrap.dropdown',
-  'MessageCenterModule'
+  'MessageCenterModule',
+  'ngCsv'
 ])
   .config(function ($routeProvider) {
     $routeProvider

@@ -272,7 +272,7 @@ angular.module('interfaceApp')
         d3s.type = [];
         DataService.labelMainEntities(graphSelector, 'rByEntity');
         DataService.contextNode = undefined;
-        DataService.selected = [];
+        DataService.selected = undefined;
         $rootScope.$broadcast('node-data-ready');
     }
 
