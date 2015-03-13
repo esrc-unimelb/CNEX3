@@ -110,7 +110,7 @@ angular.module('interfaceApp')
               if (scope.selections.indexOf(d.id) === -1) {
                   // remove all landmark labels
                   d3.select('#entity_graph')
-                    .selectAll('.text_landmark')
+                    .selectAll('.text-landmark')
                     .remove();
 
                   // highlight the node
@@ -133,9 +133,11 @@ angular.module('interfaceApp')
                   })
 
                   // where is the node located relative to the underlying svg
-                  var coords = DataService.determineLabelPosition('#entity_graph', d);
+                  var coords = d3s.determineLabelPosition('#entity_graph', d);
 
-                  d3.select('#entity_graph').select('svg').select('g').append('text')
+                  d3.select('#entity_graph')
+                      .select('.text-container')
+                      .append('text')
                       .attr('x', coords.x)
                       .attr('y', coords.y)
                       .attr('id', 'text_' + d.id)
@@ -263,15 +265,26 @@ angular.module('interfaceApp')
               scope.labelMainEntities();
           }
 
-        scope.labelMainEntities = function() {
-            if (scope.force.alpha() > 0.004) {
-                $timeout(function(d) {
-                    scope.labelMainEntities();
-                }, 200);
-            } else {
-                DataService.labelMainEntities('#entity_graph');
-            }
-        }
+          scope.centerGraph = function() {
+              if (scope.force.alpha() > 0.004) {
+                  $timeout(function(d) {
+                      scope.centerGraph();
+                  }, 200);
+              } else {
+                  var t = d3s.calculateTransformAndScale('#entity_graph')
+                  scope.zoom.translate(t.translate).scale(t.scale);
+                  d3.select('#entity_graph')
+                    .selectAll('g')
+                    .transition()
+                    .duration(500)
+                    .attr('transform', 'translate(' + t.translate + ')' + ' scale(' + t.scale + ')');
+                  scope.labelMainEntities();
+              }
+          }
+
+          scope.labelMainEntities = function() {
+              d3s.renderLabels('#entity_graph');
+          }
 
           scope.drawGraph = function(d) {
               scope.selections = [];
@@ -296,9 +309,21 @@ angular.module('interfaceApp')
               }   
 
               // redraw the view when zooming
-              var redraw = function() {
+              scope.redraw = function() {
+                  var svg = d3.select('#entity_graph')
+                              .select('.node-container');
+                  svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
+
+                  svg = d3.select('#entity_graph')
+                          .select('.text-container')
                   svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
               }
+
+              scope.zoom = d3.behavior
+                             .zoom()
+                             //.scale([0.6])
+                             //.translate([scope.svgWidth/5, scope.h/6])
+                             .scaleExtent([0,8]).on('zoom', scope.redraw);
 
               scope.force = d3.layout.force()
                 .nodes(d.nodes)
@@ -315,10 +340,20 @@ angular.module('interfaceApp')
                 .attr('width', scope.svgWidth)
                 .attr('height', scope.h)
                 .attr('class', 'svg')
-                .attr('viewBox', '0 0 ' + scope.w + ' ' + scope.h)
-                .attr('preserveAspectRatio', 'xMidYMid meet')
-                .call(d3.behavior.zoom().scaleExtent([0,8]).on('zoom', redraw))
-                .append('g');
+                .attr('viewBox', '0 0 ' + scope.svgWidth + ' ' + scope.h)
+                .attr('preserveAspectRatio', 'xMinYMin meet')
+                .call(scope.zoom)
+                .append('g')
+                .attr('class', 'node-container');
+                //.attr('transform','rotate(0) translate(' + scope.svgWidth/5 + ',' + scope.h/6 + ') scale(.6)');
+
+              // add a group for the text elements we add later
+              d3.select('#entity_graph')
+                .select('svg')
+                .append('g')
+                .attr('class', 'text-container');
+                //.attr('transform','rotate(0) translate(' + scope.svgWidth/5 + ',' + scope.h/6 + ') scale(.6)');
+
 
               var path = svg.selectAll('.link').data(scope.force.links());
               var node = svg.selectAll('.node').data(scope.force.nodes());
@@ -350,9 +385,8 @@ angular.module('interfaceApp')
                     })
                 });
 
-                scope.labelMainEntities();
+                scope.centerGraph();
           }
-
 
           scope.$on('draw-entity-graph', function() {
               var d = DataService.entityNetwork;

@@ -41,7 +41,7 @@ angular.module('interfaceApp')
 
         d3s.highlight(contextNode, selections);
         d3s.highlightLinks(contextNode, selections);
-        d3s.labelSelections(graphSelector, selections, 5);
+        d3s.labelSelections(graphSelector, selections);
 
         DataService.contextNode = selections[0];
         DataService.selected = createDataStructure(graphSelector, selections);
@@ -153,60 +153,6 @@ angular.module('interfaceApp')
           });
     }
 
-
-    /*
-     * createDataStructure
-     */
-    function createDataStructure(graphSelector, selections) {
-        // in order to sort these we need to build a new array
-        //  of data objects first. /sigh
-        var s2 = [];
-        angular.forEach(selections, function(v,k) {
-            d3.select(graphSelector)
-              .select('#node_' + v)
-              .each(function(d) {
-                  s2.push(d);
-              });
-        })
-        s2 = _.sortBy(s2, function(d) { return d.r; });
-        return s2;
-    }
-
-    /*
-     * @function: labelSelections
-     */
-    function labelSelections(graphSelector, selections, total) {
-        // if the total to label is undefined, label all nodes
-        if (total === undefined) {
-            total = selections.length; 
-        }
-
-        // remove any text elements
-        d3.select(graphSelector)
-          .selectAll('text')
-          .remove();
-
-        selections = createDataStructure(graphSelector, selections);
-        selections = selections.reverse();
-
-        // iterate over the selections and label as required
-        var i = 0;
-        angular.forEach(selections.slice(0, total), function(v,k) {
-            d3.select(graphSelector)
-              .select('#node_' + v.id)
-              .each(function(d) {
-                  var coords = DataService.determineLabelPosition(graphSelector, d);
-                  d3.select(graphSelector).select('svg').select('g').append('text')
-                     .attr('x', coords.x)
-                     .attr('y', coords.y)
-                     .attr('id', 'text_' + d.id)
-                     .attr('class', 'text')
-                     .attr('font-size', '20px')
-                     .text(d.name);
-              });
-        })
-    }
-
     /*
      * highlightLinks
      */
@@ -243,7 +189,7 @@ angular.module('interfaceApp')
           .transition()
           .duration(500)
           .attr('r', function(d) {
-              return d.r;
+              return d[d3s.sizeBy];
           })
           .attr('fill', function(d) {
               return d.color;
@@ -270,40 +216,39 @@ angular.module('interfaceApp')
           });
 
         d3s.type = [];
-        DataService.labelMainEntities(graphSelector, 'rByEntity');
         DataService.contextNode = undefined;
         DataService.selected = undefined;
+        d3s.renderLabels(graphSelector);
         $rootScope.$broadcast('node-data-ready');
     }
 
     /*
      * @function: sizeNodesBy
      */
-    function sizeNodesBy(by, graphSelector) {
+    function sizeNodesBy(graphSelector, by) {
         d3.select(graphSelector)
           .selectAll('.node')
           .transition()
           .duration([750])
           .attr('r', function(d) {
               if (by === 'evenly') {
+                  // saved for later user by other things
+                  d3s.sizeBy = 'r';
                   return '10';
               } else if (by === 'entities') {
+                  // saved for later user by other things
+                  d3s.sizeBy = 'rByEntity';
                   return d.rByEntity;
               } else if (by === 'publications') {
+                  // saved for later user by other things
+                  d3s.sizeBy = 'rByPublication';
                   return d.rByPublication;
               } else if (by === 'objects') {
+                  // saved for later user by other things
+                  d3s.sizeBy = 'rByDobject';
                   return d.rByDobject;
               }
           });
-    }
-
-    /*
-     * @function: resetNodeDimensions
-     */
-    function resetNodeDimensions() {
-        d3.selectAll('.node')
-          .transition()
-          .attr('r', function(d) { return d.r; });
     }
 
     /*
@@ -314,8 +259,201 @@ angular.module('interfaceApp')
         return s;
     }
 
+    /*
+     * @function: parseTransform
+     */
+    function parseTransform(t) {
+        var transform = {};
+        transform.translate = t.match(/translate\(.*?\)/)[0];
+        transform.scale = t.match(/scale\(.*?\)/)[0];
+        transform.rotate = t.match(/rotate\(.*?\)/)[0];
+        return transform;
+    }
+
+    // rotate the graph left
+    function rotateLeft(graphSelector, currentRotation) {
+        d3.select(graphSelector)
+          .selectAll('text')
+          .remove();
+
+        var svg = d3.select(graphSelector)
+          .select('.node-container');
+        var t = d3s.parseTransform(svg.attr('transform'));
+
+        var r;
+        if (currentRotation === -345) {
+            r = 0;
+        } else {
+            r = currentRotation - 15;
+        }
+
+        /*
+        var bbox, x, y;
+        bbox = d3.select('svg').select('g')[0][0].getBBox();
+        x = bbox.x + bbox.width / 2;
+        y = bbox.y + bbox.height / 2;
+        */
+
+        svg.transition()
+           .duration(500)
+           .attr('transform', 'rotate(' + r + ')' +  t.translate + ' ' + t.scale);
+
+        return r;
+    }
+
+    // rotate the graph right
+    function rotateRight(graphSelector, currentRotation) {
+        d3.select(graphSelector)
+          .selectAll('text')
+          .remove();
+
+        var svg = d3.select(graphSelector)
+          .select('.node-container');
+        var t = d3s.parseTransform(svg.attr('transform'));
+
+        var r;
+        if (currentRotation === 345) {
+            r = 0;
+        } else {
+            r = currentRotation + 15;
+        }
+
+        d3.select(graphSelector).select('svg')[0][0].getBBox();
+        svg.transition()
+           .duration(500)
+           .attr('transform', 'rotate(' + r + ')' +  t.translate + ' ' + t.scale);
+
+        return r;
+    }
+
+    /*
+     * @function: calculateTransformAndScale
+     */
+    function calculateTransformAndScale(graphSelector) {
+        // center the graph
+        var gc = d3.select(graphSelector).select('.node-container')[0][0].getBoundingClientRect();
+        var pc = d3.select(graphSelector)[0][0].getBoundingClientRect();
+        console.log(gc, pc);
+        console.log(d3.select(graphSelector).select('svg')[0][0].getBBox());
+
+        var use = gc.width > gc.height ? gc.width: gc.height;
+        var scale = pc.width / use;
+        var scx = ((gc.width - pc.width) / 2) * scale,
+            scy = ((gc.height - pc.height) / 2) * scale,
+            t = [scx, scy];
+
+        //console.log(t, scale);
+        return { 'translate': t, 'scale': scale * 0.8 }
+    }
+
+    function determineLabelPosition(graphSelector, d) {
+        var w = d3.select(graphSelector).select('svg').attr('width');
+        var h = d3.select(graphSelector).select('svg').attr('height');
+
+        // where is the node located relative to the underlying svg
+        var nx, ny;
+        var qx = d.x / w;
+        var qy = d.y / h;
+        if (qx < 0.5 && qy < 0.5) {
+             nx = d.x + d.r / 2;
+             ny = d.y - d.r / 2;
+        } else if (qx < 0.5 && qy > 0.5) {
+             nx = d.x + d.r / 2;
+             ny = d.y + d.r / 2;
+        } else if (qx > 0.5 && qy < 0.5) {
+             nx = d.x + d.r / 2;
+             ny = d.y - d.r / 2;
+        } else {
+             nx = d.x + d.r / 2;
+             ny = d.y + d.r / 2;
+        }
+        return {
+            'x': nx,
+            'y': ny
+        }
+    }
+
+    /*
+     * createDataStructure
+     */
+    function createDataStructure(graphSelector, selections) {
+        // in order to sort these we need to build a new array
+        //  of data objects first. /sigh
+        var s2 = [];
+        angular.forEach(selections, function(v,k) {
+            d3.select(graphSelector)
+              .select('#node_' + v)
+              .each(function(d) {
+                  s2.push(d);
+              });
+        })
+        return s2;
+    }
+
+    /*
+     * @function: renderLabels
+     */
+    function renderLabels(graphSelector) {
+        if (d3s.selected !== undefined) {
+            d3s.labelSelections(graphSelector, d3s.selected);
+        } else {
+            d3s.labelMainEntities(graphSelector);
+        }
+    }
+
+    /*
+     * @function: labelSelections
+     */
+    function labelSelections(graphSelector, selections) {
+        selections = createDataStructure(graphSelector, selections);
+        selections = _.sortBy(selections, function(d) { return d[d3s.sizeBy]; });
+        selections = selections.reverse();
+        d3s.label(graphSelector, selections.slice(0, d3s.nLabels));
+    }
+
+    /*
+     * @function: labelMainEntities
+     */
+    function labelMainEntities(graphSelector) {
+        var selections = _.sortBy(d3.select(graphSelector).selectAll('.node').data(), function(d) { return d[d3s.sizeBy]; });
+        selections = selections.reverse();
+        d3s.label(graphSelector, selections.slice(0, d3s.nLabels));
+    }
+
+
+    /*
+     * @function: label
+     */
+    function label(graphSelector, selections) {
+        // ditch any previous labels;
+        d3.select(graphSelector)
+          .selectAll('text')
+          .remove();
+
+        // iterate over the selections and label as required
+        var i = 0;
+        angular.forEach(selections, function(v,k) {
+            d3.select(graphSelector)
+              .select('#node_' + v.id)
+              .each(function(d) {
+                  var coords = determineLabelPosition(graphSelector, d);
+                  d3.select(graphSelector)
+                     .select('.text-container')
+                     .append('text')
+                     .attr('x', coords.x)
+                     .attr('y', coords.y)
+                     .attr('id', 'text_' + d.id)
+                     .attr('class', 'text-landmark')
+                     .attr('font-size', '20px')
+                     .text(d.name);
+              });
+        })
+    }
+
     var d3s = {
         highlightedTypes: [],
+        nLabels: 5,
+        sizeBy: 'r',
         colors: d3.scale.category20(),
         highlightNodeAndLocalEnvironment: highlightNodeAndLocalEnvironment,
         highlightByType: highlightByType,
@@ -323,9 +461,15 @@ angular.module('interfaceApp')
         highlight: highlight,
         highlightLinks: highlightLinks,
         sizeNodesBy: sizeNodesBy,
+        parseTransform: parseTransform,
+        rotateLeft: rotateLeft,
+        rotateRight: rotateRight,
+        calculateTransformAndScale: calculateTransformAndScale,
+        renderLabels: renderLabels,
+        labelMainEntities: labelMainEntities,
         labelSelections: labelSelections,
-        resetNodeDimensions: resetNodeDimensions,
-
+        label: label,
+        determineLabelPosition: determineLabelPosition,
         reset: reset,
         sanitize: sanitize
     }

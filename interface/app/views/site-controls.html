@@ -35,6 +35,14 @@
                             <br/>
                             <div class="row">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <!--
+                                    <button class="btn btn-sm btn-default" ng-class="" ng-click="rotateLeft()">
+                                        <i class="fa fa-undo"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-default" ng-class="" ng-click="rotateRight()">
+                                        <i class="fa fa-repeat"></i>
+                                    </button>
+                                    -->
                                     <button class="btn btn-sm btn-default" ng-class="" ng-click="toggleLabels()">Toggle Labels</button>
                                 </div>
                             </div>
@@ -70,7 +78,7 @@
                                     Total number of unconnected nodes
                                 </div>
                                 <div class="col-sm-4 col-md-4 col-lg-4">
-                                    {{data.unConnected.length}}
+                                    {{data.unConnectedTotal}}
                                 </div>
                             </div>
                             <div class="row">

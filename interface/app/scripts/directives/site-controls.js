@@ -10,6 +10,7 @@ angular.module('interfaceApp')
       },
       link: function postLink(scope, element, attrs) {
           scope.labelsVisible = true;
+          scope.currentRotation = 0;
 
           var w = angular.element($window);
           w.bind('resize', function() {
@@ -35,8 +36,13 @@ angular.module('interfaceApp')
                   nodes: DataService.nodes,
                   links: DataService.links,
                   unConnected: DataService.unConnectedNodes,
-                  percentUnConnected: DataService.unConnectedNodes.length / (DataService.nodes.length + DataService.unConnectedNodes.length) * 100,
               }
+
+              scope.data.unConnectedTotal = 0;
+              angular.forEach(DataService.unConnectedNodes, function(v,k) {
+                  scope.data.unConnectedTotal += v.length;
+              });
+              
 
               // if there are unconnected nodes - enable the download button
               if (DataService.unConnectedNodes === undefined) {
@@ -87,7 +93,6 @@ angular.module('interfaceApp')
                   scope.selectionsDownload = true;
               } else {
                   // nothing selected so wipe it
-                  console.log('here');
                   scope.selectedNodesData = undefined;
                   scope.selectionsDownload = false;
               }
@@ -122,6 +127,7 @@ angular.module('interfaceApp')
               scope.showData = false;
 
               // reset the graph
+              d3s.sizeBy = 'r';
               d3s.reset('#site_graph');
 
               // tag node sizing selected
@@ -155,25 +161,28 @@ angular.module('interfaceApp')
           scope.sizeNodesBy = function(by) {
               if (by === 'evenly') {
                   scope.sizeBy = [ "active", "", "", "" ];
-                  DataService.labelMainEntities('#site_graph', 'rByEntity');
               } else if (by === 'entities') {
                   scope.sizeBy = [ "", "active", "", "" ];
-                  DataService.labelMainEntities('#site_graph', 'rByEntity');
               } else if (by === 'publications') {
                   scope.sizeBy = [ "", "", "active", "" ];
-                  DataService.labelMainEntities('#site_graph', 'rByPublication');
               } else if (by === 'objects') {
                   scope.sizeBy = [ "", "", "", "active" ];
-                  DataService.labelMainEntities('#site_graph', 'rByDobject');
               }
-              d3s.sizeNodesBy(by, '#site_graph');
+              d3s.sizeNodesBy('#site_graph', by);
+              d3s.renderLabels('#site_graph');
           }
 
-          // panels to open in the accordion
-          scope.panels = { 'activePanel': [2,3] }
-        
-          // tag node sizing selected
-          scope.sizeBy = [ "", "active", "", "" ];
+/*
+          // rotate the graph left
+          scope.rotateLeft = function() {
+              scope.currentRotation = d3s.rotateLeft('#site_graph', scope.currentRotation);
+          }
+
+          // rotate the graph right
+          scope.rotateRight = function() {
+              scope.currentRotation = d3s.rotateRight('#site_graph', scope.currentRotation);
+          }
+*/
 
           // assemble the CSV
           scope.construct = function(what) {
@@ -192,6 +201,13 @@ angular.module('interfaceApp')
                   scope.unConnectedNodesData = d;
               }
           }
+
+          // panels to open in the accordion
+          scope.panels = { 'activePanel': [0,2,3] }
+        
+          // tag node sizing selected
+          scope.sizeBy = [ "", "active", "", "" ];
+
       }
     };
   }]);
