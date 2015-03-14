@@ -390,6 +390,7 @@ angular.module('interfaceApp')
           }
 
           scope.$on('draw-entity-graph', function() {
+              scope.ready = true;
               var d = DataService.entityNetwork;
               graphStatistics(d);
               scope.drawGraph(d);

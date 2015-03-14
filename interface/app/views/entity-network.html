@@ -1,9 +1,14 @@
-<div ng-if="!relaxed" style="position: fixed; top: 0, left: 0; z-index: 200; width: 100%; height: 100%;"></div>
+<div ng-if="!relaxed" style="position: fixed; top: 0; left: 0; z-index: 200; width: 100%; height: 100%;"></div>
 
-<!-- Entity statistics panel -->
-<div class="row">
+<div ng-if="!ready" style="position: absolute; top: 0; left: 0; z-index: 200; width: 100%; height: 100%;">
+    <span class='text-center'><h4>Initialising...</h4></span>
+</div>
+
+
+<div>
+    <!-- Entity statistics panel -->
     <div ng-style="sidepanelStyle" ng-if="showSidePanel">
-        <div ng-style="statisticsPanelStyle" ng-hide="showInfoPanel">
+        <div ng-style="statisticsPanelStyle" ng-hide="showInfoPanel" ng-if="ready">
             <div class="row" ng-hide="removeClose">
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <button type="button" class="close" aria-label="Close" ng-click="close()"><span aria-hidden="true">&times;</span></button>
@@ -49,59 +54,61 @@
             </div>
         </div>
     </div>
-    <div ng-style="mainpanelStyle">
-        <div id="entity_graph"></div>
-    </div> 
-</div>
 
-<!-- data view panel -->
-<div ng-style="sidepanelStyle" ng-if="showInfoPanel">
-    <div ng-style="statisticsPanelStyle">
-        <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12 pull-right">
-                <button type="button" class="close" aria-label="Close" ng-click="closeInfoPanel()"><span aria-hidden="true">&times;</span></button>
+    <!-- Data view panel -->
+    <div ng-style="sidepanelStyle" ng-if="showInfoPanel">
+        <div ng-style="statisticsPanelStyle">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12 pull-right">
+                    <button type="button" class="close" aria-label="Close" ng-click="closeInfoPanel()"><span aria-hidden="true">&times;</span></button>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <button class="btn btn-default" ng-click="reset()">Reset</button>
-                <hr/>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <button class="btn btn-default" ng-click="reset()">Reset</button>
+                    <hr/>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12">
-                <div class="panel-group" bs-collapse ng-model="multiplePanels.activePanels" data-allow-multiple="false" data-start-collapsed="false" data-animation="">
-                    <div class="panel panel-default" ng-repeat="selection in selections">
-                        <div class="panel-heading" ng-style="{ 'background-color': selectionData[selection].color }">
-                           <h4 class="panel-title">
-                                <a bs-collapse-toggle><span style="font-family:monospace;">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span><br/>
-                                {{selectionData[selection].name}} ({{selectionData[selection].df | date: 'yyyy'}} - {{selectionData[selection].dt | date: 'yyyy'}})</a>
-                            </h4>
-                        </div>
-                        <div class="panel-collapse" bs-collapse-target>
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
-                                        <a href="{{selectionData[selection].url}}" target="_blank">{{selectionData[selection].url}}</a>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <div class="panel-group" bs-collapse ng-model="multiplePanels.activePanels" data-allow-multiple="false" data-start-collapsed="false" data-animation="">
+                        <div class="panel panel-default" ng-repeat="selection in selections">
+                            <div class="panel-heading" ng-style="{ 'background-color': selectionData[selection].color }">
+                               <h4 class="panel-title">
+                                    <a bs-collapse-toggle><span style="font-family:monospace;">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span><br/>
+                                    {{selectionData[selection].name}} ({{selectionData[selection].df | date: 'yyyy'}} - {{selectionData[selection].dt | date: 'yyyy'}})</a>
+                                </h4>
+                            </div>
+                            <div class="panel-collapse" bs-collapse-target>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
+                                            <a href="{{selectionData[selection].url}}" target="_blank">{{selectionData[selection].url}}</a>
+                                        </div>
                                     </div>
-                                </div>
-                                <br/>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <span ng-if="selectionData[selection].summnote">
-                                            <p ng-bind-html="selectionData[selection].summnote" 
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <span ng-if="selectionData[selection].summnote">
+                                                <p ng-bind-html="selectionData[selection].summnote" 
+                                                    style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                            </span>
+                                            <p ng-bind-html="selectionData[selection].fullnote"
                                                 style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
-                                        </span>
-                                        <p ng-bind-html="selectionData[selection].fullnote"
-                                            style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                 </div>
+                     </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Network panel -->
+<div ng-style="mainpanelStyle">
+    <div id="entity_graph"></div>
+</div> 
