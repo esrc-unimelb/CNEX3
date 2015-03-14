@@ -86,5 +86,7 @@ class SiteConfig(ConfigBase):
         conf['map']['source'] = datamap[0]
         conf['map']['localpath'] = datamap[1]
         conf['public'] = ast.literal_eval(self.get('GENERAL', 'public'))
+        conf['allow_groups'] = self.get('GENERAL', 'allow_groups', aslist=True)
+        conf['allow_users'] = self.get('GENERAL', 'allow_users', aslist=True)
         return conf
 
