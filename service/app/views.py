@@ -139,9 +139,6 @@ def network_stats(request):
 def convert_graph(request):
     code = request.matchdict['code']
 
-    from base64 import b32encode
-    from os import urandom
-    key = b32encode(urandom(9)).strip('=')
     G = nx.readwrite.json_graph.node_link_graph(request.json['graph'])
     output = StringIO.StringIO()
     nx.readwrite.write_gml(G, output)
