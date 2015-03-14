@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .directive('siteControls', [ '$rootScope', '$window', 'DataService', 'configuration', 'D3Service', 'SolrService',
-        function ($rootScope, $window, DataService, configuration, d3s, SolrService) {
+  .directive('siteControls', [ '$rootScope', '$window', '$http', '$sce', '$timeout', 'DataService', 'configuration', 'D3Service', 'SolrService',
+        function ($rootScope, $window, $http, $sce, $timeout, DataService, conf, d3s, SolrService) {
     return {
       templateUrl: 'views/site-controls.html',
       restrict: 'E',
@@ -11,6 +11,7 @@ angular.module('interfaceApp')
       link: function postLink(scope, element, attrs) {
           scope.labelsVisible = true;
           scope.currentRotation = 0;
+          scope.disableDownloadButton = '';
 
           var w = angular.element($window);
           w.bind('resize', function() {
@@ -200,6 +201,22 @@ angular.module('interfaceApp')
                   });
                   scope.unConnectedNodesData = d;
               }
+          }
+
+          scope.downloadGraph = function() {
+            scope.disableDownloadButton = 'disabled';
+            var url = conf[conf.service] + '/convert';
+            $http.post(url, { 'graph': DataService.siteGraph }).then(function(resp) {
+                scope.graphUrl = $sce.trustAsResourceUrl(resp.data.file);
+                $timeout(function() {
+                    document.getElementById('graphDownloader').click();
+                    scope.disableDownloadButton = '';
+                }, 200);
+
+            },
+            function(resp) {
+                console.log(resp);
+            });
           }
 
           // panels to open in the accordion

@@ -76,6 +76,9 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
+            // store the graph
+            DataService.siteGraph = d.graph;
+
             var ns = d.graph.nodes;
             var ls = d.graph.links;
 
