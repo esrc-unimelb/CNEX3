@@ -61,8 +61,8 @@ def get(tree, path, attrib=None, element=None, aslist=None):
             else:
                 return [ e.text for e in result ]
         except IndexError:
-            print path
-            print tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })
+            log.error(path)
+            log.error(tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' }))
 
 def get_xml(href):
     """Given a href, find the corresponding XML data file.
@@ -83,7 +83,7 @@ def get_xml(href):
     except IOError:
         return None
 
-def get_site_data(request, authenticated=False):
+def get_site_data(request, authenticated=False, claims=None):
     site_configs = os.path.join(os.path.dirname(request.registry.settings['app.config']), request.registry.app_config['general']['sites'])
     sites = {}
     for f in os.listdir(site_configs):
@@ -92,8 +92,39 @@ def get_site_data(request, authenticated=False):
         sites[f] = d
 
     if authenticated:
-        # if the user has been authenticated - return all data
-        return sites
+        # if the user has been authenticated - return all public sites AND private 
+        # ones they're allowed to see
+        if claims is not None:
+            groups = claims['user']['groups'] 
+
+            # return only the public sites and the allowed private ones
+            allowed_sites = {}
+            for s in sites:
+                # push all the public sites in
+                if sites[s]['public']: 
+                    allowed_sites[s] = sites[s];
+                else:
+                    # check group allows
+                    s1 = set(sites[s]['allow_groups'])
+                    s2 = set(groups)
+                    r = s1.intersection(s2)
+                    if r:
+                        log.info("%s: access granted to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
+                        allowed_sites[s] = sites[s];
+                        continue
+
+                    # check user allows
+                    if claims['user']['email'] in sites[s]['allow_users']:
+                        log.info("%s: access granted to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
+                        allowed_sites[s] = sites[s];
+                        continue
+
+                    log.info("%s: access denied to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
+            return allowed_sites
+        else:
+            log.error('Something is very wrong. No claims passed when there should have been')
+            raise HTTPForbidden
+
     else:
         # return only the public data
         public_sites = {}
@@ -103,32 +134,33 @@ def get_site_data(request, authenticated=False):
         return public_sites
 
 def verify_access(request, site=None):
-    # Global access checker
-    try:
+    if 'Authorization' in request.headers:
         resp = requests.get(request.registry.app_config['general']['token'], headers={ 'Authorization': request.headers['Authorization'] })
         if resp.status_code == 200:
             claims = json.loads(resp.text)['claims']
-            sites = get_site_data(request, authenticated=True)
+            sites = get_site_data(request, authenticated=True, claims=claims)
 
-            log.info("%s: Access granted to: %s" % (request.client_addr, claims['user']['name']))
             if site is not None: 
                 site_data = sites.pop(site, None)
                 if site_data == None:
+                    log.info("%s: Access to: %s denied. %s (%s)" % (request.client_addr, site, claims['user']['name'], claims['user']['email']))
                     raise HTTPForbidden
+
+                log.info("%s: Access granted to: %s, %s (%s)" % (request.client_addr, site, claims['user']['name'], claims['user']['email']))
                 return claims, site_data
             else:
+                log.info("%s: Access granted to: %s (%s)" % (request.client_addr, claims['user']['name'], claims['user']['email']))
                 return claims, sites
-        else:
-            log.info("%s: Access denied. %s, %s" % (request.client_addr, resp.status_code, resp.text))
-            raise HTTPForbidden
-
-    except:
+    else:
         log.info("%s: No Authorisation header in request. Stripping private sites." % request.client_addr)
         sites = get_site_data(request, authenticated=False)
         if site is not None:
             site_data = sites.pop(site, None)
             if site_data == None:
+                log.info("%s: Access denied." % request.client_addr)
                 raise HTTPForbidden
             return None, site_data
         else:
             return None, sites
+
+
