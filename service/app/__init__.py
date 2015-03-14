@@ -36,7 +36,7 @@ def main(global_config, **settings):
     config.add_route('entity-data',             '/entity/{code}/data')
     config.add_route('entity-build',            '/entity/{code}/{id}')
     config.add_route('entity-build-status',     '/entity/{code}/{id}/status')
-    config.add_route('convert-graph',           '/convert')
+    config.add_route('convert-graph',           '/convert/{code}')
 
     config.scan()
     return config.make_wsgi_app()
