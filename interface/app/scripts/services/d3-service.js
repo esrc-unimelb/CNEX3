@@ -333,8 +333,8 @@ angular.module('interfaceApp')
         // center the graph
         var gc = d3.select(graphSelector).select('.node-container')[0][0].getBoundingClientRect();
         var pc = d3.select(graphSelector)[0][0].getBoundingClientRect();
-        console.log(gc, pc);
-        console.log(d3.select(graphSelector).select('svg')[0][0].getBBox());
+        //console.log(gc, pc);
+        //console.log(d3.select(graphSelector).select('svg')[0][0].getBBox());
 
         var use = gc.width > gc.height ? gc.width: gc.height;
         var scale = pc.width / use;
