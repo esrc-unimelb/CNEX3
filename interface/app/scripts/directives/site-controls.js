@@ -11,7 +11,7 @@ angular.module('interfaceApp')
       link: function postLink(scope, element, attrs) {
           scope.labelsVisible = true;
           scope.currentRotation = 0;
-          scope.disableDownloadButton = '';
+          scope.disableDownloadButton = false;
 
           var w = angular.element($window);
           w.bind('resize', function() {
@@ -204,18 +204,17 @@ angular.module('interfaceApp')
           }
 
           scope.downloadGraph = function() {
-            scope.disableDownloadButton = 'disabled';
-            var url = conf[conf.service] + '/convert';
+            scope.disableDownloadButton = true;
+            var url = conf[conf.service] + '/convert/' + DataService.site.code;
             $http.post(url, { 'graph': DataService.siteGraph }).then(function(resp) {
                 scope.graphUrl = $sce.trustAsResourceUrl(resp.data.file);
                 $timeout(function() {
                     document.getElementById('graphDownloader').click();
-                    scope.disableDownloadButton = '';
+                    scope.disableDownloadButton = false;
                 }, 200);
 
             },
             function(resp) {
-                console.log(resp);
             });
           }
 
