@@ -19,6 +19,7 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import StringIO
 import os.path
+from datetime import datetime
 
 from config import Config
 
@@ -136,14 +137,21 @@ def network_stats(request):
 
 @view_config(route_name="convert-graph", request_method='POST', renderer='json')
 def convert_graph(request):
+    code = request.matchdict['code']
+
     from base64 import b32encode
     from os import urandom
     key = b32encode(urandom(9)).strip('=')
     G = nx.readwrite.json_graph.node_link_graph(request.json['graph'])
-    f = open(os.path.join(request.registry.app_config['general']['share_path'], "%s.gml" % key), 'w')
-    nx.readwrite.write_gml(G, f)
-    f.close()
-    return { 'file': os.path.join(request.registry.app_config['general']['share_url'], "%s.gml" % key) }
+    output = StringIO.StringIO()
+    nx.readwrite.write_gml(G, output)
+    output = output.getvalue().replace("None", '""')
+
+    fname = "%s-%s-network.gml" % (code, datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M"))
+    with open(os.path.join(os.path.join(request.registry.app_config['general']['share_path'], fname)), 'w') as f:
+        f.write(output)
+    fname = os.path.join(request.registry.app_config['general']['share_url'], fname)
+    return { 'file': fname }
 
 
 def bare_tag(tag):
