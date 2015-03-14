@@ -279,6 +279,7 @@ angular.module('interfaceApp')
                     .duration(500)
                     .attr('transform', 'translate(' + t.translate + ')' + ' scale(' + t.scale + ')');
                   scope.labelMainEntities();
+                  scope.relaxed = true;
               }
           }
 

@@ -9,7 +9,8 @@
         stroke-width: 2.0;
     }
 </style>
-<div ng-if="!relaxed" style="position: fixed; top: 0px; left: 0px; z-index:500000; width: 200px; padding: 15px 30px;">
+<div ng-if="!relaxed" style="position: fixed; top: 0, left: 0; z-index: 200; width: 100%; height: 100%;"></div>
+<div ng-if="!relaxed" style="position: fixed; top: 0; left: 0; z-index:100; width: 200px; padding: 15px 30px;">
     <progress-meter processed="{{processed}}" total="{{total}}" invert="true"></progress-meter>
 </div>
 <div id="site_graph"></div>
