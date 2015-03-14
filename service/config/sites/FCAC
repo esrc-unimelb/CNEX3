@@ -12,3 +12,7 @@ map: http://www.findandconnect.gov.au/ref/act, /srv/ha/web/FCAC/LIVE
 
 ## Is the site public? True or False
 public: True
+
+## Allow rules - only checked when public = False
+allow_groups: 
+allow_users: 

@@ -12,3 +12,7 @@ map: http://www.eoas.info, /srv/ha/web/EOAS/LIVE
 
 ## Is the site public? True or False
 public: True
+
+## Allow rules - only checked when public = False
+allow_groups: 
+allow_users: 

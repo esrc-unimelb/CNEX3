@@ -12,3 +12,7 @@ map: http://www.saulwick.info, /srv/ha/web/SAUL/testing
 
 ## Is the site public? True or False
 public: True
+
+## Allow rules - only checked when public = False
+allow_groups: 
+allow_users: 
