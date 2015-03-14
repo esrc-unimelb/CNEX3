@@ -17,6 +17,8 @@ from datetime import datetime
 from lxml import etree, html
 import networkx as nx
 from networkx.readwrite import json_graph
+import StringIO
+import os.path
 
 from config import Config
 
@@ -131,6 +133,18 @@ def network_stats(request):
         'url': n.url,
         'degree': sum(d) / len(d)
     }
+
+@view_config(route_name="convert-graph", request_method='POST', renderer='json')
+def convert_graph(request):
+    from base64 import b32encode
+    from os import urandom
+    key = b32encode(urandom(9)).strip('=')
+    G = nx.readwrite.json_graph.node_link_graph(request.json['graph'])
+    f = open(os.path.join(request.registry.app_config['general']['share_path'], "%s.gml" % key), 'w')
+    nx.readwrite.write_gml(G, f)
+    f.close()
+    return { 'file': os.path.join(request.registry.app_config['general']['share_url'], "%s.gml" % key) }
+
 
 def bare_tag(tag):
     return tag.rsplit("}", 1)[-1]

@@ -54,6 +54,8 @@ class Config(ConfigBase):
                 'data_age': self.get('GENERAL', 'data_age'),
                 'sites': self.get('GENERAL', 'sites'),
                 'disable_auth': ast.literal_eval(self.get('GENERAL', 'disable_auth')),
+                'share_path': self.get('GENERAL', 'share_path'),
+                'share_url': self.get('GENERAL', 'share_url'),
             },
             'mongodb': {
                 'nodes': self.get('MONGODB', 'nodes', aslist=True),
