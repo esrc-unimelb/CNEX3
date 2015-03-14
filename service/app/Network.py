@@ -56,7 +56,7 @@ class Network:
 
         # are we in the process of building it? return now; nothing to do
         doc = self.db.network_progress.find_one({ 'site': self.site })
-        print doc
+        #print doc
         if doc is not None:
             log.debug('Graph currently being built')
             return
