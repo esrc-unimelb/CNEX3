@@ -203,7 +203,7 @@ angular.module('interfaceApp')
           }
 
           // panels to open in the accordion
-          scope.panels = { 'activePanel': [0,2,3] }
+          scope.panels = { 'activePanel': [0,1,2] }
         
           // tag node sizing selected
           scope.sizeBy = [ "", "active", "", "" ];
