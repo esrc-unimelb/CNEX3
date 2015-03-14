@@ -10,10 +10,14 @@ angular.module('interfaceApp')
           sizeToParent: '@'
       },
       link: function postLink(scope, element, attrs) {
+
+          scope.highlight = false;
+
           // do we hide or show the embed links?
           //  if link=false we assume it's loading in an iframe
           //   or is linked to from some other site.
           scope.removeClose = false;
+
           if ($routeParams.link === "false") {
               scope.hideLinks = true;
               scope.removeClose = true;
@@ -355,7 +359,6 @@ angular.module('interfaceApp')
                 .attr('class', 'text-container');
                 //.attr('transform','rotate(0) translate(' + scope.svgWidth/5 + ',' + scope.h/6 + ') scale(.6)');
 
-
               var path = svg.selectAll('.link').data(scope.force.links());
               var node = svg.selectAll('.node').data(scope.force.nodes());
 
@@ -398,6 +401,52 @@ angular.module('interfaceApp')
 
           scope.close = function() {
               $rootScope.$broadcast('destroy-entity-network-view');
+          }
+          scope.highlightFirstOrderConnections = function () {
+              scope.highlight =! scope.highlight;
+
+              if (scope.highlight) {
+                  var highlight = [];
+                  highlight.push(scope.contextNode.id);
+
+                  d3.select('#entity_graph')
+                    .selectAll('.link')
+                    .attr('opacity', function(d) {
+                        if (d.source_id === scope.contextNode.id) {
+                            highlight.push(d.target_id);
+                            return conf.opacity.default;
+                        } else if ( d.target_id === scope.contextNode.id) {
+                            highlight.push(d.source_id);
+                            return conf.opacity.default;
+                        } else {
+                            return conf.opacity.unselected;
+                        } 
+                    });
+                    d3.select('#entity_graph')
+                      .selectAll('.node')
+                      .attr('fill', function(d) {
+                          if (highlight.indexOf(d.id) !== -1) {
+                              return d.color;
+                          } else {
+                              return '#ccc';
+                          }
+                      })
+                      .attr('opacity', function(d) {
+                          if (highlight.indexOf(d.id) !== -1) {
+                              return conf.opacity.default;
+                          } else {
+                              conf.opacity.unselected;
+                          }
+                      });
+              } else {
+                  d3.select('#entity_graph')
+                    .selectAll('.node')
+                    .attr('fill', function(d) { return d.color; })
+                    .attr('opacity', conf.opacity.default);
+                  d3.select('#entity_graph')
+                    .selectAll('.link')
+                    .attr('opacity', conf.opacity.default);
+              }
           }
       }
     };
