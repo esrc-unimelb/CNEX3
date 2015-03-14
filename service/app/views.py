@@ -10,16 +10,15 @@ from pyramid.httpexceptions import (
 import logging
 log = logging.getLogger(__name__)
 
-import os
 import sys
 import time
-from datetime import datetime
 from lxml import etree, html
 import networkx as nx
 from networkx.readwrite import json_graph
 import StringIO
+import os
 import os.path
-from datetime import datetime
+import datetime
 
 from config import Config
 
@@ -139,12 +138,19 @@ def network_stats(request):
 def convert_graph(request):
     code = request.matchdict['code']
 
+    # clear out graphs older than 6 hours
+    for root, dirs, files in os.walk(request.registry.app_config['general']['share_path']):
+        for f in files:
+            dt = datetime.datetime.now () - datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(root, f)))
+            if dt > datetime.timedelta(hours=1):
+                os.remove(os.path.join(root, f))
+
     G = nx.readwrite.json_graph.node_link_graph(request.json['graph'])
     output = StringIO.StringIO()
     nx.readwrite.write_gml(G, output)
     output = output.getvalue().replace("None", '""')
 
-    fname = "%s-%s-network.gml" % (code, datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M"))
+    fname = "%s-%s-network.gml" % (code, datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H-%M"))
     with open(os.path.join(os.path.join(request.registry.app_config['general']['share_path'], fname)), 'w') as f:
         f.write(output)
     fname = os.path.join(request.registry.app_config['general']['share_url'], fname)
