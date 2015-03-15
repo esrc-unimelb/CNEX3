@@ -147,7 +147,7 @@ class Network:
     def functions_as_nodes(self, graph, tree):
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
-        url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
+        url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId[1]")
         df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
         dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
         name = self.get_entity_name(tree, ntype)
@@ -172,7 +172,7 @@ class Network:
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
         core_type = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityType")
-        url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId")
+        url = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityId[1]")
         df = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:fromDate", attrib="standardDate")
         dt = get(tree, "/e:eac-cpf/e:cpfDescription/e:description/e:existDates/e:dateRange/e:toDate", attrib="standardDate")
         name = self.get_entity_name(tree, ntype)
