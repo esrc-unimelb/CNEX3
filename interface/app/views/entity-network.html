@@ -25,13 +25,15 @@
                         <p>Embed this graph in your page.
                             <div class="well">{{iframeCode}}</div>
                         </p>
-                        <button class="btn btn-sm btn-block btn-default" ng-click="highlightFirstOrderConnections()">Toggle first order connections</button>
                     </span>
                     <hr/>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
+                    <p>
+                        <button class="btn btn-sm btn-default" ng-click="highlightFirstOrderConnections()">Highlight direct connections to context node.</button>
+                    </p>
                     <div class="panel-group" ng-model="panels.activePanel" bs-collapse data-allow-multiple="true" data-start-collapsed="false" data-animation="">
                         <div class="panel panel-default" ng-repeat="(k, v) in stats">
                             <div class="panel-heading" ng-style="{ 'background-color': '{{v.color}}' }">
