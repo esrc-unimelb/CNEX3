@@ -1,8 +1,10 @@
 <div ng-if="!relaxed" style="position: absolute; top: 0; left: 0; z-index: 200; width: 100%; height: 100%; background-color: #ccc; opacity: 0.3;">
 </div>
-
-<div ng-if="!relaxed" style="position: absolute; top: 0; left: 0; z-index: 210; width: 100%; height: 100%;">
-    <spinner colour="black"></spinner>
+<div ng-if="!relaxed" style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; margin: auto; z-index: 200; width: 100%; height: 100%; " class="text-center">
+    <h4>Please Wait.</h4>
+</div>
+<div ng-if="!ready" style="position: absolute; top: 0; left: 0; z-index: 200; width: 100%; height: 100%;" class="text-center">
+    <h4>loading...</h4>
 </div>
 
 

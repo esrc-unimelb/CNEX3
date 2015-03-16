@@ -33,8 +33,8 @@ angular.module('interfaceApp')
             top: '50%', // Top position relative to parent
             left: '50%' // Left position relative to parent
           };
-          //var spinner = new Spinner(opts).spin();
-          // element[0].appendChild(spinner.el);
+          var spinner = new Spinner(opts).spin();
+          element[0].appendChild(spinner.el);
       }
     };
   });
