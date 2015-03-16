@@ -1,0 +1,39 @@
+<div style="position: relative; display: inline-block;">
+    <button class="btn btn-sm btn-default" ng-hide='showPicker' ng-click="toggleColourPicker()">Show Colour Picker</button>
+    <button class="btn btn-sm btn-default" ng-show='showPicker' ng-click="toggleColourPicker()">Hide Colour Picker</button>
+    <div style="position:absolute; z-index: 200; width: 200px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 5px 5px 2px #ccc;" 
+         ng-if="showPicker" class="animate-if">
+        <div ng-repeat="(type, colour) in colours">
+            <p ng-click="changeColour(type)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                {{type}}
+                <span class="pull-right" style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{colour}};"></span>
+            </p>
+        </div>
+    </div>
+    <div style="position:absolute; z-index: 300; width: 270px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 5px 5px 2px #ccc;"
+        ng-if="showChooser" class="animate-if">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <strong>Change colour: </strong>{{type}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <span ng-repeat="colour in pallette" ng-click="setColour(colour)" 
+                    style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{colour}}; margin: 5px;">
+                </span>
+            </div>
+            <div class="col-sm-12">
+                <input class="form-control" ="text" ng-model="custom.colour" placeholder="or set one of your own"/>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-sm btn-default" ng-click="save()">Save</button>
+                <button class="btn btn-sm btn-default" ng-click="dismissChooser()">Dismiss</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -16,17 +16,19 @@ angular.module('interfaceApp')
       'searchWhat': [ '0', '1', '2', '3' ],
 
       'colours': {
-          'person': '#d62728',
-          'corporatebody': '#ffbb78',
-          'event': '#1f77b4',
-          'concept': '#aec7e8',
-          'place': '#ff9896',
-          'culturalartefact': '#9467bd',
-          'published': '#98df8a',
-          'archival': '#2ca02c',
-          'digitalObject': '#ff7f0e'
+          'person': '#FF6961',
+          'corporatebody': '#779ECB',
+          'event': '#03C03C',
+          'concept': '#FF9900',
+          'place': '#966FD6',
+          'culturalartefact': '#FFB347',
+          'published': '#77DD77',
+          'archival': '#779ECB',
+          'digitalobject': '#C23B22'
 
       },
+
+      'pallette': [ '#C23B22', '#FF6961', '#03C03C', '#77DD77', '#779ECB', '#AEC6CF', '#FFDF00', '#966FD6', '#B19CD9', '#FF9900', '#FFB347', ],
 
       'opacity': {
           'default': '1',

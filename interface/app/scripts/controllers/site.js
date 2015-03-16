@@ -135,6 +135,15 @@ angular.module('interfaceApp')
                 DataService.unConnectedNodes[k] = _.sortBy(v, function(d) { return d.name; });
             });
             DataService.weightBounds = weightBounds;
+            var types = {};
+            angular.forEach(nodes, function(v,k) {
+                if (types[v.type] === undefined) {
+                    types[v.type] = { 'count': 1, 'checked': false, 'color': v.color, 'coreType': v.coreType };
+                } else {
+                    types[v.type].count += 1;
+                }
+            })
+            DataService.types = types;
 
             // now instantiate the graph
             $scope.ready = true;

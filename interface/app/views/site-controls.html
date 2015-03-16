@@ -44,7 +44,8 @@
                                     </button>
                                     -->
                                     <button class="btn btn-sm btn-default" ng-class="" ng-click="toggleLabels()">Toggle Labels</button>
-                                    <button class="btn btn-sm btn-default" ng-disabled="disableDownloadButton" ng-click="downloadGraph()">Download data (GML)</button>
+                                    <colour-picker></colour-picker>
+                                    <button class="btn btn-sm btn-default pull-right" ng-disabled="disableDownloadButton" ng-click="downloadGraph()">Download data (GML)</button>
                                     <a id="graphDownloader" ng-href="{{graphUrl}}" style="display: none;" download></a>
                                 </div>
                             </div>

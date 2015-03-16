@@ -53,16 +53,9 @@ angular.module('interfaceApp')
                   scope.unconnectedDownload = true;
               }
 
-              var types = {};
-              angular.forEach(scope.data.nodes, function(v,k) { 
-                  if (types[v.type] === undefined) {
-                      types[v.type] = { 'count': 1, 'checked': false, 'color': v.color, 'coreType': v.coreType };
-                  } else {
-                      types[v.type].count += 1;
-                  }
-              })
-              scope.data.types = types;
-          })
+              // get the types
+              scope.data.types = DataService.types;
+          });
 
           // process the data when it's available
           scope.$on('node-data-ready', function() {
@@ -105,7 +98,32 @@ angular.module('interfaceApp')
                       scope.data.types[k].checked = false;
                   })
               d3s.highlightById('#site_graph', SolrService.selected);
-          })
+          });
+
+          // handle color changes
+          scope.$on('colours-changed', function() {
+              var nodes = d3.select('#site_graph')
+                            .selectAll('.node')
+                            .data();
+              var ns = DataService.processNodeSet(nodes);
+              d3.select('#site_graph')
+                .transition()
+                .duration(500)
+                .selectAll('.node')
+                .attr('fill', function(d) { return d.color; } )
+                .style('stroke', function(d) { return d.color; });
+
+              d3.selectAll('.date')
+                .transition()
+                .duration(500)
+                .attr('fill', function(d) { return d.color; })
+                .style('stroke', function(d) { return d.color; });
+
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k].color = conf.colours[v.coreType.toLowerCase()];
+              })
+
+          });
 
           scope.clearTypes = function() {
               angular.forEach(scope.data.types, function(v,k) {
