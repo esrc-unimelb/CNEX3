@@ -36,9 +36,9 @@
         <span ng-repeat="site in sites">
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="col-sm-6 col-md-6"><span style="font-family:monospace;">{{site.code}}</span>&nbsp;&#8212;&nbsp;<a href="{{site.url}">{{site.name}}</a></div>
+                    <div class="col-sm-6 col-md-6"><span style="font-family:monospace;">{{site.code}}</span>&nbsp;&#8212;&nbsp;{{site.name}}</div>
                     <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site.code}}/byEntity">Explore by Context Entity</a></div>
-                    <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site.code}}/byFunction">Explore by Function</a></div>
+                    <div class="col-sm-3 col-md-3 text-center"><a href="{{site.url}}" target="_blank">visit site&nbsp;<i class="fa fa-external-link"></i></a></div>
                 </div>
             </div>
         </span>
@@ -63,10 +63,10 @@
             <a href="http://d3js.org/" target=_blank"><button class="btn btn-default btn-block btn-sm">d3</button></a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="http://www.html5rocks.com/en/" target="_blank"><button class="btn btn-default btn-block btn-sm">HTML5</button></a>
+            <a href="http://python.org" target="_blank"><button class="btn btn-default btn-block btn-sm">Python</button></a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="http://python.org" target="_blank"><button class="btn btn-default btn-block btn-sm">Python</button></a>
+            <a href="https://networkx.github.io/" target="_blank"><button class="btn btn-default btn-block btn-sm">NetworkX</button></a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
             <a href="http://lxml.de" target="_blank"><button class="btn btn-default btn-block btn-sm">lxml</button></a>
@@ -75,9 +75,6 @@
     <br/>
     <div class="row">
         <div class="col-sm-3 col-md-3 col-lg-3">
-            <a href="https://networkx.github.io/" target="_blank"><button class="btn btn-default btn-block btn-sm">NetworkX</button></a>
-        </div>
-        <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="http://gruntjs.com" target="blank"><button class="btn btn-default btn-block btn-sm">Grunt</button></a>
         </div>
         <div class="col-sm-3 col-md-3 col-lg-3">
@@ -85,6 +82,9 @@
         </div>
         <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="http://nodejs.org" target="_blank"><button class="btn btn-default btn-block btn-sm">NodeJS</button></a>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
+            <a href="http://www.html5rocks.com/en/" target="_blank"><button class="btn btn-default btn-block btn-sm">HTML5</button></a>
         </div>
     </div>
     <br/>
