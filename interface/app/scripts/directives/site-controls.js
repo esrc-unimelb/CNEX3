@@ -221,6 +221,7 @@ angular.module('interfaceApp')
               }
           }
 
+          // download the graph data
           scope.downloadGraph = function() {
             scope.disableDownloadButton = true;
             var url = conf[conf.service] + '/convert/' + DataService.site.code;
