@@ -34,10 +34,11 @@
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <p>
                         <button class="btn btn-sm btn-default" ng-click="highlightFirstOrderConnections()">Highlight direct connections to context node.</button>
+                        <colour-picker types="stats"></colour-picker>
                     </p>
                     <div class="panel-group" ng-model="panels.activePanel" bs-collapse data-allow-multiple="true" data-start-collapsed="false" data-animation="">
                         <div class="panel panel-default" ng-repeat="(k, v) in stats">
-                            <div class="panel-heading" ng-style="{ 'background-color': '{{v.color}}' }">
+                            <div class="panel-heading" style="background-color: {{v.color}};">
                                 <h4 class="panel-title">
                                     <a bs-collapse-toggle>{{k}} ({{v.count}})</a>
                                 </h4>

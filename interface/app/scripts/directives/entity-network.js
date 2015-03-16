@@ -89,6 +89,25 @@ angular.module('interfaceApp')
               })
           });
 
+          // handle color changes
+          scope.$on('colours-changed', function() {
+              var nodes = d3.select('#entity_graph')
+                            .selectAll('.node')
+                            .data();
+              var ns = DataService.processNodeSet(nodes);
+              d3.select('#entity_graph')
+                .transition()
+                .duration(500)
+                .selectAll('.node')
+                .attr('fill', function(d) { return d.color; } )
+                .style('stroke', function(d) { return d.color; });
+
+              angular.forEach(scope.stats, function(v,k) {
+                  scope.stats[k].color = conf.colours[v.coreType];
+              })
+
+          });
+
           var graphStatistics = function(d) {
               scope.stats = {}
               angular.forEach(d.nodes, function(v,k) {
@@ -99,7 +118,8 @@ angular.module('interfaceApp')
                       scope.stats[v.type] = {
                           'count': 1,
                           'color': v.color,
-                          'entries': [ v ]
+                          'entries': [ v ],
+                          'coreType': v.coreType.toLowerCase()
                       }
                   } else {
                       scope.stats[v.type].count += 1;

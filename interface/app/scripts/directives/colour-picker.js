@@ -6,6 +6,7 @@ angular.module('interfaceApp')
       templateUrl: 'views/colour-picker.html',
       restrict: 'E',
       scope: {
+          types: '='
       },
       link: function postLink(scope, element, attrs) {
           scope.showPicker = false;
@@ -14,8 +15,9 @@ angular.module('interfaceApp')
 
           // get the default colours from the configuration
           scope.colours = {};
-          angular.forEach(DataService.types, function(v, k) {
-              scope.colours[v.coreType] = conf.colours[v.coreType.toLowerCase()];
+          var t = scope.types === undefined ? DataService.types : scope.types
+          angular.forEach(t, function(v, k) {
+              scope.colours[conf.mapForward[v.coreType]] = conf.colours[v.coreType];
           });
 
           // get the pallette from the configuration
@@ -33,7 +35,7 @@ angular.module('interfaceApp')
           }
           scope.setColour = function(colour) {
               scope.colours[scope.type] = colour;
-              conf.colours[scope.type] = colour;
+              conf.colours[conf.mapReverse()[scope.type]] = colour;
               scope.showPicker = true;
               scope.showChooser = false;
               $rootScope.$broadcast('colours-changed');

@@ -28,6 +28,26 @@ angular.module('interfaceApp')
 
       },
 
+      'mapForward': {
+          'person': 'Person',
+          'corporatebody': 'Corporate Body',
+          'event': 'Event',
+          'concept': 'Concept',
+          'place': 'Place',
+          'culturalartefact': 'Cultural Artefact',
+          'published': 'Published Resource',
+          'archival': 'Archival Resource',
+          'digitalobject': 'Digital Object',
+      },
+
+      'mapReverse': function() {
+          var map = {};
+          angular.forEach(this.mapForward, function(v, k) {
+              map[v] = k;
+          })
+          return map;
+      },
+
       'pallette': [ '#C23B22', '#FF6961', '#03C03C', '#77DD77', '#779ECB', '#AEC6CF', '#FFDF00', '#966FD6', '#B19CD9', '#FF9900', '#FFB347', ],
 
       'opacity': {

@@ -2,11 +2,11 @@
 
 angular.module('interfaceApp')
   .controller('SiteCtrl', [ '$rootScope', '$scope', '$routeParams', '$http', '$timeout', '$location', 'configuration', 'DataService', 
-    function($rootScope, $scope, $routeParams, $http, $timeout, $location, configuration, DataService) {
+    function($rootScope, $scope, $routeParams, $http, $timeout, $location, conf, DataService) {
 
         $scope.site = $routeParams.code; 
         $scope.graph = $routeParams.explore;
-        $scope.service = configuration[configuration.service];
+        $scope.service = conf[conf.service];
         $scope.showEntityNetwork = false;
 
         $scope.initting = true;
@@ -138,7 +138,13 @@ angular.module('interfaceApp')
             var types = {};
             angular.forEach(nodes, function(v,k) {
                 if (types[v.type] === undefined) {
-                    types[v.type] = { 'count': 1, 'checked': false, 'color': v.color, 'coreType': v.coreType };
+                    types[v.type] = { 
+                        'count': 1, 
+                        'checked': false, 
+                        'color': v.color, 
+                        'coreType': v.coreType.toLowerCase(), 
+                        'coreTypeDisplayName': conf.mapForward[v.coreType.toLowerCase()]
+                    };
                 } else {
                     types[v.type].count += 1;
                 }
