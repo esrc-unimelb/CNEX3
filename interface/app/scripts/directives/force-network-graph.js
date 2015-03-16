@@ -65,6 +65,7 @@ angular.module('interfaceApp')
                     .duration(500)
                     .attr('transform', 'translate(' + t.translate + ') scale(' + t.scale + ')');
                   scope.labelMainEntities();
+                  scope.relaxed = true;
               }
           }
           scope.labelMainEntities = function() {
@@ -118,14 +119,6 @@ angular.module('interfaceApp')
                   });
               }
 
-              // we ditch the cooling bar indicator as the
-              //   simulation doesn't seem to get to 0 thus triggering
-              //   the 'end' event
-              if (scope.force.alpha() < 0.0055) {
-                  scope.$apply(function() {
-                      scope.relaxed = true;
-                  })
-              }
           }
 
           scope.force = d3.layout.force()

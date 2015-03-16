@@ -66,8 +66,8 @@ angular.module('interfaceApp')
               }
 
               scope.statisticsPanelStyle = {
-                  'border-radius': '16px',
-                  'border': 'solid 1px black',
+                  'border-radius': '4px',
+                  'border': 'solid 1px #ccc',
                   'background-color': 'white',
                   'padding': '15px 15px 15px 15px',
                   'overflow': 'auto',
@@ -105,7 +105,6 @@ angular.module('interfaceApp')
               angular.forEach(scope.stats, function(v,k) {
                   scope.stats[k].color = conf.colours[v.coreType];
               })
-
           });
 
           var graphStatistics = function(d) {
@@ -316,6 +315,7 @@ angular.module('interfaceApp')
               scope.selectionData = {};
 
               d3.select('#entity_graph').select('svg').remove();
+              scope.tickCounter = 0;
               var tick = function() {
                   path.attr("d", function(d) {
                     var dx = d.target.x - d.source.x,
@@ -331,6 +331,18 @@ angular.module('interfaceApp')
                   node.attr('transform', function(d) {
                     return 'translate(' + d.x + ',' + d.y + ')';
                   });
+
+                  // we can't update on every cycle as the html
+                  //  element doesn't keep up
+                  scope.tickCounter += 1;
+                  if (scope.tickCounter === 2) {
+                      scope.tickCounter = 0;
+                      scope.$apply(function() {
+                          scope.total = 0.1;
+                          scope.processed = scope.force.alpha();
+                
+                      });
+                  }
               }   
 
               // redraw the view when zooming
