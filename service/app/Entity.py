@@ -206,31 +206,39 @@ class Entity:
         # get the data file url
         if self.request.GET.get('q') is not None:
             datafile = self.request.GET.get('q').replace(self.source_map['source'], self.source_map['localpath'])
+            log.debug(datafile)
         else:
             return '' 
 
         # if there's an EAC ref - use it
-        xml = get_xml(self.request.GET.get('q'))
+        xml = get_xml(datafile)
         if xml is not None:
-            tree = etree.parse(xml)
+            tree = etree.parse(xml.replace(self.source_map['source'], self.source_map['localpath']))
 
-            summnote = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
+            summnote = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True)
+            if summnote:
+                summnote = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
+            else:
+                summnote = ''
 
             full_note = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist', element=True)
-            for c in full_note.getchildren():
-                if c.tag == '{urn:isbn:1-931666-33-4}abstract':
-                    c.getparent().remove(c)
+            fn = ''
+            if full_note:
+                fn = []
+                for c in full_note.getchildren():
+                    if c.tag == '{urn:isbn:1-931666-33-4}abstract':
+                        c.getparent().remove(c)
 
-            full_note = [ etree.tostring(f, method='html') for f in full_note ]
-            fn = []
-            for c in full_note:
-                c = c.replace('<list',  '<ul' )
-                c = c.replace('</list', '</ul')
-                c = c.replace('<item',  '<li' )
-                c = c.replace('</item', '</li')
-                fn.append(c)
+                full_note = [ etree.tostring(f, method='html') for f in full_note ]
+                for c in full_note:
+                    c = c.replace('<list',  '<ul' )
+                    c = c.replace('</list', '</ul')
+                    c = c.replace('<item',  '<li' )
+                    c = c.replace('</item', '</li')
+                    fn.append(c)
+                fn = ' '.join(fn)
 
-            return summnote, ' '.join(fn)
+            return summnote, fn
 
         else:
             # no EAC datafile
