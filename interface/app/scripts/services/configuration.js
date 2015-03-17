@@ -4,7 +4,7 @@ angular.module('interfaceApp')
   .constant('configuration', {
       'development': 'https://service.esrc.info',
       'production': 'https://cnex.esrc.unimelb.edu.au',
-      'service': 'production',
+      'service': 'development',
       'solr': 'https://solr.esrc.unimelb.edu.au/ESRC/select',
 
       'searchFields': {

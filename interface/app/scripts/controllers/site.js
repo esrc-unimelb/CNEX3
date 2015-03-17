@@ -12,7 +12,6 @@ angular.module('interfaceApp')
         $scope.initting = true;
         $scope.progress = false;
         $scope.datasetError = false;
-        $scope.controls = false;
         $scope.total = 0;
         $scope.processed = 0;
 
@@ -58,7 +57,6 @@ angular.module('interfaceApp')
             $http.get(url).then(function(resp) {
                 if (resp.data.processed !== null) {
                     $scope.initting = false;
-                    $scope.controls = false;
                     $scope.progress = true;
                     $scope.processed = resp.data.processed;
                     $scope.total = resp.data.total;
@@ -66,7 +64,6 @@ angular.module('interfaceApp')
                 } else {
                     $scope.progress = false;
                     $scope.initting = false;
-                    $scope.controls = true;
                     $scope.processData(resp.data);
                 }
             },
@@ -82,61 +79,46 @@ angular.module('interfaceApp')
             var ns = d.graph.nodes;
             var ls = d.graph.links;
 
-            // given the graph, create an array with unconnected nodes
-            //
-            // and
-            //
-            // nodes / links arrays
-            var nodes = [], nodeMap = {}, links = [];
-            var i, j = 0, nodesTmp = [], nodeData = {};
-            var connectedNodes = [], unConnectedNodes = [], processedLinks = [];
-            var weightBounds = [];
-
-            angular.forEach(ns, function(v, k) {
-                var n = v.id;
-                nodeData[n] = v;
-            })
-
+            // add some color and the default node radius
+            // split the dataset into linked and unlinked
+            ns = DataService.processNodeSet(ns);
+            var nodemap = ns.map,
+                linkedNodes = ns.linkedNodes,
+                unLinkedNodes = ns.unLinkedNodes;
+            var nodeKey = _.pluck(linkedNodes, 'id');
+            
+            // rebuild the links array using the positions from the linkedNodes array
+            var links = [];
             // figure out the connectedNodes and associated links
             angular.forEach(ls, function(v, k) {
                 var sn = v.source_id;
                 var tn = v.target_id;
-                if (nodesTmp.indexOf(sn) === -1) {
-                    nodesTmp.push(sn);
-                    nodes.push(nodeData[sn]);
-                    nodeMap[sn] = nodeData[sn];
-                }
-                if (nodesTmp.indexOf(tn) === -1) {
-                    nodesTmp.push(tn);
-                    nodes.push(nodeData[tn]);
-                    nodeMap[tn] = nodeData[tn];
-                }
-                links.push({ 'source': nodesTmp.indexOf(sn), 'target': nodesTmp.indexOf(tn) });
-            });
 
-            // figure out the unConnected Nodes
-            var unConnectedNodes = [];
-            angular.forEach(ns, function(v,k) {
-                var n = v.id;
-                if (nodesTmp.indexOf(n) === -1) {
-                    unConnectedNodes.push(v);
+                if (nodeKey.indexOf(sn) !== -1 && nodeKey.indexOf(tn) !== -1) {
+                    var link = {
+                        'source': nodeKey.indexOf(sn),
+                        'target': nodeKey.indexOf(tn),
+                        'source_id': sn,
+                        'target_id': tn
+                    }
+                    links.push(link);
                 }
             });
 
-            // add some color and the default node radius
-            ns = DataService.processNodeSet(ns);
 
-            DataService.nodes = nodes;
-            DataService.nodeMap = nodeMap;
-            DataService.links = links;
+            // group unconnected nodes by type and sort alphabetically
             DataService.unConnectedNodes = {};
-            var undata = _.groupBy(unConnectedNodes, function(d) { return d.type; });
+            var undata = _.groupBy(unLinkedNodes, function(d) { return d.type; });
             angular.forEach(undata, function(v, k) {
                 DataService.unConnectedNodes[k] = _.sortBy(v, function(d) { return d.name; });
             });
-            DataService.weightBounds = weightBounds;
+
+            DataService.nodes = linkedNodes;
+            DataService.links = links;
+            DataService.nodeMap = nodemap;
+
             var types = {};
-            angular.forEach(nodes, function(v,k) {
+            angular.forEach(linkedNodes, function(v,k) {
                 if (types[v.type] === undefined) {
                     types[v.type] = { 
                         'count': 1, 
@@ -151,9 +133,13 @@ angular.module('interfaceApp')
             })
             DataService.types = types;
 
-            // now instantiate the graph
+            // get the data structure ready for the graph and 
+
+            // now get it all going
             $scope.ready = true;
-            $timeout(function() { $rootScope.$broadcast('graph-data-loaded'); }, 100);
+            $timeout(function(d) {
+                $rootScope.$broadcast('graph-data-loaded');
+            }, 100);
         }
 
 

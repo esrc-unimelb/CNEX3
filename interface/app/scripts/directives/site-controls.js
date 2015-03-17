@@ -44,7 +44,6 @@ angular.module('interfaceApp')
                   scope.data.unConnectedTotal += v.length;
               });
               
-
               // if there are unconnected nodes - enable the download button
               if (DataService.unConnectedNodes === undefined) {
                   scope.unconnectedDownload = false;

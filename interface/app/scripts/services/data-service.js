@@ -46,10 +46,10 @@ angular.module('interfaceApp')
         var nodeSizesByRelatedDobjects = [];
 
         angular.forEach(nodes, function(v, k) {
-            nodeSizesByConnections.push(v.connections);
-            nodeSizesByRelatedEntities.push(v.relatedEntities);
-            nodeSizesByRelatedPublications.push(v.relatedPublications);
-            nodeSizesByRelatedDobjects.push(v.relatedDobjects);
+            if (v.connections !== undefined) nodeSizesByConnections.push(v.connections);
+            if (v.relatedEntities !== undefined) nodeSizesByRelatedEntities.push(v.relatedEntities);
+            if (v.relatedPublications !== undefined) nodeSizesByRelatedPublications.push(v.relatedPublications);
+            if (v.relatedDobjects !== undefined) nodeSizesByRelatedDobjects.push(v.relatedDobjects);
         })
         var weightBoundsByConnections = [Math.min.apply(null, nodeSizesByConnections), Math.max.apply(null, nodeSizesByConnections)];
         var weightBoundsByEntity = [Math.min.apply(null, nodeSizesByRelatedEntities), Math.max.apply(null, nodeSizesByRelatedEntities)];
@@ -61,30 +61,27 @@ angular.module('interfaceApp')
         var sizeByPublication = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBoundsByPublication), Math.max.apply(null, weightBoundsByPublication)]);
         var sizeByDobject = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBoundsByDobject), Math.max.apply(null, weightBoundsByDobject)]);
 
+
+        var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
         angular.forEach(nodes, function(v,k) {
-            try {
-                nodes[k].color = conf.colours[v.coreType.toLowerCase()];
-                nodes[k].r = sizeByConnections(v.connections);
-                nodes[k].rByEntity = sizeByEntity(v.relatedEntities);
-                nodes[k].rByPublication = sizeByPublication(v.relatedPublications);
-                nodes[k].rByDobject = sizeByDobject(v.relatedDobjects);
-            } catch(e) {
+            if (v.name !== undefined) {
+                v.color = conf.colours[v.coreType.toLowerCase()];
+                v.r = sizeByConnections(v.connections);
+                v.rByEntity = sizeByEntity(v.relatedEntities);
+                v.rByPublication = sizeByPublication(v.relatedPublications);
+                v.rByDobject = sizeByDobject(v.relatedDobjects);
+                nodemap[v.id] = v;
+                if (v.connections === 0) {
+                    unLinkedNodes.push(v);
+                } else {
+                    linkedNodes.push(v)
+                }
             }
         })
-        return nodes;
+        return { 'map': nodemap, 'linkedNodes': linkedNodes, 'unLinkedNodes': unLinkedNodes };
     }
 
     var DataService = {
-        // connected nodes
-        nodes: [],
-
-        // un-connected nodes
-        unConnectedNodes: [],
-
-        // links
-        links: [],
-
-        nodeColorByType: {},
         getEntityNetwork: getEntityNetwork,
         processNodeSet: processNodeSet
     }

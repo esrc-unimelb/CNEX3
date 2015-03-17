@@ -148,7 +148,11 @@ angular.module('interfaceApp')
                       })
                   });
           };
-          scope.drawDateVis();
+
+          // populate the controls widget
+          scope.$on('graph-data-loaded', function() {
+            scope.drawDateVis();
+          });
       }
     };
   }]);

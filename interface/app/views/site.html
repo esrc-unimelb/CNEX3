@@ -17,10 +17,16 @@
         <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3">
             <h4 class="text-center">Building the graph: {{processed}} of {{total}} entities processed.</h4>
             <p class="text-center">
-                This can take some time. You'll also notice the screen go blank after it's done building the<br/>
-                graph as the browser works desperately to draw the components.
-                <br/><br/>
-                The amount of time the browser requires to draw the graph <em>increases</em><br/>
+                This can take some time. 
+            </p>
+            <hr/>
+            <p class="text-center">
+               After the graph is built, the application may seem as if it has stalled.<br/>
+               Give it a moment; a data processing stage is preparing the data for display.<br/>
+               This can take quite some time and it increases as the graphs size increases.
+            </p>
+            <p class="text-center">
+                Finally, the amount of time the browser requires to draw the graph <em>increases</em><br/>
                 with increasing graph size so please <em>be patient.</em>
             </p>
         </div>
@@ -28,11 +34,11 @@
 </div>
 
 <div ng-hide="showEntityNetwork">
-    <div class="row" style="background-color: white;">
-        <div class="col-md-7 col-lg-7" ng-if="!progress && !datasetError && ready" style="padding-right: 0px;">
+    <div class="row" style="background-color: white;" ng-if="ready">
+        <div class="col-md-7 col-lg-7" style="padding-right: 0px;">
             <force-network-graph></force-network-graph>
         </div>
-        <div class="col-md-5 col-lg-5" ng-if="!progress && !datasetError && ready">
+        <div class="col-md-5 col-lg-5">
             <site-controls></site-controls>
         </div>
     </div>
