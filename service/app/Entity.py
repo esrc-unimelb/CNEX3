@@ -206,7 +206,6 @@ class Entity:
         # get the data file url
         if self.request.GET.get('q') is not None:
             datafile = self.request.GET.get('q').replace(self.source_map['source'], self.source_map['localpath'])
-            log.debug(datafile)
         else:
             return '' 
 
@@ -242,7 +241,7 @@ class Entity:
 
         else:
             # no EAC datafile
-            tree = html.parse(self.request.GET.get('q'))
+            tree = html.parse(datafile)
             data = tree.xpath('//dl[@class="content-summary"]')
             return None, etree.tostring(data[0])
 
