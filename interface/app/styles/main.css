@@ -52,5 +52,6 @@ path.link {
       animation: fadeOut 0.5s;
 }
 
-
-
+.table-hover > tbody > tr:hover {
+      background-color: #D9EDF7;
+}

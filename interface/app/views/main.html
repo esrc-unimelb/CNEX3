@@ -33,15 +33,19 @@
         </div>
     </div>
     <div ng-if="ready">
-        <span ng-repeat="site in sites">
-            <div class="row">
-                <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="col-sm-6 col-md-6"><span style="font-family:monospace;">{{site.code}}</span>&nbsp;&#8212;&nbsp;{{site.name}}</div>
-                    <div class="col-sm-3 col-md-3 text-center"><a href="#/site/{{site.code}}/byEntity">Explore by Context Entity</a></div>
-                    <div class="col-sm-3 col-md-3 text-center"><a href="{{site.url}}" target="_blank">visit site&nbsp;<i class="fa fa-external-link"></i></a></div>
-                </div>
-            </div>
-        </span>
+        <table class="table table-hover">
+            <tr ng-repeat="site in sites">
+                <td>
+                    <span style="font-family:monospace;">{{site.code}}</span>&nbsp;&#8212;&nbsp;{{site.name}}
+                </td>
+                <td>
+                    <a href="#/site/{{site.code}}/byEntity">Explore by Context Entity</a>
+                </td>
+                <td>
+                    <a href="{{site.url}}" target="_blank">visit site&nbsp;<i class="fa fa-external-link"></i></a>
+                </td>
+            </tr>
+        </table>
     </div>
     <div ng-if='serviceUnavailable'>
         Well this is embarassing! Sorry - but we seem to be a bit broken at this time...
