@@ -7,7 +7,6 @@ from pyramid.paster import setup_logging
 from config import Config as appConfig
 from connectors import MongoBackend
 
-
 def init_mongodb_connection(conf):
     m = MongoBackend()
     m.connect(conf)
@@ -20,6 +19,7 @@ def main(global_config, **settings):
     setup_logging(global_config['__file__'])
 
     config.add_renderer('jsonp', JSONP(param_name='callback'))
+    config.add_renderer('ujson', factory='app.renderers.UjsonRenderer')
     config.add_static_view('static', 'static', cache_max_age=3600)
 
     # initialise a connection to mongo on startup and store the client

@@ -163,4 +163,3 @@ def verify_access(request, site=None):
         else:
             return None, sites
 
-

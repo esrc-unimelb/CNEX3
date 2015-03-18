@@ -63,7 +63,7 @@ def network_build(request):
 
     return { 'started': True, 'name': site['name'], 'url': site['url'] }
 
-@view_config(route_name='network-build-status', request_method='GET', renderer='json')
+@view_config(route_name='network-build-status', request_method='GET', renderer='ujson')
 def network_build_status(request):
     db = mdb(request)
     site = request.matchdict['code']
@@ -84,7 +84,7 @@ def network_build_status(request):
         doc = db.network_progress.find_one({ 'site': site })
         return { 'total': doc['total'], 'processed': doc['processed'] }
 
-@view_config(route_name='entity-build-status', request_method='GET', renderer='json')
+@view_config(route_name='entity-build-status', request_method='GET', renderer='ujson')
 def entity_build_status(request):
     db = mdb(request)
     site = request.matchdict['code']
