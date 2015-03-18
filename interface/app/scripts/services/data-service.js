@@ -172,7 +172,7 @@ angular.module('interfaceApp')
         var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
         angular.forEach(nodes, function(v,k) {
             if (v.name !== undefined) {
-                v.color = conf.types[v.coreType.toLowerCase()];
+                v.color = conf.defaultColors[v.coreType.toLowerCase()];
                 v.r = sizeByConnections(v.connections);
                 v.rByEntity = sizeByEntity(v.relatedEntities);
                 v.rByPublication = sizeByPublication(v.relatedPublications);
