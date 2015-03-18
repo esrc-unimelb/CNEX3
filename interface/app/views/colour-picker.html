@@ -1,7 +1,7 @@
 <div style="position: relative; display: inline-block;">
     <button class="btn btn-sm btn-default" ng-hide='showPicker' ng-click="toggleColourPicker()">Colour Picker</button>
     <button class="btn btn-sm btn-default" ng-show='showPicker' ng-click="toggleColourPicker()">Hide Colour Picker</button>
-    <div style="position:absolute; z-index: 200; width: 200px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px;" 
+    <div style="position:absolute; z-index: 200; width: 350px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px;" 
          ng-if="showPicker" class="animate-if">
         <div ng-repeat="(type, colour) in colours">
             <p ng-click="changeColour(type)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
