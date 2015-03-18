@@ -7,6 +7,7 @@ angular.module('interfaceApp')
       templateUrl: 'views/date-vis.html',
       restrict: 'E',
       scope: {
+          data: '=',
       },
       link: function postLink(scope, element, attrs) {
 
@@ -43,7 +44,7 @@ angular.module('interfaceApp')
               scope.height = scope.width * 0.55;
 
               if (scope.ranges.length === 0 || scope.points.length === 0 || scope.dates.length === 0) {
-                  var nodes = DataService.nodes;
+                  var nodes = scope.data.nodes;
                   var points = [], ranges = [], dates = [];
 
                   // split the dataset into those nodes with both start and end
@@ -149,10 +150,9 @@ angular.module('interfaceApp')
                   });
           };
 
-          // populate the controls widget
-          scope.$on('graph-data-loaded', function() {
-            scope.drawDateVis();
-          });
+          // draw the graph
+          scope.drawDateVis();
+
       }
     };
   }]);
