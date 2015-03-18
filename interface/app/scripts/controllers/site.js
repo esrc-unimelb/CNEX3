@@ -12,19 +12,22 @@ angular.module('interfaceApp')
         $scope.initting = true;
         $scope.progress = false;
         $scope.datasetError = false;
+        $scope.ready = false;
+        $scope.loadGraph = false;
         $scope.total = 0;
         $scope.processed = 0;
 
         var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph;
         $http.get(url).then(function(d) {
             // kick off the progress update in a moment; needs time to get going..
-            $timeout(function() { $scope.update(); }, 200);
+            $timeout(function() { $scope.update(); }, 100);
             $scope.progress = false;
-            DataService.site = {
+            $scope.site = {
                 'name': d.data.name,
                 'url': d.data.url,
                 'code': $scope.site
             }
+            DataService.site = $scope.site;
         },
         function() {
             $scope.datasetError = true;
@@ -53,7 +56,7 @@ angular.module('interfaceApp')
         });
 
         $scope.update = function() {
-            var url = $scope.service + '/network/' + $scope.site + '/' + $scope.graph + '/status';
+            var url = $scope.service + '/network/' + $scope.site.code + '/' + $scope.graph + '/status';
             $http.get(url).then(function(resp) {
                 if (resp.data.processed !== null) {
                     $scope.initting = false;
@@ -73,72 +76,13 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
-            // store the graph
-            DataService.siteGraph = d.graph;
-
-            var ns = d.graph.nodes;
-            var ls = d.graph.links;
-
-            // add some color and the default node radius
-            // split the dataset into linked and unlinked
-            ns = DataService.processNodeSet(ns);
-            var nodemap = ns.map,
-                linkedNodes = ns.linkedNodes,
-                unLinkedNodes = ns.unLinkedNodes;
-            var nodeKey = _.pluck(linkedNodes, 'id');
-            
-            // rebuild the links array using the positions from the linkedNodes array
-            var links = [];
-            // figure out the connectedNodes and associated links
-            angular.forEach(ls, function(v, k) {
-                var sn = v.source_id;
-                var tn = v.target_id;
-
-                if (nodeKey.indexOf(sn) !== -1 && nodeKey.indexOf(tn) !== -1) {
-                    var link = {
-                        'source': nodeKey.indexOf(sn),
-                        'target': nodeKey.indexOf(tn),
-                        'source_id': sn,
-                        'target_id': tn
-                    }
-                    links.push(link);
-                }
-            });
-
-
-            // group unconnected nodes by type and sort alphabetically
-            DataService.unConnectedNodes = {};
-            var undata = _.groupBy(unLinkedNodes, function(d) { return d.type; });
-            angular.forEach(undata, function(v, k) {
-                DataService.unConnectedNodes[k] = _.sortBy(v, function(d) { return d.name; });
-            });
-
-            DataService.nodes = linkedNodes;
-            DataService.links = links;
-            DataService.nodeMap = nodemap;
-
-            var types = {};
-            angular.forEach(linkedNodes, function(v,k) {
-                if (types[v.type] === undefined) {
-                    types[v.type] = { 
-                        'count': 1, 
-                        'checked': false, 
-                        'color': v.color, 
-                        'coreType': v.coreType.toLowerCase(), 
-                        'coreTypeDisplayName': conf.mapForward[v.coreType.toLowerCase()]
-                    };
-                } else {
-                    types[v.type].count += 1;
-                }
-            })
-            DataService.types = types;
-
-            // get the data structure ready for the graph and 
+            $scope.data = DataService.processSiteData(d);
 
             // now get it all going
             $scope.ready = true;
+            
             $timeout(function(d) {
-                $rootScope.$broadcast('graph-data-loaded');
+                $scope.loadGraph = true;
             }, 100);
         }
 
