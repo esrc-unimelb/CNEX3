@@ -180,16 +180,20 @@ angular.module('interfaceApp')
         var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
         angular.forEach(nodes, function(v,k) {
             if (v.name !== undefined) {
-                v.color = conf.defaultColors[v.coreType.toLowerCase()];
-                v.r = sizeByConnections(v.connections);
-                v.rByEntity = sizeByEntity(v.relatedEntities);
-                v.rByPublication = sizeByPublication(v.relatedPublications);
-                v.rByDobject = sizeByDobject(v.relatedDobjects);
-                nodemap[v.id] = v;
-                if (v.connections === 0) {
-                    unLinkedNodes.push(v);
-                } else {
-                    linkedNodes.push(v)
+                try {
+                    v.color = conf.defaultColors[v.coreType.toLowerCase()];
+                    v.r = sizeByConnections(v.connections);
+                    v.rByEntity = sizeByEntity(v.relatedEntities);
+                    v.rByPublication = sizeByPublication(v.relatedPublications);
+                    v.rByDobject = sizeByDobject(v.relatedDobjects);
+                    nodemap[v.id] = v;
+                    if (v.connections === 0) {
+                        unLinkedNodes.push(v);
+                    } else {
+                        linkedNodes.push(v)
+                    }
+                } catch(e) {
+                    // skip bad data
                 }
             }
         })
