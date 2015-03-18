@@ -14,18 +14,19 @@
         <progress-meter processed="{{processed}}" total="{{total}}" error="{{datasetError}}"></progress-meter>
     </div>
     <div class="row">
-        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3">
-            <h4 class="text-center">Building the graph: {{processed}} of {{total}} entities processed.</h4>
-            <p class="text-center">
+        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3 text-center">
+            <h4>{{site.name}}</h4>
+            <h3>Building the graph: {{processed}} of {{total}} entities processed.</h3>
+            <p>
                 This can take some time. 
             </p>
             <hr/>
-            <p class="text-center">
+            <p>
                After the graph is built, the application may seem as if it has stalled.<br/>
                Give it a moment; a data processing stage is preparing the data for display.<br/>
                This can take quite some time and it increases as the graphs size increases.
             </p>
-            <p class="text-center">
+            <p>
                 Finally, the amount of time the browser requires to draw the graph <em>increases</em><br/>
                 with increasing graph size so please <em>be patient.</em>
             </p>
@@ -36,10 +37,10 @@
 <div ng-hide="showEntityNetwork">
     <div class="row" style="background-color: white;" ng-if="ready">
         <div class="col-md-7 col-lg-7" style="padding-right: 0px;">
-            <force-network-graph></force-network-graph>
+            <force-network-graph data='data' ng-if="loadGraph"></force-network-graph>
         </div>
         <div class="col-md-5 col-lg-5">
-            <site-controls></site-controls>
+            <site-controls data='data' site='site' ></site-controls>
         </div>
     </div>
 </div>
