@@ -7,11 +7,44 @@ angular.module('interfaceApp')
       templateUrl: 'views/site-controls.html',
       restrict: 'E',
       scope: {
+          data: '=',
+          site: '='
       },
       link: function postLink(scope, element, attrs) {
+
+          // assemble the CSV
+          scope.construct = function(what) {
+              var d = [];
+              if (what === 'selected') {
+                  angular.forEach(DataService.selected, function(v,k) {
+                      d.push([v.id, v.type, v.name, v.url]);
+                  });
+                  scope.selectedNodesData = d;
+              } else if (what === 'unconnected') {
+                  angular.forEach(scope.data.unConnectedNodes, function(v,k) {
+                      angular.forEach(v, function(i, j) {
+                        d.push([i.id, i.type, i.name, i.url]);
+                      })
+                  });
+                  scope.unConnectedNodesData = d;
+              }
+          }
+
           scope.labelsVisible = true;
           scope.currentRotation = 0;
           scope.disableDownloadButton = false;
+          scope.unconnectedDownload = false;
+          scope.data.unConnectedTotal = 0;
+
+          // if there are unconnected nodes, count them and enable the download button
+          if (scope.data.unConnectedNodes !== undefined) {
+              angular.forEach(scope.data.unConnectedNodes, function(v,k) {
+                  scope.data.unConnectedTotal += v.length;
+              });
+
+              scope.construct('unconnected');
+              scope.unconnectedDownload = true;
+          }
 
           var w = angular.element($window);
           w.bind('resize', function() {
@@ -27,35 +60,9 @@ angular.module('interfaceApp')
                   'overflow-y': 'auto'
               }
           }
+
           sizeThePanel();
           scope.showData = false;
-
-          // populate the controls widget
-          scope.$on('graph-data-loaded', function() {
-              scope.site = DataService.site;
-              scope.data = {
-                  nodes: DataService.nodes,
-                  links: DataService.links,
-                  unConnected: DataService.unConnectedNodes,
-              }
-
-              scope.data.unConnectedTotal = 0;
-              angular.forEach(DataService.unConnectedNodes, function(v,k) {
-                  scope.data.unConnectedTotal += v.length;
-              });
-              
-              // if there are unconnected nodes - enable the download button
-              if (DataService.unConnectedNodes === undefined) {
-                  scope.unconnectedDownload = false;
-              } else {
-                  scope.construct('unconnected');
-                  scope.unconnectedDownload = true;
-              }
-
-              // get the types
-              scope.data.types = DataService.types;
-          });
-
           // process the data when it's available
           scope.$on('node-data-ready', function() {
               var cndata;
@@ -65,7 +72,7 @@ angular.module('interfaceApp')
                   scope.clearTypes();
 
                   // get the context node data and extract the node from the selected array
-                  scope.contextNodeData = DataService.nodeMap[DataService.contextNode];
+                  scope.contextNodeData = scope.data.datamap[DataService.contextNode];
                   cndata = _.reject(DataService.selected, function(d) { return d.id === DataService.contextNode });
               } else {
                   cndata = DataService.selected;
@@ -201,25 +208,6 @@ angular.module('interfaceApp')
               scope.currentRotation = d3s.rotateRight('#site_graph', scope.currentRotation);
           }
 */
-
-          // assemble the CSV
-          scope.construct = function(what) {
-              var d = [];
-              if (what === 'selected') {
-                  angular.forEach(DataService.selected, function(v,k) {
-                      d.push([v.id, v.type, v.name, v.url]);
-                  });
-                  scope.selectedNodesData = d;
-              } else if (what === 'unconnected') {
-                  angular.forEach(scope.data.unConnected, function(v,k) {
-                      angular.forEach(v, function(i, j) {
-                        d.push([i.id, i.type, i.name, i.url]);
-                      })
-                  });
-                  scope.unConnectedNodesData = d;
-              }
-          }
-
           // download the graph data
           scope.downloadGraph = function() {
             scope.disableDownloadButton = true;
