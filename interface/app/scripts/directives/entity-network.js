@@ -443,6 +443,13 @@ angular.module('interfaceApp')
                               return '#ccc';
                           }
                       })
+                      .attr('stroke', function(d) {
+                          if (highlight.indexOf(d.id) !== -1) {
+                              return d.color;
+                          } else {
+                              return '#ccc';
+                          }
+                      })
                       .attr('opacity', function(d) {
                           if (highlight.indexOf(d.id) !== -1) {
                               return conf.opacity.default;
