@@ -15,7 +15,7 @@ angular.module('interfaceApp')
       },
       'searchWhat': [ '0', '1', '2', '3' ],
 
-      'colours': {
+      'types': {
           'person': '#FF6961',
           'corporatebody': '#779ECB',
           'event': '#03C03C',

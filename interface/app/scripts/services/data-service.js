@@ -40,7 +40,6 @@ angular.module('interfaceApp')
         DataService.entityGraph = d.graph;
 
         var ns = DataService.processNodeSet(d.nodes);
-        DataService.types = processTypes(ns.linkedNodes);
         DataService.entityData = {
             'nodes': ns.linkedNodes,
             'links': d.links,
@@ -112,21 +111,40 @@ angular.module('interfaceApp')
         // construct an object keyed by types in the dataset
         var types = {};
         angular.forEach(nodes, function(v,k) {
-            if (types[v.type] === undefined) {
-                types[v.type] = {
+            if (conf.mapForward[v.type.toLowerCase()] !== undefined) {
+                k = conf.mapForward[v.type.toLowerCase()];
+            } else {
+                k = v.type
+            }
+            if (types[k] === undefined) {
+                types[k] = {
                     'count': 1,
                     'checked': false,
                     'color': v.color,
-                    'coreType': v.coreType.toLowerCase(),
-                    'coreTypeDisplayName': conf.mapForward[v.coreType.toLowerCase()]
+                    'coreType': conf.mapForward[v.coreType.toLowerCase()]
                 };
             } else {
-                types[v.type].count += 1;
+                types[k].count += 1;
             }
         })
+        conf.types = types;
         return types;
-
     }
+
+    function getColor(k) {
+        if (conf.mapForward[k.toLowerCase()] !== undefined) {
+            k = conf.mapForward[k.toLowerCase()];
+        }
+        return conf.types[k].color;
+    }
+
+    function setColor(k, color) {
+        if (conf.mapForward[k.toLowerCase()] !== undefined) {
+            k = conf.mapForward[k.toLowerCase()];
+        }
+        conf.types[k].color = color;
+    }
+
     function processNodeSet(nodes) {
         // determine the lowest and highest neighbour counts
         var nodeSizesByConnections = [];
@@ -154,7 +172,7 @@ angular.module('interfaceApp')
         var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
         angular.forEach(nodes, function(v,k) {
             if (v.name !== undefined) {
-                v.color = conf.colours[v.coreType.toLowerCase()];
+                v.color = conf.types[v.coreType.toLowerCase()];
                 v.r = sizeByConnections(v.connections);
                 v.rByEntity = sizeByEntity(v.relatedEntities);
                 v.rByPublication = sizeByPublication(v.relatedPublications);
@@ -175,7 +193,9 @@ angular.module('interfaceApp')
 
         getEntityNetwork: getEntityNetwork,
         processSiteData: processSiteData,
-        processNodeSet: processNodeSet
+        processNodeSet: processNodeSet,
+        getColor: getColor,
+        setColor: setColor,
     }
 
     return DataService;

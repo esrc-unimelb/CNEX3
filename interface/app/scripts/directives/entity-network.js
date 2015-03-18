@@ -23,6 +23,22 @@ angular.module('interfaceApp')
               scope.contextNode = scope.data.datamap[DataService.currentEntity];
               scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id) + '?link=false';
               scope.iframeCode = "<iframe src='" + scope.graphLink + "' style='border:0; width: 1024; height: 90%;' seamless='true' ></iframe>";
+
+              // construct the entity stats object
+              var bytype = _.groupBy(scope.data.nodes, function(d) { return d.type; });
+              scope.stats = {};
+              angular.forEach(bytype, function(v, k) {
+                  var color = DataService.getColor(k);
+                  if (conf.mapForward[k.toLowerCase()] !== undefined) {
+                      k = conf.mapForward[k.toLowerCase()];
+                  }
+                  var entries = _.sortBy(v, function(d) { return d.name; });
+                  scope.stats[k] = {
+                    'entries': entries,
+                    'count': entries.length,
+                    'color': color,
+                  };
+              });
               scope.ready = true;
               scope.drawGraph();
           })
@@ -104,17 +120,17 @@ angular.module('interfaceApp')
               var nodes = d3.select('#entity_graph')
                             .selectAll('.node')
                             .data();
-              var ns = DataService.processNodeSet(nodes);
               d3.select('#entity_graph')
                 .transition()
                 .duration(500)
                 .selectAll('.node')
-                .attr('fill', function(d) { return d.color; } )
-                .style('stroke', function(d) { return d.color; });
+                .attr('fill', function(d) { return DataService.getColor(d.type); } )
+                .style('stroke', function(d) { return DataService.getColor(d.type); });
 
-              angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k].color = conf.colours[v.coreType];
-              })
+              angular.forEach(scope.stats, function(v,k) {
+                  scope.stats[k].color = conf.types[k].color;
+              });
+              scope.data.types = conf.types;
           });
 
           scope.showDetails = function(d) {

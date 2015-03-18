@@ -112,7 +112,7 @@ angular.module('interfaceApp')
           .duration(500)
           .attr('fill', function(d) {
               if (selections.indexOf(d.id) !== -1) {
-                  return d.color;
+                  return DataService.getColor(d.type);
               } else {
                   return '#ccc';
               }
@@ -121,7 +121,7 @@ angular.module('interfaceApp')
               if (d.id === contextNode) {
                   return 'black'
               } else if (selections.indexOf(d.id) !== -1) {
-                  return d.color; 
+                  return DataService.getColor(d.type); 
               } else {
                   return '#ccc';
               }
@@ -146,7 +146,7 @@ angular.module('interfaceApp')
               if (d.id === contextNode) {
                   return 'black'
               } else if (selections.indexOf(d.id) !== -1) {
-                  return d.color;
+                  return DataService.getColor(d.type);
               } else {
                   return '#ccc';
               }
@@ -192,10 +192,10 @@ angular.module('interfaceApp')
               return d[d3s.sizeBy];
           })
           .attr('fill', function(d) {
-              return d.color;
+              return DataService.getColor(d.type);
           })
           .style('stroke', function(d) {
-              return d.color;
+              return DataService.getColor(d.type);
           })
           .attr('opacity', function(d) {
               return conf.opacity.default;
@@ -212,7 +212,7 @@ angular.module('interfaceApp')
           .duration(500)
           .attr('opacity', conf.opacity.default)
           .style('stroke', function(d) {
-              return d.color;
+              return DataService.getColor(d.type);
           });
 
         d3s.type = [];

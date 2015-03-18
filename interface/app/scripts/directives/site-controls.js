@@ -116,18 +116,16 @@ angular.module('interfaceApp')
                 .transition()
                 .duration(500)
                 .selectAll('.node')
-                .attr('fill', function(d) { return d.color; } )
-                .style('stroke', function(d) { return d.color; });
+                .attr('fill', function(d) { return DataService.getColor(d.type); } )
+                .style('stroke', function(d) { return DataService.getColor(d.type); });
 
               d3.selectAll('.date')
                 .transition()
                 .duration(500)
-                .attr('fill', function(d) { return d.color; })
-                .style('stroke', function(d) { return d.color; });
+                .attr('fill', function(d) { return DataService.getColor(d.type); } )
+                .style('stroke', function(d) { return DataService.getColor(d.type); });
 
-              angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k].color = conf.colours[v.coreType.toLowerCase()];
-              })
+              scope.data.types = conf.types;
 
           });
 

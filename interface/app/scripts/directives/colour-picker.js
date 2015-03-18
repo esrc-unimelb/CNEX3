@@ -17,7 +17,10 @@ angular.module('interfaceApp')
           scope.colours = {};
           var t = scope.types === undefined ? DataService.types : scope.types
           angular.forEach(t, function(v, k) {
-              scope.colours[conf.mapForward[v.coreType]] = conf.colours[v.coreType];
+              if (conf.mapForward[k.toLowerCase()] !== undefined) {
+                  k = conf.mapForward[k.toLowerCase()];
+              }
+              scope.colours[k] = v.color;
           });
 
           // get the pallette from the configuration
@@ -35,7 +38,7 @@ angular.module('interfaceApp')
           }
           scope.setColour = function(colour) {
               scope.colours[scope.type] = colour;
-              conf.colours[conf.mapReverse()[scope.type]] = colour;
+              DataService.setColor(scope.type, colour);
               scope.showPicker = true;
               scope.showChooser = false;
               $rootScope.$broadcast('colours-changed');
