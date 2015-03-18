@@ -25,10 +25,7 @@ angular.module('interfaceApp')
             var url = service + '/entity/' + DataService.site.code + '/' + entityId + '/status';
             $http.get(url).then(function(resp) {
                 if (resp.data.status === 'complete') {
-                    resp.data.graph.nodes = DataService.processNodeSet(resp.data.graph.nodes);
-                    //DataService.entityNetwork = resp.data.graph;
-                    DataService.entityNetwork = DataService.processNodeSet(resp.data.graph);
-                    $rootScope.$broadcast('draw-entity-graph');
+                    processEntityData(resp.data.graph);
                 } else {
                     $timeout( function() { getData(); }, 100 );
                 }
@@ -38,6 +35,98 @@ angular.module('interfaceApp')
         }
     }
 
+    function processEntityData(d) { 
+        // store the graph
+        DataService.entityGraph = d.graph;
+
+        var ns = DataService.processNodeSet(d.nodes);
+        DataService.types = processTypes(ns.linkedNodes);
+        DataService.entityData = {
+            'nodes': ns.linkedNodes,
+            'links': d.links,
+            'types': processTypes(ns.linkedNodes),
+            'datamap': ns.map,
+        }
+        $rootScope.$broadcast('draw-entity-graph');
+    }
+
+    function processSiteData(d) {
+
+        // store the graph
+        DataService.siteGraph = d.graph;
+
+        var ns = d.graph.nodes;
+        var ls = d.graph.links;
+
+        // add some color and the default node radius
+        // split the dataset into linked and unlinked
+        ns = DataService.processNodeSet(ns);
+        var datamap = ns.map,
+            linkedNodes = ns.linkedNodes,
+            unLinkedNodes = ns.unLinkedNodes;
+
+        // get the data structure ready for the graph and
+        var data = {
+            'nodes': linkedNodes,
+            'links': processLinks(ls, _.pluck(linkedNodes, 'id')),
+            'unConnectedNodes': processUnLinkedNodes(unLinkedNodes),
+            'types': processTypes(linkedNodes),
+            'datamap': datamap,
+        }
+        return data;
+
+    }
+
+    function processLinks(ls, nodeKey) {
+        // rebuild the links array using the positions from the linkedNodes array
+        var links = [];
+        // figure out the connectedNodes and associated links
+        angular.forEach(ls, function(v, k) {
+            var sn = v.sid;
+            var tn = v.tid;
+
+            if (nodeKey.indexOf(sn) !== -1 && nodeKey.indexOf(tn) !== -1) {
+                var link = {
+                    'source': nodeKey.indexOf(sn),
+                    'target': nodeKey.indexOf(tn),
+                    'source_id': sn,
+                    'target_id': tn
+                }
+                links.push(link);
+            }
+        });
+        return links;
+    }
+
+    function processUnLinkedNodes(nodes) {
+        // group unconnected nodes by type and sort alphabetically
+        var unConnectedNodes = {};
+        var undata = _.groupBy(nodes, function(d) { return d.type; });
+        angular.forEach(undata, function(v, k) {
+            unConnectedNodes[k] = _.sortBy(v, function(d) { return d.name; });
+        });
+        return unConnectedNodes;
+    }
+
+    function processTypes(nodes) {
+        // construct an object keyed by types in the dataset
+        var types = {};
+        angular.forEach(nodes, function(v,k) {
+            if (types[v.type] === undefined) {
+                types[v.type] = {
+                    'count': 1,
+                    'checked': false,
+                    'color': v.color,
+                    'coreType': v.coreType.toLowerCase(),
+                    'coreTypeDisplayName': conf.mapForward[v.coreType.toLowerCase()]
+                };
+            } else {
+                types[v.type].count += 1;
+            }
+        })
+        return types;
+
+    }
     function processNodeSet(nodes) {
         // determine the lowest and highest neighbour counts
         var nodeSizesByConnections = [];
@@ -82,7 +171,10 @@ angular.module('interfaceApp')
     }
 
     var DataService = {
+        processingStatus: {},
+
         getEntityNetwork: getEntityNetwork,
+        processSiteData: processSiteData,
         processNodeSet: processNodeSet
     }
 
