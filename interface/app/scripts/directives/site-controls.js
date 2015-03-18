@@ -37,7 +37,7 @@ angular.module('interfaceApp')
           scope.data.unConnectedTotal = 0;
 
           // if there are unconnected nodes, count them and enable the download button
-          if (scope.data.unConnectedNodes !== undefined) {
+          if (!_.isEmpty(scope.data.unConnectedNodes)) {
               angular.forEach(scope.data.unConnectedNodes, function(v,k) {
                   scope.data.unConnectedTotal += v.length;
               });
