@@ -130,7 +130,10 @@ angular.module('interfaceApp')
               angular.forEach(scope.stats, function(v,k) {
                   scope.stats[k].color = conf.types[k].color;
               });
-              scope.data.types = conf.types;
+
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k] = conf.types[k].color;
+              })
           });
 
           scope.showDetails = function(d) {
@@ -144,7 +147,7 @@ angular.module('interfaceApp')
                   d3.select('#entity_graph')
                     .select('#node_' + d.id)
                     .attr('stroke', 'black')
-                    .attr('fill', d.color);
+                    .attr('fill', DataService.getColor(d.type));
 
                   // highlight the relevant links
                   angular.forEach(scope.selections, function(v, k) {
@@ -195,7 +198,7 @@ angular.module('interfaceApp')
                   // remove node highlighting
                   d3.select('#entity_graph')
                     .select('#node_' + d.id)
-                    .attr('stroke', d.color);
+                    .attr('stroke', DataService.getColor(d.type));
 
                   // remove link highlight
                   angular.forEach(scope.selections, function(v, k) {
@@ -267,8 +270,8 @@ angular.module('interfaceApp')
                 .transition()
                 .duration(250)
                 .selectAll('.node')
-                .attr('fill', function(d) { return d.color; })
-                .style('stroke', function(d) { return d.color; })
+                .attr('fill', function(d) { return DataService.getColor(d.type); })
+                .style('stroke', function(d) { return DataService.getColor(d.type); })
                 .style('opacity', conf.opacity.default);
            
               // remove link highlight
@@ -416,7 +419,7 @@ angular.module('interfaceApp')
                     return d.r;
                 })
                 .attr('fill', function(d) {
-                    return d.color;
+                    return DataService.getColor(d.type);
                 })
                 .on('click', function(d) {
                     scope.$apply(function() {
@@ -454,14 +457,14 @@ angular.module('interfaceApp')
                       .selectAll('.node')
                       .attr('fill', function(d) {
                           if (highlight.indexOf(d.id) !== -1) {
-                              return d.color;
+                              return DataService.getColor(d.type);
                           } else {
                               return '#ccc';
                           }
                       })
                       .attr('stroke', function(d) {
                           if (highlight.indexOf(d.id) !== -1) {
-                              return d.color;
+                              return DataService.getColor(d.type);
                           } else {
                               return '#ccc';
                           }
@@ -476,7 +479,7 @@ angular.module('interfaceApp')
               } else {
                   d3.select('#entity_graph')
                     .selectAll('.node')
-                    .attr('fill', function(d) { return d.color; })
+                    .attr('fill', function(d) { return DataService.getColor(d.type); })
                     .attr('opacity', conf.opacity.default);
                   d3.select('#entity_graph')
                     .selectAll('.link')

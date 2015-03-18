@@ -14,19 +14,22 @@ angular.module('interfaceApp')
           scope.custom = {};
 
           // get the default colours from the configuration
-          scope.colours = {};
-          var t = scope.types === undefined ? DataService.types : scope.types
-          angular.forEach(t, function(v, k) {
-              if (conf.mapForward[k.toLowerCase()] !== undefined) {
-                  k = conf.mapForward[k.toLowerCase()];
-              }
-              scope.colours[k] = v.color;
-          });
+          var process = function() {
+              scope.colours = {};
+              angular.forEach(scope.types, function(v, k) {
+                  if (conf.mapForward[k.toLowerCase()] !== undefined) {
+                      k = conf.mapForward[k.toLowerCase()];
+                  }
+                  scope.colours[k] = conf.types[k].color;
+              });
+          }
+          process();
 
           // get the pallette from the configuration
           scope.pallette = conf.pallette;
 
           scope.toggleColourPicker = function() {
+              process();
               scope.showPicker = !scope.showPicker;
               scope.showChooser = false;
           }

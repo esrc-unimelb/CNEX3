@@ -127,8 +127,16 @@ angular.module('interfaceApp')
                 types[k].count += 1;
             }
         })
-        conf.types = types;
+        setTypes(types);
         return types;
+    }
+
+    function setTypes(types) {
+        angular.forEach(types, function(v,k) {
+            if (conf.types[k] === undefined) {
+                conf.types[k] = v;
+            }
+        });
     }
 
     function getColor(k) {

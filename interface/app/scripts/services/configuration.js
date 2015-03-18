@@ -28,6 +28,8 @@ angular.module('interfaceApp')
 
       },
 
+      types: {},
+
       'mapForward': {
           'person': 'Person',
           'corporatebody': 'Corporate Body',
