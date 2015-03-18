@@ -137,7 +137,7 @@ class Entity:
             else:
                 rtype = core_type
             self.graph.add_node(rid, { 'type': rtype, 'coreType': core_type, 'name': rname, 'url': rurl })
-            self.graph.add_edge(rid, node_id, source_id=rid, target_id=node_id)
+            self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
 
         if ndegrees == 1:
             return
@@ -179,7 +179,7 @@ class Entity:
 
                 # add node, add edge, call this method on this node
                 self.graph.add_node(neighbour_id)
-                self.graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
+                self.graph.add_edge(node_id, neighbour_id, sid=node_id, tid=neighbour_id)
                 self.entities_as_nodes(neighbour_tree, ndegrees)
             except KeyError:
                 pass

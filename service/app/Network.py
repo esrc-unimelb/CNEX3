@@ -161,12 +161,12 @@ class Network:
         if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
             for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
                 graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
-                graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
+                graph.add_edge(node_id, function.text, sid=node_id, tid=function.text)
 
         else:
             for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
                 graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
-                graph.add_edge(node_id, function.text, source_id=node_id, target_id=function.text)
+                graph.add_edge(node_id, function.text, sid=node_id, tid=function.text)
     
     def entities_as_nodes(self, graph, tree):
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
@@ -219,7 +219,7 @@ class Network:
                 neighbour_ref = node.attrib['{http://www.w3.org/1999/xlink}href']
                 neighbour_id = os.path.basename(neighbour_ref).split('b.htm')[0]
                 graph.add_node(neighbour_id)
-                graph.add_edge(node_id, neighbour_id, source_id=node_id, target_id=neighbour_id)
+                graph.add_edge(node_id, neighbour_id, sid=node_id, tid=neighbour_id)
             except KeyError:
                 pass
         #print node_id, node_source, node_type
