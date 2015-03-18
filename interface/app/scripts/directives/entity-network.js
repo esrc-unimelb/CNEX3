@@ -18,6 +18,16 @@ angular.module('interfaceApp')
           //   or is linked to from some other site.
           scope.removeClose = false;
 
+          scope.$on('draw-entity-graph', function() {
+              scope.data = DataService.entityData;
+              scope.contextNode = scope.data.datamap[DataService.currentEntity];
+              scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id) + '?link=false';
+              scope.iframeCode = "<iframe src='" + scope.graphLink + "' style='border:0; width: 1024; height: 90%;' seamless='true' ></iframe>";
+              scope.ready = true;
+              scope.drawGraph();
+          })
+
+
           if ($routeParams.link === "false") {
               scope.hideLinks = true;
               scope.removeClose = true;
@@ -102,32 +112,10 @@ angular.module('interfaceApp')
                 .attr('fill', function(d) { return d.color; } )
                 .style('stroke', function(d) { return d.color; });
 
-              angular.forEach(scope.stats, function(v,k) {
-                  scope.stats[k].color = conf.colours[v.coreType];
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k].color = conf.colours[v.coreType];
               })
           });
-
-          var graphStatistics = function(d) {
-              scope.stats = {}
-              angular.forEach(d.nodes, function(v,k) {
-                  if (v.id === DataService.currentEntity) {
-                      scope.contextNode = v;
-                  }
-                  if (scope.stats[v.type] === undefined) {
-                      scope.stats[v.type] = {
-                          'count': 1,
-                          'color': v.color,
-                          'entries': [ v ],
-                          'coreType': v.coreType.toLowerCase()
-                      }
-                  } else {
-                      scope.stats[v.type].count += 1;
-                      scope.stats[v.type].entries.push(v);
-                  }
-              })
-              scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id) + '?link=false';
-              scope.iframeCode = "<iframe src='" + scope.graphLink + "' style='border:0; width: 1024; height: 90%;' seamless='true' ></iframe>";
-          }
 
           scope.showDetails = function(d) {
               if (scope.selections.indexOf(d.id) === -1) {
@@ -310,7 +298,7 @@ angular.module('interfaceApp')
               d3s.renderLabels('#entity_graph');
           }
 
-          scope.drawGraph = function(d) {
+          scope.drawGraph = function() {
               scope.selections = [];
               scope.selectionData = {};
 
@@ -362,9 +350,10 @@ angular.module('interfaceApp')
                              //.translate([scope.svgWidth/5, scope.h/6])
                              .scaleExtent([0,8]).on('zoom', scope.redraw);
 
+
               scope.force = d3.layout.force()
-                .nodes(d.nodes)
-                .links(d.links)
+                .nodes(scope.data.nodes)
+                .links(scope.data.links)
                 .charge(-2000)
                 .linkDistance(200)
                 .linkStrength(1)
@@ -382,14 +371,12 @@ angular.module('interfaceApp')
                 .call(scope.zoom)
                 .append('g')
                 .attr('class', 'node-container');
-                //.attr('transform','rotate(0) translate(' + scope.svgWidth/5 + ',' + scope.h/6 + ') scale(.6)');
 
               // add a group for the text elements we add later
               d3.select('#entity_graph')
                 .select('svg')
                 .append('g')
                 .attr('class', 'text-container');
-                //.attr('transform','rotate(0) translate(' + scope.svgWidth/5 + ',' + scope.h/6 + ') scale(.6)');
 
               var path = svg.selectAll('.link').data(scope.force.links());
               var node = svg.selectAll('.node').data(scope.force.nodes());
@@ -399,7 +386,7 @@ angular.module('interfaceApp')
                   .append("svg:path")
                   .attr("class", "link")
                   .attr('id', function(d) {
-                    return 'link_' + d.source_id + '_' + d.target_id;
+                    return 'link_' + d.sid + '_' + d.tid;
                   });
 
               //draw the nodes
@@ -424,13 +411,6 @@ angular.module('interfaceApp')
                 scope.centerGraph();
           }
 
-          scope.$on('draw-entity-graph', function() {
-              scope.ready = true;
-              var d = DataService.entityNetwork;
-              graphStatistics(d);
-              scope.drawGraph(d);
-          })
-
           scope.close = function() {
               $rootScope.$broadcast('destroy-entity-network-view');
           }
@@ -444,11 +424,11 @@ angular.module('interfaceApp')
                   d3.select('#entity_graph')
                     .selectAll('.link')
                     .attr('opacity', function(d) {
-                        if (d.source_id === scope.contextNode.id) {
-                            highlight.push(d.target_id);
+                        if (d.sid === scope.contextNode.id) {
+                            highlight.push(d.tid);
                             return conf.opacity.default;
-                        } else if ( d.target_id === scope.contextNode.id) {
-                            highlight.push(d.source_id);
+                        } else if ( d.tid === scope.contextNode.id) {
+                            highlight.push(d.sid);
                             return conf.opacity.default;
                         } else {
                             return conf.opacity.unselected;
