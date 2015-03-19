@@ -75,11 +75,12 @@ def network_build_status(request):
         graph_data = doc['graph_data']
         doc = db.network_progress.remove({ 'site': site })
 
-        G = json_graph.node_link_graph(graph_data, directed=False, multigraph=False)
-        if not nx.is_connected(G):
-            components = nx.connected_component_subgraphs(G)
-            (index, G) = max(enumerate(components), key = lambda tup: len(tup[1]))
-        return { 'total': None, 'processed': None, 'graph': graph_data, 'center': nx.center(G) }
+#        G = json_graph.node_link_graph(graph_data, directed=False, multigraph=False)
+#        if not nx.is_connected(G):
+#            components = nx.connected_component_subgraphs(G)
+#            (index, G) = max(enumerate(components), key = lambda tup: len(tup[1]))
+#        return { 'total': None, 'processed': None, 'graph': graph_data, 'center': nx.center(G) }
+        return { 'total': None, 'processed': None, 'graph': graph_data }
     else:
         doc = db.network_progress.find_one({ 'site': site })
         return { 'total': doc['total'], 'processed': doc['processed'] }
