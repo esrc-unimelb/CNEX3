@@ -46,7 +46,16 @@ def health_check(request):
 @view_config(route_name='home', request_method='GET', renderer='json')
 def home_page(request):
     claims, sites = verify_access(request)
-    return { 'sites': sites }
+
+    # strip the data that's NOT required
+    clean_sites = {}
+    for k, v in sites.items():
+        clean_sites[k] = {
+            'code': v['code'],
+            'name': v['name'],
+            'url': v['url']
+        }
+    return { 'sites': clean_sites }
 
 @view_config(route_name='network-build', request_method='GET', renderer='json')
 def network_build(request):
