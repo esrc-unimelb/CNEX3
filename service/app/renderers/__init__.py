@@ -22,6 +22,6 @@ class UjsonRenderer(object):
             response = request.response
             ct = response.content_type
             if ct == response.default_content_type:
-                response.content_type = 'application/x-msgpack'
+                response.content_type = 'application/x-json'
         return ujson.dumps(value)
 
