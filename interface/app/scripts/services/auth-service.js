@@ -89,6 +89,7 @@ angular.module('interfaceApp')
           function(resp) {
               // if we get a 401 Unauthorized - try the login again
               if (resp.status === 401) {
+                  AuthService.logout();
                   $rootScope.$broadcast('user-logged-out');
                   if (redirectToLogin !== false) {
                       MCS.removeShown();

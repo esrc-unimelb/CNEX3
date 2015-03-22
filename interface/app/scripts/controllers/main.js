@@ -19,7 +19,10 @@ angular.module('interfaceApp')
             $scope.ready = false;
         });
       }
-      getSitesList();
+      //getSitesList();
+
+      // Valid token?
+      AuthService.verify(false);
 
       // listen for the logged in message from the auth service
       $scope.$on('user-logged-in', function() {
@@ -37,8 +40,6 @@ angular.module('interfaceApp')
           getSitesList();
       });
 
-      // Valid token?
-      AuthService.verify(false);
 
       $scope.login =  function() {
           // Log the user in - or otherwise
