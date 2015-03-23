@@ -34,6 +34,11 @@ angular.module('interfaceApp')
                   .attr('opacity', configuration.opacity.default);
           });
 
+          // cancel the timeout if the location changes
+          scope.$on('$locationChangeStart', function() {
+              $timeout.cancel(scope.timer);
+          })
+
           scope.nodes = scope.data.nodes;
           scope.links = scope.data.links;
 
@@ -45,7 +50,7 @@ angular.module('interfaceApp')
 
           var centerGraph = function() {
               if (scope.force.alpha() > 0.004) {
-                  $timeout(function(d) {
+                  scope.timer = $timeout(function(d) {
                       centerGraph();
                   }, 500);
               } else {

@@ -43,6 +43,31 @@ angular.module('interfaceApp')
               scope.drawGraph();
           })
 
+          // cancel the timeout if the location changes
+          scope.$on('$locationChangeStart', function() {
+            $timeout.cancel(scope.timer);
+          })
+
+          // handle color changes
+          scope.$on('colours-changed', function() {
+              var nodes = d3.select('#entity_graph')
+                            .selectAll('.node')
+                            .data();
+              d3.select('#entity_graph')
+                .transition()
+                .duration(500)
+                .selectAll('.node')
+                .attr('fill', function(d) { return DataService.getColor(d.type); } )
+                .style('stroke', function(d) { return DataService.getColor(d.type); });
+
+              angular.forEach(scope.stats, function(v,k) {
+                  scope.stats[k].color = conf.types[k].color;
+              });
+
+              angular.forEach(scope.data.types, function(v,k) {
+                  scope.data.types[k] = conf.types[k].color;
+              })
+          });
 
           if ($routeParams.link === "false") {
               scope.hideLinks = true;
@@ -112,27 +137,6 @@ angular.module('interfaceApp')
           w.bind('resize', function() {
               scope.$apply(function() {
                 sizeThePanels();
-              })
-          });
-
-          // handle color changes
-          scope.$on('colours-changed', function() {
-              var nodes = d3.select('#entity_graph')
-                            .selectAll('.node')
-                            .data();
-              d3.select('#entity_graph')
-                .transition()
-                .duration(500)
-                .selectAll('.node')
-                .attr('fill', function(d) { return DataService.getColor(d.type); } )
-                .style('stroke', function(d) { return DataService.getColor(d.type); });
-
-              angular.forEach(scope.stats, function(v,k) {
-                  scope.stats[k].color = conf.types[k].color;
-              });
-
-              angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k] = conf.types[k].color;
               })
           });
 
@@ -300,7 +304,7 @@ angular.module('interfaceApp')
 
           scope.centerGraph = function() {
               if (scope.force.alpha() > 0.004) {
-                  $timeout(function(d) {
+                  scope.timer = $timeout(function(d) {
                       scope.centerGraph();
                   }, 200);
               } else {
