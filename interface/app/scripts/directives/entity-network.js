@@ -137,6 +137,9 @@ angular.module('interfaceApp')
           });
 
           scope.showDetails = function(d) {
+              // ensure we toggle highlighting off
+              scope.highlight = false;
+
               if (scope.selections.indexOf(d.id) === -1) {
                   // remove all landmark labels
                   d3.select('#entity_graph')
@@ -462,14 +465,14 @@ angular.module('interfaceApp')
                               return '#ccc';
                           }
                       })
-                      .attr('stroke', function(d) {
+                      .style('stroke', function(d) {
                           if (highlight.indexOf(d.id) !== -1) {
                               return DataService.getColor(d.type);
                           } else {
                               return '#ccc';
                           }
                       })
-                      .attr('opacity', function(d) {
+                      .style('opacity', function(d) {
                           if (highlight.indexOf(d.id) !== -1) {
                               return conf.opacity.default;
                           } else {
@@ -480,6 +483,7 @@ angular.module('interfaceApp')
                   d3.select('#entity_graph')
                     .selectAll('.node')
                     .attr('fill', function(d) { return DataService.getColor(d.type); })
+                    .style('stroke', function(d) { return DataService.getColor(d.type); })
                     .attr('opacity', conf.opacity.default);
                   d3.select('#entity_graph')
                     .selectAll('.link')
