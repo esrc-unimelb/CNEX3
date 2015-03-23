@@ -121,27 +121,8 @@ class Entity:
         except:
             self.graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
-        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
-        for node in related_resources:
-            # for each node - get the id, type, name and href
-            #  add a node to describe it
-            #  add an edge between this node (context node) and the resource node
-            rurl = node.attrib['{http://www.w3.org/1999/xlink}href']
-            core_type = get(node, 'e:relationEntry', attrib='localType')
-            rname = get(node, 'e:relationEntry')
-            rid = rurl.split('/')[-1:][0].split('.htm')[0]
-
-            if core_type == 'published':
-                rtype = rname.split(':')[0]
-                rname = rname.split(':', 1)[1:][0].strip()
-            else:
-                rtype = core_type
-            self.graph.add_node(rid, { 'type': rtype, 'coreType': core_type, 'name': rname, 'url': rurl })
-            self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
-
-        if ndegrees == 1:
+        if ndegrees == 2:
             return
-
         ndegrees += 1
         related_entities = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True)
         for node in related_entities:
@@ -182,7 +163,28 @@ class Entity:
                 self.graph.add_edge(node_id, neighbour_id, sid=node_id, tid=neighbour_id)
                 self.entities_as_nodes(neighbour_tree, ndegrees)
             except KeyError:
-                pass
+                print etree.tostring(node, pretty_print=True)
+
+        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
+        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
+        for node in related_resources:
+            # for each node - get the id, type, name and href
+            #  add a node to describe it
+            #  add an edge between this node (context node) and the resource node
+            rurl = node.attrib['{http://www.w3.org/1999/xlink}href']
+            core_type = get(node, 'e:relationEntry', attrib='localType')
+            rname = get(node, 'e:relationEntry')
+            rid = rurl.split('/')[-1:][0].split('.htm')[0]
+
+            if core_type == 'published':
+                rtype = rname.split(':')[0]
+                rname = rname.split(':', 1)[1:][0].strip()
+            else:
+                rtype = core_type
+            self.graph.add_node(rid, { 'type': rtype, 'coreType': core_type, 'name': rname, 'url': rurl })
+            self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
+
+
 
     def get_entity_name(self, tree, ntype):
         if ntype == 'Person':
@@ -215,14 +217,14 @@ class Entity:
             tree = etree.parse(xml.replace(self.source_map['source'], self.source_map['localpath']))
 
             summnote = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True)
-            if summnote:
+            if summnote is not None:
                 summnote = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
             else:
                 summnote = ''
 
             full_note = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist', element=True)
             fn = ''
-            if full_note:
+            if full_note is not None:
                 fn = []
                 for c in full_note.getchildren():
                     if c.tag == '{urn:isbn:1-931666-33-4}abstract':
