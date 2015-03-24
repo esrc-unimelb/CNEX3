@@ -6,6 +6,7 @@ angular.module('interfaceApp')
       templateUrl: 'views/colour-picker.html',
       restrict: 'E',
       scope: {
+          'data': '=',
       },
       link: function postLink(scope, element, attrs) {
           scope.showPicker = false;
@@ -24,12 +25,10 @@ angular.module('interfaceApp')
           var process = function() {
               scope.types = {};
               angular.forEach(DataService.types, function(v, k) {
-                  if (conf.mapForward[k.toLowerCase()] !== undefined) {
-                      k = conf.mapForward[k.toLowerCase()];
-                  }
                   // only add those that are on the screen
-                  if (!DataService.types[k].strike) {
-                      scope.types[k] = DataService.types[k];
+                  // and part of this set
+                  if (!v.strike && scope.data.types[k] !== undefined) {
+                    scope.types[k] = DataService.types[k];
                   }
               });
           }

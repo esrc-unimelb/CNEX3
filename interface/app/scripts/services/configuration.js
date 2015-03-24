@@ -28,7 +28,7 @@ angular.module('interfaceApp')
 
       },
 
-      types: {},
+      'types': {},
 
       'mapForward': {
           'person': 'Person',

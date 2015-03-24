@@ -49,13 +49,10 @@ angular.module('interfaceApp')
 
         var ns = DataService.processNodeSet(d.nodes);
 
-        // create the types data structure
-        processTypes(ns.linkedNodes);
-
         DataService.entityData = {
             'nodes': ns.linkedNodes,
             'links': d.links,
-            'types': DataService.types,
+            'types': processTypes(ns.linkedNodes),
             'datamap': ns.map,
         }
         $rootScope.$broadcast('draw-entity-graph');
@@ -75,15 +72,12 @@ angular.module('interfaceApp')
             linkedNodes = ns.linkedNodes,
             unLinkedNodes = ns.unLinkedNodes;
 
-        // create the types data structure
-        processTypes(linkedNodes);
-
         // get the data structure ready for the graph and
         var data = {
             'nodes': linkedNodes,
             'links': processLinks(ls, _.pluck(linkedNodes, 'id')),
             'unConnectedNodes': processUnLinkedNodes(unLinkedNodes),
-            'types': DataService.types,
+            'types': processTypes(linkedNodes),
             'datamap': datamap,
         }
         return data;
@@ -146,6 +140,8 @@ angular.module('interfaceApp')
                 DataService.types[k] = v;
             }
         });
+
+        return types;
     }
 
     function getColor(k) {
@@ -218,6 +214,7 @@ angular.module('interfaceApp')
                 DataService.types[k].strike = false;
             }
         })
+        DataService.xkcd = angular.copy(DataService.types);
         $rootScope.$broadcast('filter-nodes-and-redraw');
     }
 

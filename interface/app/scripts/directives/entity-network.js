@@ -61,11 +61,11 @@ angular.module('interfaceApp')
                 .style('stroke', function(d) { return DataService.getColor(d.type); });
 
               angular.forEach(scope.stats, function(v,k) {
-                  scope.stats[k].color = conf.types[k].color;
+                  scope.stats[k].color = DataService.types[k].color;
               });
 
               angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k] = conf.types[k].color;
+                  scope.data.types[k] = DataService.types[k].color;
               })
           });
 

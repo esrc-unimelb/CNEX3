@@ -44,8 +44,8 @@
                                     </button>
                                     -->
                                     <button class="btn btn-sm btn-default" ng-class="" ng-click="toggleLabels()">Toggle Labels</button>
-                                    <colour-picker></colour-picker>
-                                    <type-filter></type-filter>
+                                    <colour-picker data="data"></colour-picker>
+                                    <type-filter  data="data"></type-filter>
                                     <button class="btn btn-sm btn-default pull-right" ng-disabled="disableDownloadButton" ng-click="downloadGraph()">Download data (GML)</button>
                                     <a id="graphDownloader" ng-href="{{graphUrl}}" style="display: none;" download></a>
                                 </div>
@@ -104,8 +104,8 @@
                                     <div class="col-sm-2 col-md-2 col-lg-2">
                                         {{typeData.count}}
                                     </div>
-                                    <div class="col-sm-2 col-md-2 col-lg-2 text-center" style="background-color: {{typeData.color}}">
-                                        <span class="form-inline">
+                                    <div class="col-sm-2 col-md-2 col-lg-2 text-center">
+                                        <span class="form-inline" style="display: block; background-color: {{typeData.color}}" ng-if="!typeData.strike">
                                             <span class="checkbox" ng-if="!typeData.strike">
                                                 <input type="checkbox" ng-click="highlightByType(type)" ng-checked="typeData.checked">
                                             </span>
