@@ -9,7 +9,6 @@ angular.module('interfaceApp')
     function init() {
         DataService.currentEntity = undefined;
         DataService.entityGraph = undefined;
-        DataService.site = undefined;
         DataService.types = {};
         DataService.filterTypes = [];
         DataService.entityData = {};
