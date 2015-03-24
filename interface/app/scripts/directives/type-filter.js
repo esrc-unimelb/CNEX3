@@ -25,6 +25,7 @@ angular.module('interfaceApp')
           }
 
           scope.toggleType = function(type) {
+              scope.dataTypes = DataService.filterTypes;
               if (scope.dataTypes.indexOf(type) === -1) {
                   scope.dataTypes.push(type);
                   scope.types[type].strike = true;

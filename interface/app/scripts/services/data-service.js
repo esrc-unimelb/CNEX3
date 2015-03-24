@@ -11,6 +11,7 @@ angular.module('interfaceApp')
         DataService.entityGraph = undefined;
         DataService.site = undefined;
         DataService.types = {};
+        DataService.filterTypes = [];
         DataService.entityData = {};
     }
 
@@ -223,6 +224,7 @@ angular.module('interfaceApp')
 
     var DataService = {
         types: {},
+        filterTypes: [],
 
         init: init,
         getEntityNetwork: getEntityNetwork,
