@@ -214,7 +214,6 @@ angular.module('interfaceApp')
                 DataService.types[k].strike = false;
             }
         })
-        DataService.xkcd = angular.copy(DataService.types);
         $rootScope.$broadcast('filter-nodes-and-redraw');
     }
 

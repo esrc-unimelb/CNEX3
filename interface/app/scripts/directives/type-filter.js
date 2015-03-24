@@ -54,7 +54,7 @@ angular.module('interfaceApp')
               angular.forEach(scope.dataTypes, function(v,k) {
                   scope.types[v].strike = false;
               })
-              scope.dataTypes = [];
+              //scope.dataTypes = [];
               scope.showPicker = false;
           }
       }
