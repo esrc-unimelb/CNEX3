@@ -3,11 +3,18 @@
     <button class="btn btn-sm btn-default" ng-show='showPicker' ng-click="toggleColourPicker()">Hide Colour Picker</button>
     <div style="position:absolute; z-index: 200; width: 350px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px;" 
          ng-if="showPicker" class="animate-if">
-        <div ng-repeat="(type, colour) in colours">
-            <p ng-click="changeColour(type)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                {{type}}
-                <span class="pull-right" style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{colour}};"></span>
+        <div ng-repeat="(k, v) in types">
+            <p>
+                <a href="" class="btn-block" ng-click="changeColour(k)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                    {{k}}
+                    <span class="pull-right" style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{v.color}};"></span>
+                </a>
             </p>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-sm btn-default" ng-click="toggleColourPicker()">Dismiss</button>
+            </div>
         </div>
     </div>
     <div style="position:absolute; z-index: 300; width: 270px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 5px 5px 2px #ccc;"
@@ -20,12 +27,12 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <span ng-repeat="colour in pallette" ng-click="setColour(colour)" 
-                    style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{colour}}; margin: 5px;">
+                <span ng-repeat="color in pallette" ng-click="setColor(color)" 
+                    style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{color}}; margin: 5px;">
                 </span>
             </div>
             <div class="col-sm-12">
-                <input class="form-control" ng-model="custom.colour" placeholder="or set one of your own"/>
+                <input class="form-control" ng-model="custom.color" placeholder="or set one of your own"/>
             </div>
         </div>
         <br/>

@@ -6,32 +6,41 @@ angular.module('interfaceApp')
       templateUrl: 'views/colour-picker.html',
       restrict: 'E',
       scope: {
-          types: '='
       },
       link: function postLink(scope, element, attrs) {
           scope.showPicker = false;
           scope.showChooser = false;
           scope.custom = {};
 
-          // get the default colours from the configuration
-          var process = function() {
-              scope.colours = {};
-              angular.forEach(scope.types, function(v, k) {
-                  if (conf.mapForward[k.toLowerCase()] !== undefined) {
-                      k = conf.mapForward[k.toLowerCase()];
-                  }
-                  scope.colours[k] = conf.types[k].color;
-              });
-          }
-          process();
-
           // get the pallette from the configuration
           scope.pallette = conf.pallette;
 
+          scope.$on('close-colour-picker', function() {
+              scope.showPicker = false;
+              scope.showChooser = false;
+          })
+
+          // get the default colours from the configuration
+          var process = function() {
+              scope.types = {};
+              angular.forEach(DataService.types, function(v, k) {
+                  if (conf.mapForward[k.toLowerCase()] !== undefined) {
+                      k = conf.mapForward[k.toLowerCase()];
+                  }
+                  // only add those that are on the screen
+                  if (!DataService.types[k].strike) {
+                      scope.types[k] = DataService.types[k];
+                  }
+              });
+          }
+
           scope.toggleColourPicker = function() {
-              process();
               scope.showPicker = !scope.showPicker;
               scope.showChooser = false;
+              if (scope.showPicker) {
+                  $rootScope.$broadcast('close-type-filter');
+                  process();
+              }
           }
 
           scope.changeColour = function(type) {
@@ -39,15 +48,15 @@ angular.module('interfaceApp')
               scope.showChooser = true;
               scope.type = type;
           }
-          scope.setColour = function(colour) {
-              scope.colours[scope.type] = colour;
-              DataService.setColor(scope.type, colour);
+          scope.setColor = function(color) {
+              scope.types[scope.type].color = color;
+              DataService.setColor(scope.type, color);
               scope.showPicker = true;
               scope.showChooser = false;
               $rootScope.$broadcast('colours-changed');
           }
           scope.save = function() {
-              scope.setColour(scope.custom.colour);
+              scope.setColor(scope.custom.color);
               scope.dismissChooser();
           }
           scope.dismissChooser = function() {

@@ -15,7 +15,6 @@ angular.module('interfaceApp')
           scope.points = [];
           scope.ranges = [];
 
-
           var w = angular.element($window);
           w.bind('resize', function() {
               scope.$apply(function() {
@@ -35,6 +34,21 @@ angular.module('interfaceApp')
                     .attr('r', configuration.radius.date.default)
           });
 
+          // redraw graph with nodes filtered
+          scope.$on('filter-nodes-and-redraw', function() {
+              scope.nodes = [];
+              var typesToFilter = DataService.filterTypes;
+              angular.forEach(scope.data.nodes, function(v,k) {
+                  if (typesToFilter.indexOf(v.type) === -1) {
+                      scope.nodes.push(v);
+                  }
+              });
+              scope.relaxed = false;
+              scope.processed = 0.1;
+              scope.drawDateVis();
+          })
+
+
           scope.drawDateVis = function() {
               // ditch any previous svg though I'm not sure why there's
               //  still one there
@@ -43,32 +57,29 @@ angular.module('interfaceApp')
               scope.width = element.parent()[0].clientWidth - 30;
               scope.height = scope.width * 0.55;
 
-              if (scope.ranges.length === 0 || scope.points.length === 0 || scope.dates.length === 0) {
-                  var nodes = scope.data.nodes;
-                  var points = [], ranges = [], dates = [];
+              var points = [], ranges = [], dates = [];
 
-                  // split the dataset into those nodes with both start and end
-                  //  dates and those with either of start or end date
-                  angular.forEach(nodes, function(v,k) {
-                      if (v.df !== null && v.dt !== null) {
+              // split the dataset into those nodes with both start and end
+              //  dates and those with either of start or end date
+              angular.forEach(scope.nodes, function(v,k) {
+                  if (v.df !== null && v.dt !== null) {
+                      dates.push(v.df);
+                      dates.push(v.dt);
+                      ranges.push(v);
+                  } else {
+                      if (v.df !== null) {
                           dates.push(v.df);
+                          points.push(v);
+                      } else if (v.dt !== null) {
                           dates.push(v.dt);
-                          ranges.push(v);
-                      } else {
-                          if (v.df !== null) {
-                              dates.push(v.df);
-                              points.push(v);
-                          } else if (v.dt !== null) {
-                              dates.push(v.dt);
-                              points.push(v);
-                          }
+                          points.push(v);
                       }
-                  });
-                  scope.ranges = _.sortBy(ranges, 'df').reverse();
-                  points = _.sortBy(points, 'df');
-                  scope.points = _.sortBy(points, 'dt').reverse();
-                  scope.dates = dates;
-              }
+                  }
+              });
+              scope.ranges = _.sortBy(ranges, 'df').reverse();
+              points = _.sortBy(points, 'df');
+              scope.points = _.sortBy(points, 'dt').reverse();
+              scope.dates = dates;
 
               var t1 = Date.parse(d3.min(scope.dates));
               var t2 = Date.parse(d3.max(scope.dates));
@@ -115,7 +126,8 @@ angular.module('interfaceApp')
                       return xScale(dt) - xScale(df);
                   })
                   .attr('height', configuration.height.default)
-                  .attr('fill', function(d) { return d.color; })
+                  .attr('fill', function(d) { return DataService.getColor(d.type); })
+                  .style('stroke', function(d) { return DataService.getColor(d.type); })
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
                   .on('click', function(d) { 
                       scope.$apply(function() {
@@ -141,7 +153,8 @@ angular.module('interfaceApp')
                       return yScale(i);
                   })
                   .attr('r', configuration.radius.date.default)
-                  .attr('fill', function(d) { return d.color; })
+                  .attr('fill', function(d) { return DataService.getColor(d.type); })
+                  .style('stroke', function(d) { return DataService.getColor(d.type); })
                   .attr('id', function(d) { return D3Service.sanitize(d.id) + '_date'; })
                   .on('click', function(d) { 
                       scope.$apply(function() {
@@ -150,6 +163,8 @@ angular.module('interfaceApp')
                   });
           };
 
+          // first run - set scope.nodes to scope.data.nodes
+          scope.nodes = scope.data.nodes;
           // draw the graph
           scope.drawDateVis();
 

@@ -126,7 +126,7 @@ angular.module('interfaceApp')
                 .style('stroke', function(d) { return DataService.getColor(d.type); });
 
               angular.forEach(scope.data.types, function(v,k) {
-                  scope.data.types[k].color = conf.types[k].color;
+                  scope.data.types[k].color = DataService.types[k].color;
               })
 
           });

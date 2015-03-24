@@ -76,6 +76,7 @@ angular.module('interfaceApp')
         };
 
         $scope.processData = function(d) {
+            DataService.init();
             $scope.data = DataService.processSiteData(d);
 
             // now get it all going

@@ -5,6 +5,14 @@ angular.module('interfaceApp')
          function ForceData($rootScope, $http, $timeout, conf) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     //
+    //
+    function init() {
+        DataService.currentEntity = undefined;
+        DataService.entityGraph = undefined;
+        DataService.site = undefined;
+        DataService.types = {};
+        DataService.entityData = {};
+    }
 
     function getEntityNetwork(entityId) {
         // tell the panel to load
@@ -40,17 +48,20 @@ angular.module('interfaceApp')
         DataService.entityGraph = d.graph;
 
         var ns = DataService.processNodeSet(d.nodes);
+
+        // create the types data structure
+        processTypes(ns.linkedNodes);
+
         DataService.entityData = {
             'nodes': ns.linkedNodes,
             'links': d.links,
-            'types': processTypes(ns.linkedNodes),
+            'types': DataService.types,
             'datamap': ns.map,
         }
         $rootScope.$broadcast('draw-entity-graph');
     }
 
     function processSiteData(d) {
-
         // store the graph
         DataService.siteGraph = d.graph;
 
@@ -64,16 +75,18 @@ angular.module('interfaceApp')
             linkedNodes = ns.linkedNodes,
             unLinkedNodes = ns.unLinkedNodes;
 
+        // create the types data structure
+        processTypes(linkedNodes);
+
         // get the data structure ready for the graph and
         var data = {
             'nodes': linkedNodes,
             'links': processLinks(ls, _.pluck(linkedNodes, 'id')),
             'unConnectedNodes': processUnLinkedNodes(unLinkedNodes),
-            'types': processTypes(linkedNodes),
+            'types': DataService.types,
             'datamap': datamap,
         }
         return data;
-
     }
 
     function processLinks(ls, nodeKey) {
@@ -88,8 +101,8 @@ angular.module('interfaceApp')
                 var link = {
                     'source': nodeKey.indexOf(sn),
                     'target': nodeKey.indexOf(tn),
-                    'source_id': sn,
-                    'target_id': tn
+                    'sid': sn,
+                    'tid': tn
                 }
                 links.push(link);
             }
@@ -121,20 +134,16 @@ angular.module('interfaceApp')
                     'count': 1,
                     'checked': false,
                     'color': v.color,
-                    'coreType': conf.mapForward[v.coreType.toLowerCase()]
+                    'coreType': conf.mapForward[v.coreType.toLowerCase()],
+                    'strike': false
                 };
             } else {
                 types[k].count += 1;
             }
         })
-        setTypes(types);
-        return types;
-    }
-
-    function setTypes(types) {
         angular.forEach(types, function(v,k) {
-            if (conf.types[k] === undefined) {
-                conf.types[k] = v;
+            if (DataService.types[k] === undefined) {
+                DataService.types[k] = v;
             }
         });
     }
@@ -143,14 +152,14 @@ angular.module('interfaceApp')
         if (conf.mapForward[k.toLowerCase()] !== undefined) {
             k = conf.mapForward[k.toLowerCase()];
         }
-        return conf.types[k].color;
+        return DataService.types[k].color;
     }
 
     function setColor(k, color) {
         if (conf.mapForward[k.toLowerCase()] !== undefined) {
             k = conf.mapForward[k.toLowerCase()];
         }
-        conf.types[k].color = color;
+        DataService.types[k].color = color;
     }
 
     function processNodeSet(nodes) {
@@ -200,14 +209,29 @@ angular.module('interfaceApp')
         return { 'map': nodemap, 'linkedNodes': linkedNodes, 'unLinkedNodes': unLinkedNodes };
     }
 
-    var DataService = {
-        processingStatus: {},
+    function filterTypesFromData(types) {
+        DataService.filterTypes = types;
+        angular.forEach(DataService.types, function(v, k) {
+            if (types.indexOf(k) !== -1) {
+                DataService.types[k].strike = true;
+            } else {
+                DataService.types[k].strike = false;
+            }
+        })
+        $rootScope.$broadcast('filter-nodes-and-redraw');
+    }
 
+    var DataService = {
+        types: {},
+
+        init: init,
         getEntityNetwork: getEntityNetwork,
         processSiteData: processSiteData,
+        processLinks: processLinks,
         processNodeSet: processNodeSet,
         getColor: getColor,
         setColor: setColor,
+        filterTypesFromData: filterTypesFromData,
     }
 
     return DataService;

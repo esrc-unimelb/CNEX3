@@ -1,0 +1,22 @@
+<div style="position: relative; display: inline-block;">
+    <button class="btn btn-sm btn-default" ng-hide='showPicker' ng-click="toggleTypeFilter()">Type Filter</button>
+    <button class="btn btn-sm btn-default" ng-show='showPicker' ng-click="toggleTypeFilter()">Hide Type Filter</button>
+    <div style="position:absolute; z-index: 200; width: 300px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px;"
+         ng-if="showPicker" class="animate-if">
+        <div ng-repeat="(k, v) in types">
+            <p>
+                <a href="" class="btn-block" ng-click="toggleType(k)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                    <span ng-if="v.strike"><del>{{k}}</del></span>
+                    <span ng-if="!v.strike">{{k}}</span>
+                </a>
+            </p>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-sm btn-default" ng-click="redrawTheGraph()">Redraw the Graph</button>
+                <button class="btn btn-sm btn-default" ng-click="dismissFilter()">Dismiss</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -44,7 +44,8 @@
                                     </button>
                                     -->
                                     <button class="btn btn-sm btn-default" ng-class="" ng-click="toggleLabels()">Toggle Labels</button>
-                                    <colour-picker types="data.types"></colour-picker>
+                                    <colour-picker></colour-picker>
+                                    <type-filter></type-filter>
                                     <button class="btn btn-sm btn-default pull-right" ng-disabled="disableDownloadButton" ng-click="downloadGraph()">Download data (GML)</button>
                                     <a id="graphDownloader" ng-href="{{graphUrl}}" style="display: none;" download></a>
                                 </div>
@@ -97,14 +98,15 @@
                                 <hr/>
                                 <span ng-repeat="(type, typeData) in data.types">
                                     <div class="col-sm-8 col-md-8 col-lg-8">
-                                        {{type}} ({{typeData.coreType}})
+                                        <span ng-if="typeData.strike"><del>{{type}} ({{typeData.coreType}})</del></span>
+                                        <span ng-if="!typeData.strike">{{type}} ({{typeData.coreType}})</span>
                                     </div>
                                     <div class="col-sm-2 col-md-2 col-lg-2">
                                         {{typeData.count}}
                                     </div>
                                     <div class="col-sm-2 col-md-2 col-lg-2 text-center" style="background-color: {{typeData.color}}">
                                         <span class="form-inline">
-                                            <span class="checkbox">
+                                            <span class="checkbox" ng-if="!typeData.strike">
                                                 <input type="checkbox" ng-click="highlightByType(type)" ng-checked="typeData.checked">
                                             </span>
                                         </span>
