@@ -233,12 +233,14 @@ class Network:
                 return "%s, %s" % (ln, gn)
             else:
                 fn = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry[position() = 1]/e:part")
+                fn = [e for e in fn if e is not None]
                 if type(fn) == list:
                     return ', '.join(fn)
                 return fn
         else:
             fn = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:nameEntry[position() = 1]/e:part")
             if type(fn) == list:
+                fn = [e for e in fn if e is not None]
                 return ', '.join(fn)
             return fn
 
