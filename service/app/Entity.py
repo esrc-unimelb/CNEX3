@@ -217,14 +217,13 @@ class Entity:
             tree = etree.parse(xml.replace(self.source_map['source'], self.source_map['localpath']))
 
             summnote = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True)
-            if summnote is not None:
-                summnote = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
-            else:
-                summnote = ''
+            sn = ''
+            if len(summnote) != 0:
+                sn = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
 
             full_note = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist', element=True)
             fn = ''
-            if full_note is not None:
+            if len(full_note) != 0:
                 fn = []
                 for c in full_note.getchildren():
                     if c.tag == '{urn:isbn:1-931666-33-4}abstract':
@@ -239,7 +238,7 @@ class Entity:
                     fn.append(c)
                 fn = ' '.join(fn)
 
-            return summnote, fn
+            return sn, fn
 
         else:
             # no EAC datafile
