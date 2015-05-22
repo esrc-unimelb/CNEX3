@@ -190,7 +190,8 @@ angular.module('interfaceApp')
                       scope.selectionData[d.id].summnote = resp.data.summnote;
                       scope.selectionData[d.id].fullnote = resp.data.fullnote;
                   }, 
-                  function() {
+                  function(error) {
+                      scope.selectionData[d.id] = undefined;
                   });
 
               } else {

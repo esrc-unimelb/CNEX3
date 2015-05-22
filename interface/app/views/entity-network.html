@@ -86,31 +86,38 @@
                         <div class="panel panel-default" ng-repeat="selection in selections">
                             <div class="panel-heading" ng-style="{ 'background-color': selectionData[selection].color }">
                                <h4 class="panel-title">
-                                    <a bs-collapse-toggle><span style="font-family:monospace;">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span><br/>
-                                    {{selectionData[selection].name}} ({{selectionData[selection].df | date: 'yyyy'}} - {{selectionData[selection].dt | date: 'yyyy'}})</a>
+                                    <span ng-if="selectionData[selection]">
+                                        <a bs-collapse-toggle><span style="font-family:monospace;">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span><br/>
+                                        {{selectionData[selection].name}} ({{selectionData[selection].df | date: 'yyyy'}} - {{selectionData[selection].dt | date: 'yyyy'}})</a>
+                                    </span>
+                                    <span ng-if="!selectionData[selection]">
+                                        Unable to retrieve the data for {{selection}}.
+                                    </span>
                                 </h4>
                             </div>
-                            <div class="panel-collapse" bs-collapse-target>
-                                <div class="panel-body">
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
-                                            <a href="{{selectionData[selection].url}}" target="_blank">{{selectionData[selection].url}}</a>
+                            <span ng-if="selectionData[selection]">
+                                <div class="panel-collapse" bs-collapse-target>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
+                                                <a href="{{selectionData[selection].url}}" target="_blank">{{selectionData[selection].url}}</a>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <br/>
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <span ng-if="selectionData[selection].summnote">
-                                                <p ng-bind-html="selectionData[selection].summnote" 
+                                        <br/>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <span ng-if="selectionData[selection].summnote">
+                                                    <p ng-bind-html="selectionData[selection].summnote" 
+                                                        style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                                </span>
+                                                <p ng-bind-html="selectionData[selection].fullnote"
                                                     style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
-                                            </span>
-                                            <p ng-bind-html="selectionData[selection].fullnote"
-                                                style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </span>
                         </div>
                      </div>
                 </div>
