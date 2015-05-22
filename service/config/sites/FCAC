@@ -1,14 +1,14 @@
 [GENERAL]:
 # Site descriptive name
-name: Find & Connect Australian Capital Territory 
+name: Find & Connect Australian Capital Territory
 code: FCAC
-url: http://findandconnect.gov.au
+url: http://www.findandconnect.gov.au
 
 # Location of the EAC data files
-eac: /srv/ha/web/FCAC/LIVE/eac
+eac: /srv/ha/web/FCAC//testing/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: http://www.findandconnect.gov.au/ref/act, /srv/ha/web/FCAC/LIVE
+map: http://www.findandconnect.gov.au/ref/act, /srv/ha/web/FCAC//testing
 
 ## Is the site public? True or False
 public: True

@@ -8,7 +8,7 @@ url: http://www.eoas.info
 eac: /srv/ha/web/EOAS//LIVE/eac
 
 ## For file loads, map the URL back in the to filesystem
-map: http://www.eoas.info, /srv/ha/web/EOAS/LIVE
+map: http://www.eoas.info, /srv/ha/web/EOAS//LIVE
 
 ## Is the site public? True or False
 public: True
