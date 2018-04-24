@@ -6,7 +6,8 @@ from pyramid.paster import setup_logging
 
 from config import Config as appConfig
 from connectors import MongoBackend
-
+##
+import pdb
 def init_mongodb_connection(conf):
     m = MongoBackend()
     m.connect(conf)
