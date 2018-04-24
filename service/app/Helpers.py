@@ -7,6 +7,7 @@ import ast
 import json
 import traceback
 from connectors import MongoDBConnection as mdb
+import pprint 
 
 import logging
 log = logging.getLogger(__name__)
@@ -136,11 +137,12 @@ def get_site_data(request, authenticated=False, claims=None):
 def verify_access(request, site=None):
     if 'Authorization' in request.headers:
         resp = requests.get(request.registry.app_config['general']['token'], headers={ 'Authorization': request.headers['Authorization'] })
+        ##log.info(pprint (resp.status_code))
         if resp.status_code == 200:
             claims = json.loads(resp.text)['claims']
             sites = get_site_data(request, authenticated=True, claims=claims)
 
-            if site is not None: 
+            if site is not None:
                 site_data = sites.pop(site, None)
                 if site_data == None:
                     log.info("%s: Access to: %s denied. %s (%s)" % (request.client_addr, site, claims['user']['name'], claims['user']['email']))
@@ -157,9 +159,10 @@ def verify_access(request, site=None):
         if site is not None:
             site_data = sites.pop(site, None)
             if site_data == None:
+                log.info ("xxxx")
                 log.info("%s: Access denied." % request.client_addr)
                 raise HTTPForbidden
-            return None, site_data
-        else:
-            return None, sites
+                return None, site_data
+            else:
+                return None, sites
 

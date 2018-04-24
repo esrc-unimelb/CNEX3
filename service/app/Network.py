@@ -4,7 +4,7 @@ from pyramid.view import view_config
 import os
 import sys
 import time
-import json
+import ujson
 from datetime import datetime, timedelta
 from lxml import etree, html
 
@@ -123,7 +123,7 @@ class Network:
 
         # count the number of connections
         for n in graph:
-            graph.node[n]['connections'] = len(graph.neighbors(n))
+            graph.node[n]['connections'] = len(list(graph.neighbors(n)))
 
         # save the graph
         self.db.network.insert({
@@ -156,19 +156,40 @@ class Network:
         if len(dt) == 0:
             dt = None
 
-        graph.add_node(node_id, { 'type': ntype, 'name': name, 'url': url, 'df': df, 'dt': dt })
+        graph.add_node(node_id)
+        graph.node[node_id]['type'] = ntype
+        graph.node[node_id]['name'] = name
+        graph.node[node_id]['url'] = url
+        graph.node[node_id]['df'] = df
+        graph.node[node_id]['dt'] = dt
 
         if tree.xpath('/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', namespaces={ 'e': 'urn:isbn:1-931666-33-4' } ):
             for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:functions/e:function/e:term', element=True):
-                graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
+               ## graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
+                graph.add_node(function.text)
+                graph.node(function.text)['type'] = function.text
+                graph.node(function.text)['name'] = function.text
+                graph.node(function.text)['url'] = None
+                graph.node(function.text)['df'] = None
+                graph.node(function.text)['dt'] = None
                 graph.add_edge(node_id, function.text, sid=node_id, tid=function.text)
 
         else:
             for function in get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:occupations/e:occupation/e:term', element=True):
-                graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
+                ##graph.add_node(function.text, { 'type': function.text, 'name': function.text, 'url': None, 'df': None, 'dt': None })
+                graph.add_node(function.text)
+                graph.node(function.text)['type'] = function.text
+                graph.node(function.text)['name'] = function.text
+                graph.node(function.text)['url'] = None
+                graph.node(function.text)['df'] = None
+                graph.node(function.text)['dt'] = None
                 graph.add_edge(node_id, function.text, sid=node_id, tid=function.text)
     
     def entities_as_nodes(self, graph, tree):
+        """
+
+        :type graph: object
+        """
         node_id = get(tree, '/e:eac-cpf/e:control/e:recordId')
         ntype = get(tree, "/e:eac-cpf/e:control/e:localControl[@localType='typeOfEntity']/e:term")
         core_type = get(tree, "/e:eac-cpf/e:cpfDescription/e:identity/e:entityType")
@@ -182,23 +203,30 @@ class Network:
             dt = None
 
         # is the node_id an empty list or some other bit of nonsense
-        #  if it is: skip to the next one
+        # if it is: skip to the next one
         if not node_id:
             return
 
-        if graph.node.has_key(node_id):
+        ##if graph.node.has_key(node_id):
+        if node_id in graph.node:
             graph.node[node_id]['type'] = ntype
             graph.node[node_id]['coreType'] = core_type
             graph.node[node_id]['name'] = name
             graph.node[node_id]['url'] = url
             graph.node[node_id]['df'] = df
             graph.node[node_id]['dt'] = dt
-
         else:
             try:
-                graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
+                #graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
+                graph.add_node(node_id)
             except:
                 return
+            graph.node[node_id]['type'] = ntype
+            graph.node[node_id]['coreType'] = core_type
+            graph.node[node_id]['name'] = name
+            graph.node[node_id]['url'] = url
+            graph.node[node_id]['df'] = df
+            graph.node[node_id]['dt'] = dt
 
         related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)
