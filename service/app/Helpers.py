@@ -52,10 +52,11 @@ def get(tree, path, attrib=None, element=None, aslist=None):
         try:
             attribValue = result[0].attrib[attrib]
             return attribValue
-        except:
+        except KeyError:
 # handle error where the attribute is not found in the XML
+            location  = tree.xpath('/e:eac-cpf/e:control/e:recordId', namespaces={ 'e': 'urn:isbn:1-931666-33-4' })
+            log.error("Record ID %s is missing attribute %s" % (location[0].text, attrib))
             log.error(path)
-            log.error(tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' }))
             return []    
         #return result[0].attrib[attrib]
         #return tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })[0].attrib[attrib]
