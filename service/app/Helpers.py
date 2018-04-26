@@ -49,13 +49,20 @@ def get(tree, path, attrib=None, element=None, aslist=None):
 
     # return the requested attribute
     elif attrib is not None:
-        return result[0].attrib[attrib]
+        try:
+            attribValue = result[0].attrib[attrib]
+            return attribValue
+        except:
+# handle error where the attribute is not found in the XML
+            log.error(path)
+            log.error(tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' }))
+            return []    
+        #return result[0].attrib[attrib]
         #return tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })[0].attrib[attrib]
 
     # otherwise - return the text content of the node
     else:
         try:
-            #print "**", result, len(result)
             if len(result) == 1:
                 return result[0].text
             else:
