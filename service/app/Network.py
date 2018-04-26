@@ -111,7 +111,7 @@ class Network:
             elif self.graph_type == 'byFunction':
                 self.functions_as_nodes(graph, tree)
 
-            if save_counter == 20:
+            if save_counter >= 20:
                 # save a progress count
                 self.db.network_progress.update(
                     { 'site': self.site },
