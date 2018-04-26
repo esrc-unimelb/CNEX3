@@ -91,8 +91,11 @@ def network_build_status(request):
 #        return { 'total': None, 'processed': None, 'graph': graph_data, 'center': nx.center(G) }
         return { 'total': None, 'processed': None, 'graph': graph_data }
     else:
-        doc = db.network_progress.find_one({ 'site': site })
-        return { 'total': doc['total'], 'processed': doc['processed'] }
+        progress = db.network_progress.find_one({ 'site': site })
+        if progress is not None:
+            return { 'total': progress['total'], 'processed': progress['processed'] }
+        else:
+            raise HTTPNotFound
 
 @view_config(route_name='entity-build-status', request_method='GET', renderer='ujson')
 def entity_build_status(request):
