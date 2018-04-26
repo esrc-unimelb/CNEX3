@@ -110,16 +110,21 @@ class Entity:
         if len(dt) == 0:
             dt = None
 
-        try:
-            self.graph.node[node_id]['type'] = ntype
-            self.graph.node[node_id]['coreType'] = core_type
-            self.graph.node[node_id]['name'] = name
-            self.graph.node[node_id]['url'] = url 
-            self.graph.node[node_id]['df'] = df
-            self.graph.node[node_id]['dt'] = dt
+        if node_id not in self.graph:
+            try:
+                self.graph.add_node(node_id)
+            except:
+                # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
+                e = sys.exc_info()[0]
+                log.error("Failed to insert node %s" % e)
+    
+        self.graph.node[node_id]['type'] = ntype
+        self.graph.node[node_id]['coreType'] = core_type
+        self.graph.node[node_id]['name'] = name
+        self.graph.node[node_id]['url'] = url 
+        self.graph.node[node_id]['df'] = df
+        self.graph.node[node_id]['dt'] = dt
 
-        except:
-            self.graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
         if ndegrees == 2:
             return

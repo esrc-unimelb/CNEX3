@@ -186,30 +186,23 @@ class Network:
         if not node_id:
             return
 
-        if node_id in graph.node:
-            graph.node[node_id]['type'] = ntype
-            graph.node[node_id]['coreType'] = core_type
-            graph.node[node_id]['name'] = name
-            graph.node[node_id]['url'] = url
-            graph.node[node_id]['df'] = df
-            graph.node[node_id]['dt'] = dt
-
-        else:
+        if node_id not in graph.node:
             try:
                 graph.add_node(node_id)
-                #graph.add_node(node_id, { 'type': ntype[0], 'coreType': core_type[0], 'name': name[0], 'url': url[0], 'df': df[0], 'dt': dt[0] })
             except:
                 # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
                 e = sys.exc_info()[0]
                 log.error("Failed to insert node %s" % e)
                 return
-            graph.node[node_id]['type'] = ntype
-            graph.node[node_id]['coreType'] = core_type
-            graph.node[node_id]['name'] = name
-            graph.node[node_id]['url'] = url
-            graph.node[node_id]['df'] = df
-            graph.node[node_id]['dt'] = dt                
 
+        graph.node[node_id]['type'] = ntype
+        graph.node[node_id]['coreType'] = core_type
+        graph.node[node_id]['name'] = name
+        graph.node[node_id]['url'] = url
+        graph.node[node_id]['df'] = df
+        graph.node[node_id]['dt'] = dt
+
+        
         related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)
         related_publications = 0
