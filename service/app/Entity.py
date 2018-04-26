@@ -76,7 +76,7 @@ class Entity:
 
         # count the number of connections
         for n in self.graph:
-            self.graph.node[n]['connections'] = len(self.graph.neighbors(n))
+            self.graph.node[n]['connections'] = len(list(self.graph.neighbors(n)))
 
         # save the graph
         self.db.entity.insert({
