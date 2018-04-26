@@ -2,11 +2,11 @@ import os
 import sys
 import time
 from lxml import etree, html
-from config import SiteConfig
+from .config import SiteConfig
 import ast
 import json
 import traceback
-from connectors import MongoDBConnection as mdb
+from .connectors import MongoDBConnection as mdb
 
 import logging
 log = logging.getLogger(__name__)

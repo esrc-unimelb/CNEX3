@@ -15,18 +15,18 @@ import time
 from lxml import etree, html
 import networkx as nx
 from networkx.readwrite import json_graph
-import StringIO
+import io
 import os
 import os.path
 import datetime
 
-from config import Config
+from .config import Config
 
-from Helpers import *
-from Network import Network
-from Entity import Entity
+from .Helpers import *
+from .Network import Network
+from .Entity import Entity
 
-from config import Config
+from .config import Config
 
 @view_config(route_name='health-check', request_method='GET', renderer='string')
 def health_check(request):
@@ -49,7 +49,7 @@ def home_page(request):
 
     # strip the data that's NOT required
     clean_sites = {}
-    for k, v in sites.items():
+    for k, v in list(sites.items()):
         clean_sites[k] = {
             'code': v['code'],
             'name': v['name'],
@@ -136,7 +136,7 @@ def network_stats(request):
 
     n = Network(request)
     degree = n.calculate_average_degree()
-    d = [ d[1] * 100 for d in degree.items() ]
+    d = [ d[1] * 100 for d in list(degree.items()) ]
 
     return {
         'name': n.name,
@@ -156,7 +156,7 @@ def convert_graph(request):
                 os.remove(os.path.join(root, f))
 
     G = nx.readwrite.json_graph.node_link_graph(request.json['graph'])
-    output = StringIO.StringIO()
+    output = io.StringIO()
     nx.readwrite.write_gml(G, output)
     output = output.getvalue().replace("None", '""')
 

@@ -2,7 +2,7 @@
 import os
 import sys
 import os.path
-import ConfigParser
+import configparser
 import collections
 import traceback
 import ast
@@ -53,7 +53,7 @@ class Config(ConfigBase):
                 'token': self.get('GENERAL', 'token'),
                 'data_age': self.get('GENERAL', 'data_age'),
                 'sites': self.get('GENERAL', 'sites'),
-                'disable_auth': ast.literal_eval(self.get('GENERAL', 'disable_auth')),
+ #               'disable_auth': ast.literal_eval(self.get('GENERAL', 'disable_auth')),
                 'share_path': self.get('GENERAL', 'share_path'),
                 'share_url': self.get('GENERAL', 'share_url'),
             },

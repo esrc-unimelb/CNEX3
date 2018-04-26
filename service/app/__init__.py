@@ -1,22 +1,30 @@
-from pyramid.config import Configurator
 from pyramid.renderers import JSONP
 from sqlalchemy import engine_from_config
 
 from pyramid.paster import setup_logging
 
-from config import Config as appConfig
-from connectors import MongoBackend
+#from config import Config as appConfig
+
+from . import config as appConfig
+
+#from connectors import MongoBackend
+
+from . import connectors
+#import testconnectors
+
+from pyramid.config import Configurator
 
 def init_mongodb_connection(conf):
-    m = MongoBackend()
+    m = connectors.MongoBackend()
     m.connect(conf)
     return m.client
 
-def main(global_config, **settings):
+def main(global_config, **setup):
+#def main( **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    config = Configurator(settings=settings)
-    setup_logging(global_config['__file__'])
+    config = Configurator(settings=setup)
+    #setup_logging(global_config['__file__'])
 
     config.add_renderer('jsonp', JSONP(param_name='callback'))
     config.add_renderer('ujson', factory='app.renderers.UjsonRenderer')
@@ -24,7 +32,7 @@ def main(global_config, **settings):
 
     # initialise a connection to mongo on startup and store the client
     #  in the registry which will be injected into each request
-    conf = appConfig(config.registry.settings.get('app.config'))
+    conf = appConfig.Config(config.registry.settings.get('app.config'))
     config.registry.app_config = conf.app_config
     config.registry.app_config['mongodb']['client'] = init_mongodb_connection(config.registry.app_config['mongodb'])
 

@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta
 from lxml import etree, html
 
-from config import Config
+from .config import Config
 
 import logging
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 import networkx as nx
 from networkx.readwrite import json_graph
 
-from Helpers import *
+from .Helpers import *
 
 import multiprocessing
 
@@ -68,7 +68,7 @@ class Network:
                 datafiles = dict((fname, "%s/%s" % (dirpath, fname)) for fname in filenames)
 
         #  store a trace that indicates we're counting
-        total = len(datafiles.items())
+        total = len(list(datafiles.items()))
         log.debug("Total number of entities in dataset: %s" % total)
 
         # remove any previous progress traces that might exist
@@ -96,7 +96,7 @@ class Network:
         count = 0
         save_counter = 0
         nodes = {}
-        for fpath, fname in datafiles.items():
+        for fpath, fname in list(datafiles.items()):
             log.debug("Processing: %s" % os.path.join(fpath,fname))
             count += 1
 
@@ -123,8 +123,8 @@ class Network:
 
         # count the number of connections
         for n in graph:
-            graph.node[n]['connections'] = len(graph.neighbors(n))
-
+            graph.node[n]['connections'] = len(list(graph.neighbors(n)))
+ 
         # save the graph
         self.db.network.insert({
             'site': self.site,
@@ -186,7 +186,7 @@ class Network:
         if not node_id:
             return
 
-        if graph.node.has_key(node_id):
+        if node_id in graph.node:
             graph.node[node_id]['type'] = ntype
             graph.node[node_id]['coreType'] = core_type
             graph.node[node_id]['name'] = name
@@ -196,9 +196,19 @@ class Network:
 
         else:
             try:
-                graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
+                graph.add_node(node_id)
+                #graph.add_node(node_id, { 'type': ntype[0], 'coreType': core_type[0], 'name': name[0], 'url': url[0], 'df': df[0], 'dt': dt[0] })
             except:
+                # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
+                e = sys.exc_info()[0]
+                log.error("Failed to insert node %s" % e)
                 return
+            graph.node[node_id]['type'] = ntype
+            graph.node[node_id]['coreType'] = core_type
+            graph.node[node_id]['name'] = name
+            graph.node[node_id]['url'] = url
+            graph.node[node_id]['df'] = df
+            graph.node[node_id]['dt'] = dt                
 
         related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True)

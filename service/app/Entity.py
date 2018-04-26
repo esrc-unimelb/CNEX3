@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta
 from lxml import etree, html
 
-from config import Config
+from .config import Config
 
 import logging
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 import networkx as nx
 from networkx.readwrite import json_graph
 
-from Helpers import *
+from .Helpers import *
 
 import multiprocessing
 
@@ -163,7 +163,7 @@ class Entity:
                 self.graph.add_edge(node_id, neighbour_id, sid=node_id, tid=neighbour_id)
                 self.entities_as_nodes(neighbour_tree, ndegrees)
             except KeyError:
-                print etree.tostring(node, pretty_print=True)
+                print(etree.tostring(node, pretty_print=True))
 
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
