@@ -107,7 +107,7 @@ class Network:
                 continue
 
             if self.graph_type == 'byEntity':
-                self.entities_as_nodes(graph, tree);
+                self.entities_as_nodes(graph, tree)
             elif self.graph_type == 'byFunction':
                 self.functions_as_nodes(graph, tree)
 
