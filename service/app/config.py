@@ -40,10 +40,10 @@ class Config(ConfigBase):
         @params:
         request: a pyramid request object
         """
-        self.cfg = ConfigParser.SafeConfigParser()
+        self.cfg = configparser.SafeConfigParser()
         try:
             self.cfg.read(conf)
-        except ConfigParser.ParsingError:
+        except configparser.ParsingError:
             log.error('Config file parsing errors')
             log.error(sys.exc_info()[1])
             sys.exit()
@@ -69,10 +69,10 @@ class Config(ConfigBase):
 
 class SiteConfig(ConfigBase):
     def __init__(self, conf):
-        self.cfg = ConfigParser.SafeConfigParser()
+        self.cfg = configparser.SafeConfigParser()
         try:
             self.cfg.read(conf)
-        except ConfigParser.ParsingError:
+        except configparser.ParsingError:
             log.error('Config file parsing errors')
             log.error(sys.exc_info()[1])
             sys.exit()
