@@ -37,6 +37,7 @@ def main(global_config, **settings):
     config.add_route('entity-build',            '/entity/{code}/{id}')
     config.add_route('entity-build-status',     '/entity/{code}/{id}/status')
     config.add_route('convert-graph',           '/convert/{code}')
+    config.add_route('clique_status',           '/clique_status/{code}')
 
     config.scan()
     return config.make_wsgi_app()
