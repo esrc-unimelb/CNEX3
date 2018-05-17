@@ -59,8 +59,6 @@ def get(tree, path, attrib=None, element=None, aslist=None):
             log.error("Record ID %s is missing attribute %s" % (location[0].text, attrib))
             log.error(path)
             return []    
-        #return result[0].attrib[attrib]
-        #return tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })[0].attrib[attrib]
 
     # otherwise - return the text content of the node
     else:
