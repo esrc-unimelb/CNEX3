@@ -39,6 +39,6 @@ setup(name='app',
       [paste.app_factory]
       main = app:main
       [console_scripts]
-      initialize_app_db = app.scripts.initializedb:main
+      initialize_app_db = app:main
       """,
       )

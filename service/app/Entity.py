@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta
 from lxml import etree, html
 
-from config import Config
+from .config import Config
 
 import logging
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 import networkx as nx
 from networkx.readwrite import json_graph
 
-from Helpers import *
+from .Helpers import *
 
 import multiprocessing
 
@@ -76,7 +76,7 @@ class Entity:
 
         # count the number of connections
         for n in self.graph:
-            self.graph.node[n]['connections'] = len(self.graph.neighbors(n))
+            self.graph.node[n]['connections'] = len(list(self.graph.neighbors(n)))
 
         # save the graph
         self.db.entity.insert({
@@ -110,16 +110,21 @@ class Entity:
         if len(dt) == 0:
             dt = None
 
-        try:
-            self.graph.node[node_id]['type'] = ntype
-            self.graph.node[node_id]['coreType'] = core_type
-            self.graph.node[node_id]['name'] = name
-            self.graph.node[node_id]['url'] = url 
-            self.graph.node[node_id]['df'] = df
-            self.graph.node[node_id]['dt'] = dt
+        if node_id not in self.graph:
+            try:
+                self.graph.add_node(node_id)
+            except:
+                # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
+                e = sys.exc_info()[0]
+                log.error("Failed to insert node %s" % e)
+    
+        self.graph.node[node_id]['type'] = ntype
+        self.graph.node[node_id]['coreType'] = core_type
+        self.graph.node[node_id]['name'] = name
+        self.graph.node[node_id]['url'] = url 
+        self.graph.node[node_id]['df'] = df
+        self.graph.node[node_id]['dt'] = dt
 
-        except:
-            self.graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
 
         if ndegrees == 2:
             return
@@ -163,7 +168,7 @@ class Entity:
                 self.graph.add_edge(node_id, neighbour_id, sid=node_id, tid=neighbour_id)
                 self.entities_as_nodes(neighbour_tree, ndegrees)
             except KeyError:
-                print etree.tostring(node, pretty_print=True)
+                print(etree.tostring(node, pretty_print=True))
 
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
         related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
