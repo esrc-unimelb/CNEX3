@@ -109,7 +109,7 @@ def get_site_data(request, authenticated=False, claims=None):
             for s in sites:
                 # push all the public sites in
                 if sites[s]['public']: 
-                    allowed_sites[s] = sites[s];
+                    allowed_sites[s] = sites[s]
                 else:
                     # check group allows
                     s1 = set(sites[s]['allow_groups'])
@@ -117,13 +117,13 @@ def get_site_data(request, authenticated=False, claims=None):
                     r = s1.intersection(s2)
                     if r:
                         log.info("%s: access granted to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
-                        allowed_sites[s] = sites[s];
+                        allowed_sites[s] = sites[s]
                         continue
 
                     # check user allows
                     if claims['user']['email'] in sites[s]['allow_users']:
                         log.info("%s: access granted to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
-                        allowed_sites[s] = sites[s];
+                        allowed_sites[s] = sites[s]
                         continue
 
                     log.info("%s: access denied to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
