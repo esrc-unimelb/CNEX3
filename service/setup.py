@@ -14,6 +14,12 @@ requires = [
     'pyramid_debugtoolbar',
     'zope.sqlalchemy',
     'waitress',
+    'pymongo',
+    'msgpack',
+    'ujson',
+    'lxml',
+    'networkx',
+    'requests'
     ]
 
 setup(name='app',

@@ -59,8 +59,6 @@ def get(tree, path, attrib=None, element=None, aslist=None):
             log.error("Record ID %s is missing attribute %s" % (location[0].text, attrib))
             log.error(path)
             return []    
-        #return result[0].attrib[attrib]
-        #return tree.xpath(path, namespaces={ 'e': 'urn:isbn:1-931666-33-4' })[0].attrib[attrib]
 
     # otherwise - return the text content of the node
     else:
@@ -111,7 +109,7 @@ def get_site_data(request, authenticated=False, claims=None):
             for s in sites:
                 # push all the public sites in
                 if sites[s]['public']: 
-                    allowed_sites[s] = sites[s];
+                    allowed_sites[s] = sites[s]
                 else:
                     # check group allows
                     s1 = set(sites[s]['allow_groups'])
@@ -119,13 +117,13 @@ def get_site_data(request, authenticated=False, claims=None):
                     r = s1.intersection(s2)
                     if r:
                         log.info("%s: access granted to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
-                        allowed_sites[s] = sites[s];
+                        allowed_sites[s] = sites[s]
                         continue
 
                     # check user allows
                     if claims['user']['email'] in sites[s]['allow_users']:
                         log.info("%s: access granted to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
-                        allowed_sites[s] = sites[s];
+                        allowed_sites[s] = sites[s]
                         continue
 
                     log.info("%s: access denied to: %s (%s)" % (s,claims['user']['name'], claims['user']['email']))
@@ -169,7 +167,8 @@ def verify_access(request, site=None):
             if site_data == None:
                 log.info("%s: Access denied." % request.client_addr)
                 raise HTTPForbidden
-                return None, site_data
             else:
-                return None, sites
+                return None, site_data
+        else:
+            return None, sites
 
