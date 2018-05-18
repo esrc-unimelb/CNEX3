@@ -167,7 +167,8 @@ def verify_access(request, site=None):
             if site_data == None:
                 log.info("%s: Access denied." % request.client_addr)
                 raise HTTPForbidden
-                return None, site_data
             else:
-                return None, sites
+                return None, site_data
+        else:
+            return None, sites
 
