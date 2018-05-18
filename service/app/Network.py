@@ -223,13 +223,8 @@ class Network:
                 e = sys.exc_info()[0]
                 log.error("Failed to insert node %s" % e)
                 return
-            graph.node[node_id]['type'] = ntype
-            graph.node[node_id]['coreType'] = core_type
-            graph.node[node_id]['name'] = name
-            graph.node[node_id]['url'] = url
-            graph.node[node_id]['df'] = df
-            graph.node[node_id]['dt'] = dt
-
+        
+        #if we get here we have a valid node
         graph.node[node_id]['type'] = ntype
         graph.node[node_id]['coreType'] = core_type
         graph.node[node_id]['name'] = name
