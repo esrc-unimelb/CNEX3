@@ -170,8 +170,7 @@ class Entity:
             except KeyError:
                 print(etree.tostring(node, pretty_print=True))
 
-        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
-        related_resources = get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True)
+        related_resources = list(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:resourceRelation[@resourceRelationType="other"]', element=True, aslist=True))
         for node in related_resources:
             # for each node - get the id, type, name and href
             #  add a node to describe it
@@ -186,8 +185,21 @@ class Entity:
                 rname = rname.split(':', 1)[1:][0].strip()
             else:
                 rtype = core_type
-            self.graph.add_node(rid, { 'type': rtype, 'coreType': core_type, 'name': rname, 'url': rurl })
-            self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
+            if rid not in self.graph:
+                 try:
+                    self.graph.add_node(rid)
+                except:
+                # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
+                    e = sys.exc_info()[0]
+                    log.error("Failed to insert node %s" % e)
+                    return
+        
+                #if we get here we have a valid node
+                self.graph.node[rid]['type'] = rtype
+                self.graph.node[rid]['coreType'] = core_type
+                self.graph.node[rid]['name'] = rname
+                self.graph.node[rid]['url'] = rurl
+                self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
 
 
 
