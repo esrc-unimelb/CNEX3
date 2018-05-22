@@ -227,7 +227,6 @@ class Entity:
             datafile = self.request.GET.get('q').replace(self.source_map['source'], self.source_map['localpath'])
         else:
             return '' 
-
         # if there's an EAC ref - use it
         xml = get_xml(datafile)
         if xml is not None:
@@ -237,7 +236,8 @@ class Entity:
             sn = ''
             if len(summnote) != 0:
                 sn = etree.tostring(get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist/e:abstract', element=True), method='html')
-
+                sn=sn.decode('UTF8')
+            
             full_note = get(tree, '/e:eac-cpf/e:cpfDescription/e:description/e:biogHist', element=True)
             fn = ''
             if len(full_note) != 0:
@@ -245,8 +245,8 @@ class Entity:
                 for c in full_note.getchildren():
                     if c.tag == '{urn:isbn:1-931666-33-4}abstract':
                         c.getparent().remove(c)
-
-                full_note = [ etree.tostring(f, method='html') for f in full_note ]
+                     
+                full_note = [ etree.tostring(f, method='html').decode('UTF8') for f in full_note ]
                 for c in full_note:
                     c = c.replace('<list',  '<ul' )
                     c = c.replace('</list', '</ul')
@@ -254,12 +254,12 @@ class Entity:
                     c = c.replace('</item', '</li')
                     fn.append(c)
                 fn = ' '.join(fn)
-
-            return sn, fn
+                
+            return str(sn), str(fn)
 
         else:
             # no EAC datafile
             tree = html.parse(datafile)
             data = tree.xpath('//dl[@class="content-summary"]')
-            return None, etree.tostring(data[0])
+            return None, etree.tostring(data[0]).decode('UTF8')
 
