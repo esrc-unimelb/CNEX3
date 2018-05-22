@@ -7,5 +7,5 @@ interface: the client side vis component written in angular
 
 ## Dependencies
 
- * app: Python, Pyramid, SqlAlchemy, SQLite, Networkx, lxml
+ * app: Python, Pyramid, SqlAlchemy, SQLite, Networkx, lxml, ujson, PyMongo
  * interface: AngularJS, Angular-Bootstrap, d3.js, Bootstrap CSS
