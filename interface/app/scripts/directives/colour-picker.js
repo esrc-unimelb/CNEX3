@@ -43,23 +43,23 @@ angular.module('interfaceApp')
               }
           }
 
-          var changeColour = function(type) {
+          scope.changeColour = function(type) {
               scope.showPicker = false;
               scope.showChooser = true;
               scope.type = type;
           }
-          var setColor = function(color) {
+          scope.setColor = function(color) {
               scope.types[scope.type].color = color;
               DataService.setColor(scope.type, color);
               scope.showPicker = true;
               scope.showChooser = false;
               $rootScope.$broadcast('colours-changed');
           }
-          var save = function() {
+          scope.save = function() {
               scope.setColor(scope.custom.color);
               scope.dismissChooser();
           }
-          var dismissChooser = function() {
+          scope.dismissChooser = function() {
               scope.showPicker = true;
               scope.showChooser = false;
           }
