@@ -1,31 +1,33 @@
-<div class="row" style="background-color: #003268; height: 20px;">
-</div>
+<div class="row" style="background-color: #003268; height: 20px"></div>
 <div class="container">
     <div class="row" style="">
         <div class="col-sm-12 col-md-12 col-lg-12 text-center">
-            <h1 style="text-shadow: 1px -1px 2px #595959; color: #658095; line-height: 1.1;">
-                <span style="color: #3d4343;">ConneX: Contextual Network Explorer</span>
+            <h1 style="text-shadow: 1px -1px 2px #595959; color: #658095; line-height: 1.1">
+                <span style="color: #3d4343">ConneX: Contextual Network Explorer</span>
             </h1>
             <h5>Visualise and Explore the Context Entity relationships in an OHRM dataset.</h5>
-            <h4 style="font-size: 16px; font-weight: 300; text-rendering: optimizelegibility; color: #24658A;">
-                A product of the 
-                <a href="http://www.esrc.unimelb.edu.au" style="color: #24658A;">eScholarship Research Centre</a>,
-                <a href="http://www.lib.unimelb.edu.au" target="_blank" style="color: #24658A;" >The University of Melbourne Library</a>.
+            <h4 style="font-size: 16px; font-weight: 300; text-rendering: optimizelegibility; color: #24658A">
+                A product of the
+                <a href="http://www.esrc.unimelb.edu.au" style="color: #24658A">eScholarship Research Centre</a>,
+                <a href="http://www.lib.unimelb.edu.au" target="_blank" style="color: #24658A">The University of Melbourne Library</a>.
             </h4>
         </div>
     </div>
-    <br/>
+    <br>
     <div class="row" style="">
         <div class="col-sm-12 col-md-12 col-lg-12">
             <span ng-if="loggedIn">Logged in as: {{name}}.</span>
             <span ng-if="!loggedIn">Authorised users should log in.</span>
             <button class="btn btn-default bt-sm pull-right" ng-click="login()" ng-if="!loggedIn">Login</button>
             <button class="btn btn-default bt-sm pull-right" ng-click="logout()" ng-if="loggedIn">Logout</button>
-            <hr/>
-            <div class="alert alert-info text-center">This application requires the very latest in HTML5 and Javascript technology. In order to have the best possible
-            experience we recommend that you use a modern browser. Google Chrome and Mozilla Firefox are both known to work well.
-            This application will work on a tablet computer (eg. iPad) and even a phone (though you don't really want to do that!). However, please note that it was designed for 
-            computers with larger displays and more processing power than is normally found in portable devices.</div>
+            <hr>
+            <div class="alert alert-info text-center">
+                This application requires the very latest in HTML5 and Javascript technology. In order to have the best possible
+                experience we recommend that you use a modern browser. Google Chrome and Mozilla Firefox are both known to
+                work well. This application will work on a tablet computer (eg. iPad) and even a phone (though you don't
+                really want to do that!). However, please note that it was designed for computers with larger displays and
+                more processing power than is normally found in portable devices.
+            </div>
             <!--[if lte IE 9]>
                 <div class="alert alert-danger">We've detected that you're using Internet Explorer version 9 or older. This application
                 likely won't work well (or at all!) in those browsers.</div>
@@ -36,21 +38,23 @@
         <table class="table table-hover">
             <tr ng-repeat="site in sites">
                 <td>
-                    <span style="font-family:monospace;">{{site.code}}</span>&nbsp;&#8212;&nbsp;{{site.name}}
+                    <span style="font-family:monospace">{{site.code}}</span>&nbsp;&#8212;&nbsp;{{site.name}}
                 </td>
                 <td>
                     <a href="#/site/{{site.code}}/byEntity">Explore by Context Entity</a>
                 </td>
                 <td>
-                    <a href="{{site.url}}" target="_blank">visit site&nbsp;<i class="fa fa-external-link"></i></a>
+                    <a href="{{site.url}}" target="_blank">visit site&nbsp;
+                        <i class="fa fa-external-link"></i>
+                    </a>
                 </td>
             </tr>
         </table>
     </div>
-    <div ng-if='serviceUnavailable'>
+    <div ng-if="serviceUnavailable">
         Well this is embarassing! Sorry - but we seem to be a bit broken at this time...
     </div>
-    <hr style="border-color: #003268;"/>
+    <hr style="border-color: #003268">
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
             <h5>Technology Credits</h5>
@@ -58,38 +62,58 @@
     </div>
     <div class="row">
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="https://angularjs.org/" target="_blank"><button class="btn btn-default btn-block btn-sm">AngularJS</button></a>
+            <a href="https://angularjs.org/" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">AngularJS</button>
+            </a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="http://getbootstrap.com/" target="_blank"><button class="btn btn-default btn-block btn-sm">Bootstrap</button></a>
+            <a href="http://getbootstrap.com/" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">Bootstrap</button>
+            </a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="http://d3js.org/" target=_blank"><button class="btn btn-default btn-block btn-sm">d3</button></a>
+            <a href="http://d3js.org/" target="_blank&quot;">
+                <button class="btn btn-default btn-block btn-sm">d3</button>
+            </a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="http://python.org" target="_blank"><button class="btn btn-default btn-block btn-sm">Python</button></a>
+            <a href="http://python.org" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">Python</button>
+            </a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="https://networkx.github.io/" target="_blank"><button class="btn btn-default btn-block btn-sm">NetworkX</button></a>
+            <a href="https://networkx.github.io/" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">NetworkX</button>
+            </a>
         </div>
         <div class="col-sm-2 col-md-2 col-lg-2">
-            <a href="http://lxml.de" target="_blank"><button class="btn btn-default btn-block btn-sm">lxml</button></a>
+            <a href="http://lxml.de" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">lxml</button>
+            </a>
         </div>
     </div>
-    <br/>
+    <br>
     <div class="row">
         <div class="col-sm-3 col-md-3 col-lg-3">
-            <a href="http://gruntjs.com" target="blank"><button class="btn btn-default btn-block btn-sm">Grunt</button></a>
+            <a href="http://gruntjs.com" target="blank">
+                <button class="btn btn-default btn-block btn-sm">Grunt</button>
+            </a>
         </div>
         <div class="col-sm-3 col-md-3 col-lg-3">
-            <a href="http://yeoman.io/" target="_blank"><button class="btn btn-default btn-block btn-sm">Yeoman</button></a>
+            <a href="http://yeoman.io/" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">Yeoman</button>
+            </a>
         </div>
         <div class="col-sm-3 col-md-3 col-lg-3">
-            <a href="http://nodejs.org" target="_blank"><button class="btn btn-default btn-block btn-sm">NodeJS</button></a>
+            <a href="http://nodejs.org" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">NodeJS</button>
+            </a>
         </div>
         <div class="col-sm-3 col-md-3 col-lg-3">
-            <a href="http://www.html5rocks.com/en/" target="_blank"><button class="btn btn-default btn-block btn-sm">HTML5</button></a>
+            <a href="http://www.html5rocks.com/en/" target="_blank">
+                <button class="btn btn-default btn-block btn-sm">HTML5</button>
+            </a>
         </div>
     </div>
-    <br/>
+    <br>
 </div>

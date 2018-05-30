@@ -8,6 +8,7 @@ angular.module('interfaceApp')
       scope: {
           'data': '=',
       },
+      controllerAs: 'colourPickerCtrl',
       link: function postLink(scope, element, attrs) {
           scope.showPicker = false;
           scope.showChooser = false;
@@ -42,23 +43,23 @@ angular.module('interfaceApp')
               }
           }
 
-          scope.changeColour = function(type) {
+          var changeColour = function(type) {
               scope.showPicker = false;
               scope.showChooser = true;
               scope.type = type;
           }
-          scope.setColor = function(color) {
+          var setColor = function(color) {
               scope.types[scope.type].color = color;
               DataService.setColor(scope.type, color);
               scope.showPicker = true;
               scope.showChooser = false;
               $rootScope.$broadcast('colours-changed');
           }
-          scope.save = function() {
+          var save = function() {
               scope.setColor(scope.custom.color);
               scope.dismissChooser();
           }
-          scope.dismissChooser = function() {
+          var dismissChooser = function() {
               scope.showPicker = true;
               scope.showChooser = false;
           }
