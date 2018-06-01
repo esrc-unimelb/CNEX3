@@ -46,12 +46,12 @@ angular.module('interfaceApp')
     function processEntityData(d) { 
         // store the graph
         DataService.entityGraph = d.graph;
-
         var ns = DataService.processNodeSet(d.nodes);
+        var ls = DataService.processLinks(d.links, _.pluck(d.nodes, 'id'))
 
         DataService.entityData = {
             'nodes': ns.linkedNodes,
-            'links': d.links,
+            'links': ls, //d.links,
             'types': processTypes(ns.linkedNodes),
             'datamap': ns.map,
         }

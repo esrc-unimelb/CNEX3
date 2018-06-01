@@ -205,18 +205,9 @@ class Network:
         # if it is: skip to the next one
         if not node_id:
             return
-
-        ##if graph.node.has_key(node_id):
-        if node_id in graph.node:
-            graph.node[node_id]['type'] = ntype
-            graph.node[node_id]['coreType'] = core_type
-            graph.node[node_id]['name'] = name
-            graph.node[node_id]['url'] = url
-            graph.node[node_id]['df'] = df
-            graph.node[node_id]['dt'] = dt
-        else:
+       
+        if node_id not in graph.node:
             try:
-                #graph.add_node(node_id, { 'type': ntype, 'coreType': core_type, 'name': name, 'url': url, 'df': df, 'dt': dt })
                 graph.add_node(node_id)
             except:
                 # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
