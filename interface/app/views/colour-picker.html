@@ -1,13 +1,13 @@
-<div style="position: relative; display: inline-block;">
-    <button class="btn btn-sm btn-default" ng-hide='showPicker' ng-click="toggleColourPicker()">Colour Picker</button>
-    <button class="btn btn-sm btn-default" ng-show='showPicker' ng-click="toggleColourPicker()">Hide Colour Picker</button>
-    <div style="position:absolute; z-index: 200; width: 350px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px;" 
+<div style="position: relative; display: inline-block">
+    <button class="btn btn-sm btn-default" ng-hide="showPicker" ng-click="toggleColourPicker()">Colour Picker</button>
+    <button class="btn btn-sm btn-default" ng-show="showPicker" ng-click="toggleColourPicker()">Hide Colour Picker</button>
+    <div style="position:absolute; z-index: 200; width: 350px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px" 
          ng-if="showPicker" class="animate-if">
         <div ng-repeat="(k, v) in types">
             <p>
-                <a href="" class="btn-block" ng-click="changeColour(k)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <a href="" class="btn-block" ng-click="changeColour(k)" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px">
                     {{k}}
-                    <span class="pull-right" style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{v.color}};"></span>
+                    <span class="pull-right" style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{v.color}}"></span>
                 </a>
             </p>
         </div>
@@ -17,7 +17,7 @@
             </div>
         </div>
     </div>
-    <div style="position:absolute; z-index: 300; width: 270px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 5px 5px 2px #ccc;"
+    <div style="position:absolute; z-index: 300; width: 270px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 5px 5px 2px #ccc"
         ng-if="showChooser" class="animate-if">
 
         <div class="row">
@@ -28,14 +28,14 @@
         <div class="row">
             <div class="col-sm-12">
                 <span ng-repeat="color in pallette" ng-click="setColor(color)" 
-                    style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{color}}; margin: 5px;">
+                    style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; margin: 5px" ng-style="{'background-color': '{{color}}'}">
                 </span>
             </div>
             <div class="col-sm-12">
-                <input class="form-control" ng-model="custom.color" placeholder="or set one of your own"/>
+                <input class="form-control" ng-model="custom.color" placeholder="or set one of your own">
             </div>
         </div>
-        <br/>
+        <br>
         <div class="row">
             <div class="col-sm-12">
                 <button class="btn btn-sm btn-default" ng-click="save()">Save</button>

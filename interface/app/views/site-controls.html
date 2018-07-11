@@ -1,38 +1,44 @@
 <!-- the controls panel -->
-<div ng-style="controlsPanelStyle" style="padding: 15px;">
+<div ng-style="controlsPanelStyle" style="padding: 15px">
     <!-- header -->
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
             <h4 style="">
-                <span style="color: #3d4343;">{{site.name}} ({{site.code}})</span>
+                <span style="color: #3d4343">{{site.name}} ({{site.code}})</span>
             </h4>
-            <hr/>
+            <hr>
         </div>
     </div>
    
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="panel-group" ng-model='panels.activePanel' data-animation="" data-allow-multiple="true" bs-collapse>
+            <div class="panel-group" ng-model="panels.activePanel" data-animation="" data-allow-multiple="true" bs-collapse="">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5 style="display: inline-block;"><a bs-collapse-toggle>Controls</a></h5>
+                        <h5 style="display: inline-block">
+                            <a bs-collapse-toggle="">Controls</a>
+                        </h5>
                         <button class="pull-right btn btn-sm btn-default" ng-click="reset()">Reset</button>
                     </div>
-                    <div class="panel-collapse" bs-collapse-target>
+                    <div class="panel-collapse" bs-collapse-target="">
                         <div class="panel-body">
                             <!-- control buttons -->
                             <div class="row">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
                                     <strong>Size nodes:&nbsp;</strong>
                                     <div class="btn-group text-center" role="group" aria-label="...">
-                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[1]" ng-click="sizeNodesBy('entities')">by related entities</button>
-                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[2]" ng-click="sizeNodesBy('publications')">by related publications</button>
-                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[3]" ng-click="sizeNodesBy('objects')">by related objects</button>
-                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[0]" ng-click="sizeNodesBy('evenly')">evenly</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[1]" 
+                                            ng-click="sizeNodesBy('entities')">by related entities</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[2]" 
+                                            ng-click="sizeNodesBy('publications')">by related publications</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[3]" 
+                                            ng-click="sizeNodesBy('objects')">by related objects</button>
+                                        <button class="btn btn-sm btn-default" ng-class="sizeBy[0]" 
+                                            ng-click="sizeNodesBy('evenly')">evenly</button>
                                     </div>
                                 </div>
                             </div>
-                            <br/>
+                            <br>
                             <div class="row">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
                                     <!--
@@ -45,9 +51,10 @@
                                     -->
                                     <button class="btn btn-sm btn-default" ng-class="" ng-click="toggleLabels()">Toggle Labels</button>
                                     <colour-picker data="data"></colour-picker>
-                                    <type-filter  data="data"></type-filter>
-                                    <button class="btn btn-sm btn-default pull-right" ng-disabled="disableDownloadButton" ng-click="downloadGraph()">Download data (GML)</button>
-                                    <a id="graphDownloader" ng-href="{{graphUrl}}" style="display: none;" download></a>
+                                    <type-filter data="data"></type-filter>
+                                    <button class="btn btn-sm btn-default pull-right" ng-disabled="disableDownloadButton" 
+                                        ng-click="downloadGraph()">Download data (GML)</button>
+                                    <a id="graphDownloader" ng-href="{{graphUrl}}" style="display: none" download=""></a>
                                 </div>
                             </div>
                         </div>
@@ -55,9 +62,11 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Dates</a></h5>
+                        <h5>
+                            <a bs-collapse-toggle="">Dates</a>
+                        </h5>
                     </div>
-                    <div class="panel-collapse" bs-collapse-target>
+                    <div class="panel-collapse" bs-collapse-target="">
                         <div class="panel-body">
                             <date-vis data="data"></date-vis>
                         </div>
@@ -65,9 +74,11 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Statistics and Entity Types</a></h5>
+                        <h5>
+                            <a bs-collapse-toggle="">Statistics and Entity Types</a>
+                        </h5>
                     </div>
-                    <div class="panel-collapse" bs-collapse-target>
+                    <div class="panel-collapse" bs-collapse-target="">
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-sm-8 col-md-8 col-lg-8">
@@ -95,10 +106,12 @@
                             </div>
                             <!-- dataset type statistics -->
                             <div class="row">
-                                <hr/>
+                                <hr>
                                 <span ng-repeat="(type, typeData) in data.types">
                                     <div class="col-sm-8 col-md-8 col-lg-8">
-                                        <span ng-if="typeData.strike"><del>{{type}} ({{typeData.coreType}})</del></span>
+                                        <span ng-if="typeData.strike">
+                                            <del>{{type}} ({{typeData.coreType}})</del>
+                                        </span>
                                         <span ng-if="!typeData.strike">{{type}} ({{typeData.coreType}})</span>
                                     </div>
                                     <div class="col-sm-2 col-md-2 col-lg-2">
@@ -118,11 +131,11 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5 style="display: inline-block;"><a bs-collapse-toggle>Inspect Selected Node Network</a></h5>
+                        <h5 style="display: inline-block"><a bs-collapse-toggle="">Inspect Selected Node Network</a></h5>
                         <button class="pull-right btn btn-sm btn-default" ng-if="selectionsDownload" 
                             ng-csv="selectedNodesData" field-separator="||" filename="selections.csv">Download</button>
                     </div>
-                    <div class="panel-collapse" bs-collapse-target>
+                    <div class="panel-collapse" bs-collapse-target="">
                         <div class="panel-body">
                             <div class="row" ng-if="contextNodeData">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
@@ -132,13 +145,14 @@
                                             ({{contextNodeData.id}}) {{contextNodeData.name}} ({{contextNodeData.df | date:'yyyy'}} - {{contextNodeData.dt | date:'yyyy'}})
                                         </a>
                                     </span>
-                                    <hr/>
+                                    <hr>
                                 </div>
                             </div>
                             <div class="row" ng-if="contextNetworkData">
                                 <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="(type, data) in contextNetworkData">
                                     <span class="form-inline">
-                                        <strong>{{type}} ({{data.length}})</strong><br/>
+                                        <strong>{{type}} ({{data.length}})</strong>
+                                        <br>
                                     </span>
                                     <ul>
                                         <span ng-repeat="d in data">
@@ -163,16 +177,19 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5 style="display: inline-block;"><a bs-collapse-toggle>Inspect Unconnected Nodes</a></h5>
+                        <h5 style="display: inline-block">
+                            <a bs-collapse-toggle="">Inspect Unconnected Nodes</a>
+                        </h5>
                         <button class="pull-right btn btn-sm btn-default" ng-if="unconnectedDownload" 
                             ng-csv="unConnectedNodesData" field-separator="||" filename="unconnected-nodes.csv">Download</button>
                     </div>
-                    <div class="panel-collapse" bs-collapse-target>
+                    <div class="panel-collapse" bs-collapse-target="">
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-sm-12 col-md-12 col-lg-12" ng-repeat="(type, data) in data.unConnectedNodes">
                                     <span class="form-inline">
-                                        <strong>{{type}} ({{data.length}})</strong><br/>
+                                        <strong>{{type}} ({{data.length}})</strong>
+                                        <br>
                                     </span>
                                     <ul>
                                         <span ng-repeat="d in data">
@@ -198,9 +215,11 @@
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h5><a bs-collapse-toggle>Highlight Nodes by Search</a></h5>
+                        <h5>
+                            <a bs-collapse-toggle="">Highlight Nodes by Search</a>
+                        </h5>
                     </div>
-                    <div class="panel-collapse" bs-collapse-target>
+                    <div class="panel-collapse" bs-collapse-target="">
                         <div class="panel-body">
                             <search-form search-type="keyword"></search-form>
                         </div>

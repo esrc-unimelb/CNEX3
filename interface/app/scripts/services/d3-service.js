@@ -331,18 +331,15 @@ angular.module('interfaceApp')
      */
     function calculateTransformAndScale(graphSelector) {
         // center the graph
-        var gc = d3.select(graphSelector).select('.node-container')[0][0].getBoundingClientRect();
-        var pc = d3.select(graphSelector)[0][0].getBoundingClientRect();
-        //console.log(gc, pc);
-        //console.log(d3.select(graphSelector).select('svg')[0][0].getBBox());
-
+        var gc = d3.select(graphSelector).select('.node-container').node().getBoundingClientRect();
+        var pc = d3.select(graphSelector).node().getBoundingClientRect();
+        
         var use = gc.width > gc.height ? gc.width: gc.height;
         var scale = pc.width / use;
         var scx = ((gc.width - pc.width) / 2) * scale,
             scy = ((gc.height - pc.height) / 2) * scale,
             t = [scx, scy];
 
-        //console.log(t, scale);
         return { 'translate': t, 'scale': scale * 0.8 }
     }
 
@@ -454,7 +451,7 @@ angular.module('interfaceApp')
         highlightedTypes: [],
         nLabels: 5,
         sizeBy: 'r',
-        colors: d3.scale.category20(),
+        colors: d3.scaleOrdinal(d3.schemeCategory20),
         highlightNodeAndLocalEnvironment: highlightNodeAndLocalEnvironment,
         highlightByType: highlightByType,
         highlightById: highlightById,

@@ -177,7 +177,7 @@ angular.module('interfaceApp')
               } else {
                   d3.select('#site_graph')
                     .selectAll('text')
-                    .classed({ 'hidden': false });
+                    .classed('hidden', false);
                   scope.labelsVisible = true;
               }
           }

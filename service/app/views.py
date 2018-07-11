@@ -1,4 +1,5 @@
 from pyramid.response import Response
+from pyramid.request import Request
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
     HTTPNotFound,
@@ -19,6 +20,7 @@ import io
 import os
 import os.path
 import datetime
+import json
 
 from .config import Config
 
@@ -129,8 +131,11 @@ def entity_data(request):
     claims, site = verify_access(request, site=site)
     e = Entity(request)
     summnote, fullnote = e.data()
-    return { 'summnote': summnote, 'fullnote': fullnote }
 
+    responseBody = "{ \"summnote\":" + json.dumps(summnote) + ", \"fullnote\": " + json.dumps(fullnote) + "}"
+    response = Response(body=responseBody )
+    return response
+#    return { 'summnote': summnote, 'fullnote': fullnote }
 
 @view_config(route_name="network-stats", request_method='GET', renderer='json')
 def network_stats(request):

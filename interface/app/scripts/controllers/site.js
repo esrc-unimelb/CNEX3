@@ -58,7 +58,7 @@ angular.module('interfaceApp')
         $scope.update = function() {
             var url = $scope.service + '/network/' + $scope.site.code + '/' + $scope.graph + '/status';
             $http.get(url).then(function(resp) {
-                if (resp.data.processed !== null) {
+                if ((resp.data.processed !== null) && (resp.data.processed !== "")) {
                     $scope.initting = false;
                     $scope.progress = true;
                     $scope.processed = resp.data.processed;

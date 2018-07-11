@@ -84,15 +84,13 @@ angular.module('interfaceApp')
               var t1 = Date.parse(d3.min(scope.dates));
               var t2 = Date.parse(d3.max(scope.dates));
 
-              var xScale = d3.time.scale()
+              var xScale = d3.scaleTime()
                              .domain([t1, t2])
                              .range([10,scope.width - 10]);
 
-              var xAxis = d3.svg.axis()
-                            .scale(xScale)
-                            .ticks(d3.time.years)
-                            .ticks(6)
-                            .orient("bottom");
+              var xAxis = d3.axisBottom(xScale)
+                            .tickFormat(d3.timeFormat('%y'))
+                            .ticks(6);
 
               var svg = d3.select('#date_vis')
                           .append('svg')
@@ -105,7 +103,7 @@ angular.module('interfaceApp')
                           .attr('transform', 'translate(0,' + (scope.height - 30) + ')')
                           .call(xAxis);
 
-              var yScale = d3.scale.linear()
+              var yScale = d3.scaleLinear()
                              .domain([0, scope.ranges.length])
                              .range([10, (scope.height - 40)]);
 
