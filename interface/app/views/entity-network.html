@@ -1,10 +1,40 @@
-<div style="position: relative;">
-    <div ng-if="!relaxed && ready" style="position: fixed; z-index: 200; top: 0, left: 0; width: 100%; height: 100%; opacity: 0.3;">
+<style>
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+        font: 10px sans-serif;
+    }
+
+    .link {
+        stroke-opacity: 1.0;
+        stroke-width: 2.0;
+    }
+
+    .svg-container {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%;
+        /* aspect ratio */
+        vertical-align: top;
+        overflow: hidden;
+    }
+
+    .svg-content-responsive {
+        display: inline-block;
+        position: absolute;
+        top: 10px;
+        left: 0;
+    }
+</style>
+
+<div style="position: relative">
+    <div ng-if="!relaxed && ready" style="position: fixed; z-index: 200; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3">
     </div>
-    <div ng-if="!relaxed && ready" style="position: fixed; z-index: 300; top: 0; bottom: 0; left: 0; right: 0; margin: auto; width: 100%; height: 100%; padding-left: 15px; ">
+    <div ng-if="!relaxed && ready" style="position: fixed; z-index: 300; top: 0; bottom: 0; left: 0; right: 0; margin: auto; width: 100%; height: 100%; padding-left: 15px">
         <progress-meter processed="{{processed}}" total="{{total}}" invert="true"></progress-meter>
     </div>
-    <div ng-if="!ready" style="position: absolute; top: 0; left: 0; z-index: 200; width: 100%; height: 100%;" class="text-center">
+    <div ng-if="!ready" style="position: absolute; top: 0; left: 0; z-index: 200; width: 100%; height: 100%" class="text-center">
         <h4>loading...</h4>
     </div>
 
@@ -14,13 +44,16 @@
         <div ng-style="statisticsPanelStyle" ng-hide="showInfoPanel" ng-if="ready">
             <div class="row" ng-hide="removeClose">
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <button type="button" class="close" aria-label="Close" ng-click="close()"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" aria-label="Close" ng-click="close()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <h4>
-                        <span style="font-family:monospace;">{{contextNode.id}}</span><br/>
+                        <span style="font-family:monospace">{{contextNode.id}}</span>
+                        <br>
                         <a href="{{contextNode.url}}">{{contextNode.name}}</a>
                     </h4>
                     <span ng-hide="hideLinks">
@@ -29,7 +62,7 @@
                             <div class="well">{{iframeCode}}</div>
                         </p>
                     </span>
-                    <hr/>
+                    <hr>
                 </div>
             </div>
             <div class="row">
@@ -42,25 +75,27 @@
             </div>
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="panel-group" ng-model="panels.activePanel" bs-collapse data-allow-multiple="true" data-start-collapsed="false" data-animation="">
+                    <div class="panel-group" ng-model="panels.activePanel" bs-collapse="" data-allow-multiple="true" data-start-collapsed="false"
+                        data-animation="">
                         <div class="panel panel-default" ng-repeat="(k, v) in stats">
-                            <div class="panel-heading" style="background-color: {{v.color}};">
+                            <div class="panel-heading" style="background-color: {{v.color}}">
                                 <h4 class="panel-title">
-                                    <a bs-collapse-toggle>{{k}} ({{v.count}})</a>
+                                    <a bs-collapse-toggle="">{{k}} ({{v.count}})</a>
                                 </h4>
                             </div>
-                            <div class="panel-collapse" bs-collapse-target>
+                            <div class="panel-collapse" bs-collapse-target="">
                                 <div class="panel-body">
                                     <ul>
                                         <li ng-repeat="d in v.entries">
-                                            <span style="font-family:monospace;">{{d.id}}</span>
-                                            <a href="" ng-click="showDetails(d)">{{d.name}} ({{d.df | date: 'yyyy'}} - {{d.dt | date: 'yyyy'}})</a><br/>
+                                            <span style="font-family:monospace">{{d.id}}</span>
+                                            <a href="" ng-click="showDetails(d)">{{d.name}} ({{d.df | date: 'yyyy'}} - {{d.dt | date: 'yyyy'}})</a>
+                                            <br>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                     </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -71,24 +106,29 @@
         <div ng-style="statisticsPanelStyle">
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12 pull-right">
-                    <button type="button" class="close" aria-label="Close" ng-click="closeInfoPanel()"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" aria-label="Close" ng-click="closeInfoPanel()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
                     <button class="btn btn-default" ng-click="reset()">Reset</button>
-                    <hr/>
+                    <hr>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
-                    <div class="panel-group" bs-collapse ng-model="multiplePanels.activePanels" data-allow-multiple="false" data-start-collapsed="false" data-animation="">
+                    <div class="panel-group" bs-collapse="" ng-model="multiplePanels.activePanels" data-allow-multiple="false" data-start-collapsed="false"
+                        data-animation="">
                         <div class="panel panel-default" ng-repeat="selection in selections">
                             <div class="panel-heading" ng-style="{ 'background-color': selectionData[selection].color }">
-                               <h4 class="panel-title">
+                                <h4 class="panel-title">
                                     <span ng-if="selectionData[selection]">
-                                        <a bs-collapse-toggle><span style="font-family:monospace;">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span><br/>
-                                        {{selectionData[selection].name}} ({{selectionData[selection].df | date: 'yyyy'}} - {{selectionData[selection].dt | date: 'yyyy'}})</a>
+                                        <a bs-collapse-toggle="">
+                                            <span style="font-family:monospace">{{selectionData[selection].id}}: {{selectionData[selection].type}}</span>
+                                            <br> {{selectionData[selection].name}} ({{selectionData[selection].df | date: 'yyyy'}}
+                                            - {{selectionData[selection].dt | date: 'yyyy'}})</a>
                                     </span>
                                     <span ng-if="!selectionData[selection]">
                                         Unable to retrieve the data for {{selection}}.
@@ -96,7 +136,7 @@
                                 </h4>
                             </div>
                             <span ng-if="selectionData[selection]">
-                                <div class="panel-collapse" bs-collapse-target>
+                                <div class="panel-collapse" bs-collapse-target="">
                                     <div class="panel-body">
                                         <div class="row">
                                             <div class="col-sm-12">
@@ -104,22 +144,20 @@
                                                 <a href="{{selectionData[selection].url}}" target="_blank">{{selectionData[selection].url}}</a>
                                             </div>
                                         </div>
-                                        <br/>
+                                        <br>
                                         <div class="row">
                                             <div class="col-sm-12">
                                                 <span ng-if="selectionData[selection].summnote">
-                                                    <p ng-bind-html="selectionData[selection].summnote" 
-                                                        style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                                    <p ng-bind-html="selectionData[selection].summnote" style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px"></p>
                                                 </span>
-                                                <p ng-bind-html="selectionData[selection].fullnote"
-                                                    style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px;"></p>
+                                                <p ng-bind-html="selectionData[selection].fullnote" style="font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 16px; letter-spacing: 0.16px; line-height: 25px"></p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </span>
                         </div>
-                     </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,5 +166,5 @@
     <!-- Network panel -->
     <div ng-style="mainpanelStyle">
         <div id="entity_graph"></div>
-    </div> 
+    </div>
 </div>

@@ -1,19 +1,19 @@
 <form role="form">
     <div class="input-group">
-        <input type="text" class="form-control" ng-model="searchBox" placeholder='Highlight nodes by searching the data.' autofocus>
+        <input type="text" class="form-control" ng-model="searchBox" placeholder="Highlight nodes by searching the data." autofocus>
         <span class="input-group-btn">
             <button class="btn btn-default" ng-click="search()">Search</button>
         </span>
     </div>
     <!-- <p class="help-block">{{help}}</p> -->
 </form>
-<span style="padding: 5px 0px;">
+<span style="padding: 5px 0px">
     <label class="radio-inline">
-        <input type="radio" ng-checked="phraseSearch" ng-click="setSearchType('phrase')" />
+        <input type="radio" ng-checked="phraseSearch" ng-click="setSearchType('phrase')">
         Phrase search
     </label>
     <label class="radio-inline">
-        <input type="radio" ng-checked="keywordSearch" ng-click="setSearchType('keyword')" />
+        <input type="radio" ng-checked="keywordSearch" ng-click="setSearchType('keyword')">
         Keyword search
     </label>
     <label class="radio-inline" ng-if="nSearchMatches">

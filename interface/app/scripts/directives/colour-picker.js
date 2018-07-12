@@ -8,6 +8,7 @@ angular.module('interfaceApp')
       scope: {
           'data': '=',
       },
+      controllerAs: 'colourPickerCtrl',
       link: function postLink(scope, element, attrs) {
           scope.showPicker = false;
           scope.showChooser = false;

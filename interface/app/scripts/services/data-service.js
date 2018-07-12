@@ -1,235 +1,241 @@
 'use strict';
 
 angular.module('interfaceApp')
-  .service('DataService', [ '$rootScope', '$http', '$timeout', 'configuration',
-         function ForceData($rootScope, $http, $timeout, conf) {
-    // AngularJS will instantiate a singleton by calling "new" on this function
-    //
-    //
-    function init() {
-        DataService.currentEntity = undefined;
-        DataService.entityGraph = undefined;
-        DataService.types = {};
-        DataService.filterTypes = [];
-        DataService.entityData = {};
-    }
+    .service('DataService', ['$rootScope', '$http', '$timeout', 'configuration',
+        function ForceData($rootScope, $http, $timeout, conf) {
+            // AngularJS will instantiate a singleton by calling "new" on this function
+            //
+            //
+            function init() {
+                DataService.currentEntity = undefined;
+                DataService.entityGraph = undefined;
+                DataService.types = {};
+                DataService.filterTypes = [];
+                DataService.entityData = {};
+            }
 
-    function getEntityNetwork(entityId) {
-        // tell the panel to load
-        $rootScope.$broadcast('load-entity-network-view');
+            function getEntityNetwork(entityId) {
+                // tell the panel to load
+                $rootScope.$broadcast('load-entity-network-view');
 
-        // store the ID of the current entity network we're viewing
-        DataService.currentEntity = entityId;
+                // store the ID of the current entity network we're viewing
+                DataService.currentEntity = entityId;
 
-        var service = conf[conf.service];
-        var url = service + '/entity/' + DataService.site.code + '/' + entityId;
-        $http.get(url).then(function(resp) {
-            $timeout(function() { getData(); }, 100);
-        },
-        function(resp) {
-        });
+                var service = conf[conf.service];
+                var url = service + '/entity/' + DataService.site.code + '/' + entityId;
+                $http.get(url).then(function (resp) {
+                    $timeout(function () { getData(); }, 100);
+                },
+                    function (resp) {
+                    });
 
-        var getData = function() {
-            var url = service + '/entity/' + DataService.site.code + '/' + entityId + '/status';
-            $http.get(url).then(function(resp) {
-                if (resp.data.status === 'complete') {
-                    processEntityData(resp.data.graph);
-                } else {
-                    $timeout( function() { getData(); }, 100 );
+                var getData = function () {
+                    var url = service + '/entity/' + DataService.site.code + '/' + entityId + '/status';
+                    $http.get(url).then(function (resp) {
+                        if (resp.data.status === 'complete') {
+                            processEntityData(resp.data.graph);
+                        } else {
+                            $timeout(function () { getData(); }, 100);
+                        }
+                    },
+                        function (resp) {
+                        });
                 }
-            },
-            function(resp) {
-            });
-        }
-    }
+            }
 
-    function processEntityData(d) { 
-        // store the graph
-        DataService.entityGraph = d.graph;
+            function processEntityData(d) {
+                // store the graph
+                DataService.entityGraph = d.graph;
+                DataService.entityData = processGraphData(d, 'entity');
+                $rootScope.$broadcast('draw-entity-graph');
+            }
 
-        var ns = DataService.processNodeSet(d.nodes);
+            function processSiteData(d) {
+                // store the graph
+                DataService.siteGraph = d.graph;
+                return processGraphData(d.graph, 'site');
+            }
 
-        DataService.entityData = {
-            'nodes': ns.linkedNodes,
-            'links': d.links,
-            'types': processTypes(ns.linkedNodes),
-            'datamap': ns.map,
-        }
-        $rootScope.$broadcast('draw-entity-graph');
-    }
-
-    function processSiteData(d) {
-        // store the graph
-        DataService.siteGraph = d.graph;
-
-        var ns = d.graph.nodes;
-        var ls = d.graph.links;
-
-        // add some color and the default node radius
-        // split the dataset into linked and unlinked
-        ns = DataService.processNodeSet(ns);
-        var datamap = ns.map,
-            linkedNodes = ns.linkedNodes,
-            unLinkedNodes = ns.unLinkedNodes;
-
-        // get the data structure ready for the graph and
-        var data = {
-            'nodes': linkedNodes,
-            'links': processLinks(ls, _.pluck(linkedNodes, 'id')),
-            'unConnectedNodes': processUnLinkedNodes(unLinkedNodes),
-            'types': processTypes(linkedNodes),
-            'datamap': datamap,
-        }
-        return data;
-    }
-
-    function processLinks(ls, nodeKey) {
-        // rebuild the links array using the positions from the linkedNodes array
-        var links = [];
-        // figure out the connectedNodes and associated links
-        angular.forEach(ls, function(v, k) {
-            var sn = v.sid;
-            var tn = v.tid;
-
-            if (nodeKey.indexOf(sn) !== -1 && nodeKey.indexOf(tn) !== -1) {
-                var link = {
-                    'source': nodeKey.indexOf(sn),
-                    'target': nodeKey.indexOf(tn),
-                    'sid': sn,
-                    'tid': tn
+            function processGraphData(g, graphType) {
+                
+                var ns = DataService.processNodeSet(g.nodes);
+                
+                if(graphType === 'entity'){
+                    var ls = DataService.processLinks(g.links, _.pluck(g.nodes, 'id'));
+                } else{
+                    var ls = DataService.processLinks(g.links, _.pluck(ns.linkedNodes, 'id'));
                 }
-                links.push(link);
+
+                var data = {
+                    'nodes': ns.linkedNodes,
+                    'links': ls, 
+                    'unConnectedNodes': processUnLinkedNodes(ns.unLinkedNodes),
+                    'types': processTypes(ns.linkedNodes),
+                    'datamap': ns.map,
+                }
+                return data;
             }
-        });
-        return links;
-    }
 
-    function processUnLinkedNodes(nodes) {
-        // group unconnected nodes by type and sort alphabetically
-        var unConnectedNodes = {};
-        var undata = _.groupBy(nodes, function(d) { return d.type; });
-        angular.forEach(undata, function(v, k) {
-            unConnectedNodes[k] = _.sortBy(v, function(d) { return d.name; });
-        });
-        return unConnectedNodes;
-    }
+            function processLinks(ls, nodeKey) {
+                // rebuild the links array using the positions from the linkedNodes array
+                var links = [];
+                // figure out the connectedNodes and associated links
+                angular.forEach(ls, function (v, k) {
+                    var sn = v.sid;
+                    var tn = v.tid;
+                    var sl = nodeKey.indexOf(v.sid);
+                    var tl = nodeKey.indexOf(v.tid);
 
-    function processTypes(nodes) {
-        // construct an object keyed by types in the dataset
-        var types = {};
-        angular.forEach(nodes, function(v,k) {
-            if (conf.mapForward[v.type.toLowerCase()] !== undefined) {
-                k = conf.mapForward[v.type.toLowerCase()];
-            } else {
-                k = v.type
-            }
-            if (types[k] === undefined) {
-                types[k] = {
-                    'count': 1,
-                    'checked': false,
-                    'color': v.color,
-                    'coreType': conf.mapForward[v.coreType.toLowerCase()],
-                    'strike': false
-                };
-            } else {
-                types[k].count += 1;
-            }
-        })
-        angular.forEach(types, function(v,k) {
-            if (DataService.types[k] === undefined) {
-                DataService.types[k] = v;
-            }
-        });
-
-        return types;
-    }
-
-    function getColor(k) {
-        if (conf.mapForward[k.toLowerCase()] !== undefined) {
-            k = conf.mapForward[k.toLowerCase()];
-        }
-        return DataService.types[k].color;
-    }
-
-    function setColor(k, color) {
-        if (conf.mapForward[k.toLowerCase()] !== undefined) {
-            k = conf.mapForward[k.toLowerCase()];
-        }
-        DataService.types[k].color = color;
-    }
-
-    function processNodeSet(nodes) {
-        // determine the lowest and highest neighbour counts
-        var nodeSizesByConnections = [];
-        var nodeSizesByRelatedEntities = [];
-        var nodeSizesByRelatedPublications = [];
-        var nodeSizesByRelatedDobjects = [];
-
-        angular.forEach(nodes, function(v, k) {
-            if (v.connections !== undefined) nodeSizesByConnections.push(v.connections);
-            if (v.relatedEntities !== undefined) nodeSizesByRelatedEntities.push(v.relatedEntities);
-            if (v.relatedPublications !== undefined) nodeSizesByRelatedPublications.push(v.relatedPublications);
-            if (v.relatedDobjects !== undefined) nodeSizesByRelatedDobjects.push(v.relatedDobjects);
-        })
-        var weightBoundsByConnections = [Math.min.apply(null, nodeSizesByConnections), Math.max.apply(null, nodeSizesByConnections)];
-        var weightBoundsByEntity = [Math.min.apply(null, nodeSizesByRelatedEntities), Math.max.apply(null, nodeSizesByRelatedEntities)];
-        var weightBoundsByPublication = [Math.min.apply(null, nodeSizesByRelatedPublications), Math.max.apply(null, nodeSizesByRelatedPublications)];
-        var weightBoundsByDobject = [Math.min.apply(null, nodeSizesByRelatedDobjects), Math.max.apply(null, nodeSizesByRelatedDobjects)];
-
-        var sizeByConnections = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBoundsByConnections), Math.max.apply(null, weightBoundsByConnections)]);
-        var sizeByEntity = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBoundsByEntity), Math.max.apply(null, weightBoundsByEntity)]);
-        var sizeByPublication = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBoundsByPublication), Math.max.apply(null, weightBoundsByPublication)]);
-        var sizeByDobject = d3.scale.linear().range([10,40]).domain([Math.min.apply(null, weightBoundsByDobject), Math.max.apply(null, weightBoundsByDobject)]);
-
-
-        var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
-        angular.forEach(nodes, function(v,k) {
-            if (v.name !== undefined) {
-                try {
-                    v.color = conf.defaultColors[v.coreType.toLowerCase()];
-                    v.r = sizeByConnections(v.connections);
-                    v.rByEntity = sizeByEntity(v.relatedEntities);
-                    v.rByPublication = sizeByPublication(v.relatedPublications);
-                    v.rByDobject = sizeByDobject(v.relatedDobjects);
-                    nodemap[v.id] = v;
-                    if (v.connections === 0) {
-                        unLinkedNodes.push(v);
-                    } else {
-                        linkedNodes.push(v)
+                    if (sl !== -1 && tl !== -1) {
+                        var link = {
+                            'source': sl,
+                            'target': tl,
+                            'sid': sn,
+                            'tid': tn
+                        }
+                        links.push(link);
                     }
-                } catch(e) {
-                    // skip bad data
+                });
+                return links;
+            }
+
+            function processUnLinkedNodes(nodes) {
+
+                // group unconnected nodes by type and sort alphabetically
+                return _.groupBy(_.sortBy(nodes, 'name'), 'type');
+                //return unConnectedNodes;
+            }
+
+            function processTypes(nodes) {
+                // construct an object keyed by types in the dataset
+                var types = {};
+                angular.forEach(nodes, function (v, k) {
+                    if (conf.mapForward[v.type.toLowerCase()] !== undefined) {
+                        k = conf.mapForward[v.type.toLowerCase()];
+                    } else {
+                        k = v.type
+                    }
+                    if (types[k] === undefined) {
+                        types[k] = {
+                            'count': 1,
+                            'checked': false,
+                            'color': v.color,
+                            'coreType': conf.mapForward[v.coreType.toLowerCase()],
+                            'strike': false
+                        };
+                    } else {
+                        types[k].count += 1;
+                    }
+                })
+                angular.forEach(types, function (v, k) {
+                    if (DataService.types[k] === undefined) {
+                        DataService.types[k] = v;
+                    }
+                });
+
+                return types;
+            }
+
+            function getColor(k) {
+                if (conf.mapForward[k.toLowerCase()] !== undefined) {
+                    k = conf.mapForward[k.toLowerCase()];
                 }
+                return DataService.types[k].color;
             }
-        })
-        return { 'map': nodemap, 'linkedNodes': linkedNodes, 'unLinkedNodes': unLinkedNodes };
-    }
 
-    function filterTypesFromData(types) {
-        DataService.filterTypes = types;
-        angular.forEach(DataService.types, function(v, k) {
-            if (types.indexOf(k) !== -1) {
-                DataService.types[k].strike = true;
-            } else {
-                DataService.types[k].strike = false;
+            function setColor(k, color) {
+                if (conf.mapForward[k.toLowerCase()] !== undefined) {
+                    k = conf.mapForward[k.toLowerCase()];
+                }
+                DataService.types[k].color = color;
             }
-        })
-        $rootScope.$broadcast('filter-nodes-and-redraw');
-    }
 
-    var DataService = {
-        types: {},
-        filterTypes: [],
+            function processNodeSet(nodes) {
+                // determine the lowest and highest neighbour counts
 
-        init: init,
-        getEntityNetwork: getEntityNetwork,
-        processSiteData: processSiteData,
-        processLinks: processLinks,
-        processNodeSet: processNodeSet,
-        getColor: getColor,
-        setColor: setColor,
-        filterTypesFromData: filterTypesFromData,
-    }
 
-    return DataService;
-  }]);
+                let minConnections = 1000; //TODO fix these magic numbers...
+                let maxConnections = 0;
+                let minrelatedEntities = 1000;
+                let maxrelatedEntities = 0;
+                let minrelatedPublications = 1000;
+                let maxrelatedPublications = 0;
+                let minrelatedDobjects = 1000;
+                let maxrelatedDobjects = 0;
+
+                nodes.forEach((n) => {
+                    if (n.connections !== undefined) {
+                        minConnections = minConnections < n.connections ? minConnections : n.connections;
+                        maxConnections = maxConnections > n.connections ? maxConnections : n.connections;
+                    }
+                    if (n.relatedEntities !== undefined) {
+                        minrelatedEntities = minrelatedEntities < n.relatedEntities ? minrelatedEntities : n.relatedEntities;
+                        maxrelatedEntities = maxrelatedEntities > n.relatedEntities ? maxrelatedEntities : n.relatedEntities;
+                    }
+                    if (n.relatedPublications !== undefined) {
+                        minrelatedPublications = minrelatedPublications < n.relatedPublications ? minrelatedPublications : n.relatedPublications;
+                        maxrelatedPublications = maxrelatedPublications > n.relatedPublications ? maxrelatedPublications : n.relatedPublications;
+                    }
+                    if (n.relatedDobjects !== undefined) {
+                        minrelatedDobjects = minrelatedDobjects < n.relatedDobjects ? minrelatedDobjects : n.relatedDobjects;
+                        maxrelatedDobjects = maxrelatedDobjects > n.relatedDobjects ? maxrelatedDobjects : n.relatedDobjects;
+                    }
+
+                });
+
+                const sizeByConnections = d3.scaleLinear().range([10, 40]).domain([minConnections, maxConnections]);
+                const sizeByEntity = d3.scaleLinear().range([10, 40]).domain([minrelatedEntities, maxrelatedEntities]);
+                const sizeByPublication = d3.scaleLinear().range([10, 40]).domain([minrelatedPublications, maxrelatedPublications]);
+                const sizeByDobject = d3.scaleLinear().range([10, 40]).domain([minrelatedDobjects, maxrelatedDobjects]);
+
+                var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
+                angular.forEach(nodes, function (v, k) {
+                    if (v.name !== undefined) {
+                        try {
+                            v.color = conf.defaultColors[v.coreType.toLowerCase()];
+                            v.r = sizeByConnections(v.connections);
+                            v.rByEntity = sizeByEntity(v.relatedEntities);
+                            v.rByPublication = sizeByPublication(v.relatedPublications);
+                            v.rByDobject = sizeByDobject(v.relatedDobjects);
+                            nodemap[v.id] = v;
+                            if (v.connections === 0) {
+                                unLinkedNodes.push(v);
+                            } else {
+                                linkedNodes.push(v)
+                            }
+                        } catch (e) {
+                            // skip bad data
+                        }
+                    }
+                })
+                return { 'map': nodemap, 'linkedNodes': linkedNodes, 'unLinkedNodes': unLinkedNodes };
+            }
+
+            function filterTypesFromData(types) {
+                DataService.filterTypes = types;
+                angular.forEach(DataService.types, function (v, k) {
+                    if (types.indexOf(k) !== -1) {
+                        DataService.types[k].strike = true;
+                    } else {
+                        DataService.types[k].strike = false;
+                    }
+                })
+                $rootScope.$broadcast('filter-nodes-and-redraw');
+            }
+
+            var DataService = {
+                types: {},
+                filterTypes: [],
+
+                init: init,
+                getEntityNetwork: getEntityNetwork,
+                processSiteData: processSiteData,
+                processLinks: processLinks,
+                processNodeSet: processNodeSet,
+                getColor: getColor,
+                setColor: setColor,
+                filterTypesFromData: filterTypesFromData,
+            }
+
+            return DataService;
+        }]);
