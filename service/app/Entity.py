@@ -188,18 +188,18 @@ class Entity:
             if rid not in self.graph:
                  try:
                     self.graph.add_node(rid)
-                except:
+                 except:
                 # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
                     e = sys.exc_info()[0]
                     log.error("Failed to insert node %s" % e)
                     return
         
-                #if we get here we have a valid node
-                self.graph.node[rid]['type'] = rtype
-                self.graph.node[rid]['coreType'] = core_type
-                self.graph.node[rid]['name'] = rname
-                self.graph.node[rid]['url'] = rurl
-                self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
+            #if we get here we have a valid node
+            self.graph.node[rid]['type'] = rtype
+            self.graph.node[rid]['coreType'] = core_type
+            self.graph.node[rid]['name'] = rname
+            self.graph.node[rid]['url'] = rurl
+            self.graph.add_edge(rid, node_id, sid=rid, tid=node_id)
 
 
 
