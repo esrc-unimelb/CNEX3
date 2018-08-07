@@ -117,6 +117,7 @@ class Entity:
                 # somethinge serious wrong. This should raise an exception so we can clean up the network_progress
                 e = sys.exc_info()[0]
                 log.error("Failed to insert node %s" % e)
+                return
     
         self.graph.node[node_id]['type'] = ntype
         self.graph.node[node_id]['coreType'] = core_type
