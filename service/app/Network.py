@@ -222,6 +222,7 @@ class Network:
         graph.node[node_id]['url'] = url
         graph.node[node_id]['df'] = df
         graph.node[node_id]['dt'] = dt
+           
 
         
         related_entities = len(get(tree, '/e:eac-cpf/e:cpfDescription/e:relations/e:cpfRelation', element=True))
