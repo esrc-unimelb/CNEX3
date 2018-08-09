@@ -5,6 +5,6 @@ angular.module('interfaceApp')
 
       DataService.site = {
         'code': $routeParams.code
-      }
+      };
       DataService.getEntityNetwork($routeParams.entityId);
   }]);

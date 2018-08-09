@@ -10,25 +10,25 @@ angular.module('interfaceApp')
           data: '=',
           site: '='
       },
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope) {
 
           // assemble the CSV
           scope.construct = function(what) {
               var d = [];
               if (what === 'selected') {
-                  angular.forEach(DataService.selected, function(v,k) {
+                  angular.forEach(DataService.selected, function(v) {
                       d.push([v.id, v.type, v.name, v.url]);
                   });
                   scope.selectedNodesData = d;
               } else if (what === 'unconnected') {
-                  angular.forEach(scope.data.unConnectedNodes, function(v,k) {
-                      angular.forEach(v, function(i, j) {
+                  angular.forEach(scope.data.unConnectedNodes, function(v) {
+                      angular.forEach(v, function(i) {
                         d.push([i.id, i.type, i.name, i.url]);
-                      })
+                      });
                   });
                   scope.unConnectedNodesData = d;
               }
-          }
+          };
 
           scope.labelsVisible = true;
           scope.currentRotation = 0;
@@ -38,7 +38,7 @@ angular.module('interfaceApp')
 
           // if there are unconnected nodes, count them and enable the download button
           if (!_.isEmpty(scope.data.unConnectedNodes)) {
-              angular.forEach(scope.data.unConnectedNodes, function(v,k) {
+              angular.forEach(scope.data.unConnectedNodes, function(v) {
                   scope.data.unConnectedTotal += v.length;
               });
 
@@ -50,16 +50,16 @@ angular.module('interfaceApp')
           w.bind('resize', function() {
               scope.$apply(function() {
                   sizeThePanel();
-              })
+              });
           });
 
           var sizeThePanel = function() {
-              var e = angular.element(document.getElementById('dateVisContainer'));
+//              var e = angular.element(document.getElementById('dateVisContainer'));
               scope.controlsPanelStyle = {
                   'height': $window.innerHeight - 15,
                   'overflow-y': 'auto'
-              }
-          }
+              };
+          };
 
           sizeThePanel();
           scope.showData = false;
@@ -73,7 +73,7 @@ angular.module('interfaceApp')
 
                   // get the context node data and extract the node from the selected array
                   scope.contextNodeData = scope.data.datamap[DataService.contextNode];
-                  cndata = _.reject(DataService.selected, function(d) { return d.id === DataService.contextNode });
+                  cndata = _.reject(DataService.selected, function(d) { return d.id === DataService.contextNode; });
               } else {
                   cndata = DataService.selected;
               }
@@ -102,7 +102,7 @@ angular.module('interfaceApp')
           scope.$on('search-data-ready', function() {
                   angular.forEach(scope.data.types, function(v,k) {
                       scope.data.types[k].checked = false;
-                  })
+                  });
               d3s.highlightById('#site_graph', SolrService.selected);
           });
 
@@ -111,7 +111,7 @@ angular.module('interfaceApp')
               var nodes = d3.select('#site_graph')
                             .selectAll('.node')
                             .data();
-              var ns = DataService.processNodeSet(nodes);
+              DataService.processNodeSet(nodes);
               d3.select('#site_graph')
                 .transition()
                 .duration(500)
@@ -127,19 +127,19 @@ angular.module('interfaceApp')
 
               angular.forEach(scope.data.types, function(v,k) {
                   scope.data.types[k].color = DataService.types[k].color;
-              })
+              });
 
           });
 
           scope.clearTypes = function() {
               angular.forEach(scope.data.types, function(v,k) {
                   scope.data.types[k].checked = false;
-              })
-          }
+              });
+          };
           scope.highlightByType = function(type) {
               scope.data.types[type].checked = !scope.data.types[type].checked;
               d3s.highlightByType('#site_graph', type);
-          }
+          };
           
           // trigger a reset
           scope.reset = function() {
@@ -156,16 +156,16 @@ angular.module('interfaceApp')
               d3s.reset('#site_graph');
 
               // tag node sizing selected
-              scope.sizeBy = [ "", "active", "", "" ];
+              scope.sizeBy = [ '', 'active', '', '' ];
 
               // tell search to clear
               $rootScope.$broadcast('reset-search');
-          }
+          };
 
           // open up the entity network
           scope.viewEntityNetwork = function(id) {
               DataService.getEntityNetwork(id);
-          }
+          };
           
           // toggle node labels
           scope.toggleLabels = function() {
@@ -180,22 +180,22 @@ angular.module('interfaceApp')
                     .classed('hidden', false);
                   scope.labelsVisible = true;
               }
-          }
+          };
           
           // resize the nodes
           scope.sizeNodesBy = function(by) {
               if (by === 'evenly') {
-                  scope.sizeBy = [ "active", "", "", "" ];
+                  scope.sizeBy = [ 'active', '', '', '' ];
               } else if (by === 'entities') {
-                  scope.sizeBy = [ "", "active", "", "" ];
+                  scope.sizeBy = [ '', 'active', '', '' ];
               } else if (by === 'publications') {
-                  scope.sizeBy = [ "", "", "active", "" ];
+                  scope.sizeBy = [ '', '', 'active', '' ];
               } else if (by === 'objects') {
-                  scope.sizeBy = [ "", "", "", "active" ];
+                  scope.sizeBy = [ '', '', '', 'active' ];
               }
               d3s.sizeNodesBy('#site_graph', by);
               d3s.renderLabels('#site_graph');
-          }
+          };
 
 /*
           // rotate the graph left
@@ -222,13 +222,13 @@ angular.module('interfaceApp')
             },
             function(resp) {
             });
-          }
+          };
 
           // panels to open in the accordion
-          scope.panels = { 'activePanel': [0,1,2] }
+          scope.panels = { 'activePanel': [0,1,2] };
         
           // tag node sizing selected
-          scope.sizeBy = [ "", "active", "", "" ];
+          scope.sizeBy = [ '', 'active', '', '' ];
 
       }
     };

@@ -46,7 +46,7 @@ angular.module('interfaceApp')
           var map = {};
           angular.forEach(this.mapForward, function(v, k) {
               map[v] = k;
-          })
+          });
           return map;
       },
 

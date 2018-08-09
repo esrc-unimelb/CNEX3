@@ -8,13 +8,13 @@ angular.module('interfaceApp')
       scope: {
           'data': '=',
       },
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope) {
           scope.showPicker = false;
           scope.dataTypes = [];
 
           scope.$on('close-type-filter', function() {
               scope.dismissFilter();
-          })
+          });
 
           scope.toggleTypeFilter = function() {
               scope.showPicker = !scope.showPicker;
@@ -29,10 +29,12 @@ angular.module('interfaceApp')
                           //  to pass by reference...
                           scope.types[k] = angular.copy(DataService.types[k]);
                       }
-                  })
+                  });
               }
-              if (!scope.showPicker) scope.dismissFilter();
-          }
+              if (!scope.showPicker){
+                  scope.dismissFilter();
+                }
+          };
 
           scope.toggleType = function(type) {
               scope.dataTypes = DataService.filterTypes;
@@ -43,20 +45,20 @@ angular.module('interfaceApp')
                   scope.dataTypes.splice(scope.dataTypes.indexOf(type), 1);
                   scope.types[type].strike = false;
               }
-          }
+          };
 
           scope.redrawTheGraph = function() {
               DataService.filterTypesFromData(scope.dataTypes);
               scope.showPicker = false;
-          }
+          };
 
           scope.dismissFilter = function() {
-              angular.forEach(scope.dataTypes, function(v,k) {
+              angular.forEach(scope.dataTypes, function(v) {
                   scope.types[v].strike = false;
-              })
+              });
               //scope.dataTypes = [];
               scope.showPicker = false;
-          }
+          };
       }
 
     };

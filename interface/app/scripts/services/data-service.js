@@ -40,7 +40,7 @@ angular.module('interfaceApp')
                     },
                         function (resp) {
                         });
-                }
+                };
             }
 
             function processEntityData(d) {
@@ -59,20 +59,20 @@ angular.module('interfaceApp')
             function processGraphData(g, graphType) {
                 
                 var ns = DataService.processNodeSet(g.nodes);
-                
+                var ls;
                 if(graphType === 'entity'){
-                    var ls = DataService.processLinks(g.links, _.pluck(g.nodes, 'id'));
+                    ls = DataService.processLinks(g.links, _.pluck(g.nodes, 'id'));
                 } else{
-                    var ls = DataService.processLinks(g.links, _.pluck(ns.linkedNodes, 'id'));
+                    ls = DataService.processLinks(g.links, _.pluck(ns.linkedNodes, 'id'));
                 }
 
                 var data = {
                     'nodes': ns.linkedNodes,
-                    'links': ls, 
+                    'links': ls,
                     'unConnectedNodes': processUnLinkedNodes(ns.unLinkedNodes),
                     'types': processTypes(ns.linkedNodes),
                     'datamap': ns.map,
-                }
+                };
                 return data;
             }
 
@@ -80,7 +80,7 @@ angular.module('interfaceApp')
                 // rebuild the links array using the positions from the linkedNodes array
                 var links = [];
                 // figure out the connectedNodes and associated links
-                angular.forEach(ls, function (v, k) {
+                angular.forEach(ls, function (v) {
                     var sn = v.sid;
                     var tn = v.tid;
                     var sl = nodeKey.indexOf(v.sid);
@@ -92,7 +92,7 @@ angular.module('interfaceApp')
                             'target': tl,
                             'sid': sn,
                             'tid': tn
-                        }
+                        };
                         links.push(link);
                     }
                 });
@@ -113,7 +113,7 @@ angular.module('interfaceApp')
                     if (conf.mapForward[v.type.toLowerCase()] !== undefined) {
                         k = conf.mapForward[v.type.toLowerCase()];
                     } else {
-                        k = v.type
+                        k = v.type;
                     }
                     if (types[k] === undefined) {
                         types[k] = {
@@ -126,7 +126,7 @@ angular.module('interfaceApp')
                     } else {
                         types[k].count += 1;
                     }
-                })
+                });
                 angular.forEach(types, function (v, k) {
                     if (DataService.types[k] === undefined) {
                         DataService.types[k] = v;
@@ -189,7 +189,7 @@ angular.module('interfaceApp')
                 const sizeByDobject = d3.scaleLinear().range([10, 40]).domain([minrelatedDobjects, maxrelatedDobjects]);
 
                 var nodemap = {}, linkedNodes = [], unLinkedNodes = [];
-                angular.forEach(nodes, function (v, k) {
+                angular.forEach(nodes, function (v) {
                     if (v.name !== undefined) {
                         try {
                             v.color = conf.defaultColors[v.coreType.toLowerCase()];
@@ -201,13 +201,13 @@ angular.module('interfaceApp')
                             if (v.connections === 0) {
                                 unLinkedNodes.push(v);
                             } else {
-                                linkedNodes.push(v)
+                                linkedNodes.push(v);
                             }
                         } catch (e) {
                             // skip bad data
                         }
                     }
-                })
+                });
                 return { 'map': nodemap, 'linkedNodes': linkedNodes, 'unLinkedNodes': unLinkedNodes };
             }
 
@@ -219,7 +219,7 @@ angular.module('interfaceApp')
                     } else {
                         DataService.types[k].strike = false;
                     }
-                })
+                });
                 $rootScope.$broadcast('filter-nodes-and-redraw');
             }
 
@@ -235,7 +235,7 @@ angular.module('interfaceApp')
                 getColor: getColor,
                 setColor: setColor,
                 filterTypesFromData: filterTypesFromData,
-            }
+            };
 
             return DataService;
         }]);

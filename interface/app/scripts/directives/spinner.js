@@ -8,7 +8,7 @@ angular.module('interfaceApp')
       scope: {
           colour: '@'
       },
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope, element) {
           var c;
           if (scope.colour === undefined) {
               c = 'white';

@@ -9,7 +9,7 @@ angular.module('interfaceApp')
                 scope: {
                     data: '=',
                 },
-                link: function postLink(scope, element, attrs) {
+                link: function postLink(scope, element) {
                     var w = angular.element($window);
                     w.bind('resize', function () {
                         scope.$apply(function () {
@@ -17,7 +17,7 @@ angular.module('interfaceApp')
                                 .select('svg')
                                 .style('width', element[0].parentElement.clientWidth)
                                 .style('height', $window.innerHeight);
-                        })
+                        });
                     });
 
                     scope.$on('reset', function () {
@@ -37,39 +37,39 @@ angular.module('interfaceApp')
                     // cancel the timeout if the location changes
                     scope.$on('$locationChangeStart', function () {
                         $timeout.cancel(scope.timer);
-                    })
+                    });
 
                     // redraw graph with nodes filtered
                     scope.$on('filter-nodes-and-redraw', function () {
                         scope.nodes = [];
                         var typesToFilter = DataService.filterTypes;
-                        angular.forEach(scope.data.nodes, function (v, k) {
+                        angular.forEach(scope.data.nodes, function (v) {
                             if (typesToFilter.indexOf(v.type) === -1) {
                                 scope.nodes.push(v);
                             }
                         });
-                        scope.links = DataService.processLinks(scope.data.links, _.pluck(scope.nodes, 'id'))
+                        scope.links = DataService.processLinks(scope.data.links, _.pluck(scope.nodes, 'id'));
                         scope.relaxed = false;
                         scope.processed = 0.1;
                         scope.drawGraph();
-                    })
+                    });
 
                     scope.nodes = scope.data.nodes;
                     scope.links = scope.data.links;
 
                     // figure out the dimensions of the svg
-                    var w = element[0].parentElement.clientWidth;
+                    var svgWidth = element[0].parentElement.clientWidth;
                     var h = $window.innerHeight;
 
 
                     var centerGraph = function () {
                         if (scope.force.alpha() > 0.004) {
-                            scope.timer = $timeout(function (d) {
+                            scope.timer = $timeout(function () {
                                 centerGraph();
                             }, 500);
                         } else {
 
-                            var t = d3s.calculateTransformAndScale('#site_graph')
+                            var t = d3s.calculateTransformAndScale('#site_graph');
                             //scope.zoom.translate(t.translate).scale(t.scale);
                             d3.select('#site_graph')
                                 .selectAll('g')
@@ -79,14 +79,11 @@ angular.module('interfaceApp')
                             labelMainEntities();
                             scope.relaxed = true;
                         }
-                    }
+                    };
                     var labelMainEntities = function () {
                         d3s.renderLabels('#site_graph');
-                    }
+                    };
 
-                    var getNodeName = function(id){
-                        return ;
-                    }
                     scope.drawGraph = function () {
                         // remove any previous svg
                         d3.select('#site_graph')
@@ -96,10 +93,10 @@ angular.module('interfaceApp')
                         // redraw the view when zooming
                         var redraw = function () {
                             var svg = d3.select('#site_graph').selectAll('g');
-                            svg.attr("transform", d3.event.transform)
+                            svg.attr('transform', d3.event.transform);
 
                             // svg.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale(' + d3.event.scale + ')');
-                        }
+                        };
 
                         scope.zoom = d3.zoom()
                             .scaleExtent([0, 8]).on('zoom', redraw);
@@ -132,7 +129,7 @@ angular.module('interfaceApp')
                                     scope.processed = scope.force.alpha();
                                 });
                             }
-                        }
+                        };
 
                         scope.force = d3.forceSimulation()
                             .nodes(scope.nodes)
@@ -140,26 +137,26 @@ angular.module('interfaceApp')
                                 .distance(100) // TODO this should be a selectable value
                                 .strength(1) // TODO this should be a selectable value
                             )
-                            .force("charge", d3.forceManyBody()
+                            .force('charge', d3.forceManyBody()
                                 .strength(-2000) // TODO this should be a selectable value
                             )
-                            .force("xAxis", d3.forceX(w / 2))
-                            .force("yAxis", d3.forceY(h / 2))
+                            .force('xAxis', d3.forceX(svgWidth / 2))
+                            .force('yAxis', d3.forceY(h / 2))
+                            .force('center', d3.forceCenter(svgWidth / 2, h / 2))
                             .on('tick', tick);
-                        //.on('start','');
 
+                        // create an svg and append it to the DOM
                         var svg = d3.select('#site_graph')
-                            .classed("svg-container", true)
+                            .classed('svg-container', true)
                             .append('svg')
-                            .attr('width', w)
+                            .attr('width', svgWidth)
                             .attr('height', h)
-                            .attr('viewBox', '0 0 ' + w + ' ' + h)
+                            .attr('viewBox', '0 0 ' + svgWidth + ' ' + h)
                             .attr('preserveAspectRatio', 'xMinYMin meet')
                             .call(scope.zoom)
                             .append('g')
                             .attr('class', 'node-container')
-                            .classed("svg-content-responsive", true);
-                        //.attr('transform','rotate(0) translate(' + w/5 + ',' + h/6 + ') scale(.3,.3)');
+                            .classed('svg-content-responsive', true);
 
                         // add a group for the text elements we add later
                         d3.select('#site_graph')
@@ -172,7 +169,6 @@ angular.module('interfaceApp')
                             .data(scope.links);
                         var node = svg.selectAll('.node')
                             .data(scope.nodes);
-                        //.data(scope.force.nodes());
 
                         // draw the links
 
@@ -186,9 +182,12 @@ angular.module('interfaceApp')
                             .attr('stroke-width', 2);
                         link.exit().remove();
 
-                        var textDiv = d3.select("body").append("div")
-                            .attr("class", "tooltip")
-                            .style("opacity", 0);
+                        // add a div to handle the mouse over events
+                        var textDiv = d3.select('body')
+                            .append('div')
+                            .attr('class', 'tooltip')
+                            .style('opacity', 0);
+
                         //draw the nodes
                         node.enter()
                             .append('circle')

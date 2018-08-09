@@ -96,9 +96,9 @@ angular.module('interfaceApp')
                       MCS.add('danger', 'You are not authorized to use this application. Redirecting you to the login service in 3s.',
                           { status: MCS.status.shown}, { timeout: 3000 });
 
-                      $timeout(function(){ 
-                          MCS.removeShown(); 
-                          AuthService.login() 
+                      $timeout(function(){
+                          MCS.removeShown();
+                          AuthService.login();
                       }, 3000);
                   }
               }
@@ -109,25 +109,25 @@ angular.module('interfaceApp')
        * @function: getUserData
        */
       function getUserData() {
-          var app_data;
+          var appData;
           angular.forEach(AuthService.claims.apps, function(v,k) {
               if ($location.absUrl().search(k) !== -1) {
-                  app_data = v;
+                  appData = v;
               }
-          })
-          if (app_data === undefined) {
-              console.log("Something's not right. Not logging you in.");
+          });
+          if (appData === undefined) {
+              console.log('Something\'s not right. Not logging you in.');
               AuthService.logout();
-              MCS.add('danger', "Oh snap! We're having some issues right now. Hopefully these will be resolved soon.");
+              MCS.add('danger', 'Oh snap! We\'re having some issues right now. Hopefully these will be resolved soon.');
               return;
           }
           if (AuthService.claims !== undefined) {
               return {
                   'name': AuthService.claims.user.name,
                   'email': AuthService.claims.user.email,
-                  'admin': app_data.admin
-              }
-          } 
+                  'admin': appData.admin
+              };
+          }
 
       }
 

@@ -11,21 +11,21 @@ angular.module('interfaceApp')
             var q = [];
 
             var searchFields = [];
-            angular.forEach(conf.searchWhat, function(v,k) {
+            angular.forEach(conf.searchWhat, function(v) {
                 searchFields.push({ 'name': conf.searchFields[v].fieldName, 'weight': conf.searchFields[v].weight });
 
             });
             // are we doing a wildcard search? or a single term search fuzzy search?
            if (SolrService.searchType === 'keyword') {
               what = what.replace(/ /gi, ' ' + SolrService.keywordUnion + ' ');
-              angular.forEach(searchFields, function(v, k) {
+              angular.forEach(searchFields, function(v) {
                   q.push(v.name + ':(' + what + ')');
-              })
+              });
 
             } else {
-                angular.forEach(searchFields, function(v, k) {
+                angular.forEach(searchFields, function(v) {
                     q.push(v.name + ':"' + what + '"');
-                })
+                });
              }
             q = q.join(' OR ');
 
@@ -49,7 +49,7 @@ angular.module('interfaceApp')
                 $http.jsonp(solr, q).then(function(resp) {
                     // search succeeded
                     var matchingRecords = [];
-                    angular.forEach(resp.data.response.docs, function(v, k) {
+                    angular.forEach(resp.data.response.docs, function(v) {
                         if (v.record_id !== undefined) {
                             matchingRecords.push(v.record_id);
                         }
@@ -60,16 +60,16 @@ angular.module('interfaceApp')
                 function(resp) {
                     // search failed
                 });
-            }, 
+            },
             function(resp) {
                 // search failed
             });
         }
         
-    }
+    };
 
     var SolrService = {
         search: search,
-    }
+    };
     return SolrService;
   }]);

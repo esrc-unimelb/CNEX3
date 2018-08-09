@@ -8,7 +8,7 @@ angular.module('interfaceApp')
       scope: {
           fadeBackground: '&'
       },
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope, element) {
           scope.$on('reset', function() {
               element[0].value = configuration.opacity.unselected;
           });

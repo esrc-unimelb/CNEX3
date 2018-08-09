@@ -9,7 +9,7 @@ angular.module('interfaceApp')
           'data': '=',
       },
       controllerAs: 'colourPickerCtrl',
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope) {
           scope.showPicker = false;
           scope.showChooser = false;
           scope.custom = {};
@@ -20,7 +20,7 @@ angular.module('interfaceApp')
           scope.$on('close-colour-picker', function() {
               scope.showPicker = false;
               scope.showChooser = false;
-          })
+          });
 
           // get the default colours from the configuration
           var process = function() {
@@ -32,7 +32,7 @@ angular.module('interfaceApp')
                     scope.types[k] = DataService.types[k];
                   }
               });
-          }
+          };
 
           scope.toggleColourPicker = function() {
               scope.showPicker = !scope.showPicker;
@@ -41,28 +41,28 @@ angular.module('interfaceApp')
                   $rootScope.$broadcast('close-type-filter');
                   process();
               }
-          }
+          };
 
           scope.changeColour = function(type) {
               scope.showPicker = false;
               scope.showChooser = true;
               scope.type = type;
-          }
+          };
           scope.setColor = function(color) {
               scope.types[scope.type].color = color;
               DataService.setColor(scope.type, color);
               scope.showPicker = true;
               scope.showChooser = false;
               $rootScope.$broadcast('colours-changed');
-          }
+          };
           scope.save = function() {
               scope.setColor(scope.custom.color);
               scope.dismissChooser();
-          }
+          };
           scope.dismissChooser = function() {
               scope.showPicker = true;
               scope.showChooser = false;
-          }
+          };
       }
     };
   }]);

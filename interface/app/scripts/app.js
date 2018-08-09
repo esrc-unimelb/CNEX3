@@ -29,10 +29,10 @@ angular.module('interfaceApp', [
       })
       .when('/login/:code', {
         template: '<div></div>',
-        controller: [ 'AuthService', function(AuthService) { AuthService.getToken(); }] 
+        controller: [ 'AuthService', function(AuthService) { AuthService.getToken(); }]
       })
       .when('/forbidden', {
-        template: "<h4 class='text-center'>You don't have permission to use this site.</h4>"
+        template: '<h4 class=\'text-center\'>You don\'t have permission to use this site.</h4>'
       })
       .otherwise({
         redirectTo: '/'

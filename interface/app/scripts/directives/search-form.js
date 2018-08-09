@@ -9,7 +9,7 @@ angular.module('interfaceApp')
       scope: {
           searchType: '@',
       },
-      link: function postLink(scope, element, attrs) {
+      link: function postLink(scope) {
 
           // handle app reset 
           scope.$on('reset-search', function() {
@@ -20,7 +20,7 @@ angular.module('interfaceApp')
           // process the search data
           scope.$on('search-data-ready', function() {
               scope.nSearchMatches = SolrService.selected.length;
-          })
+          });
 
           scope.search = function() {
               if (scope.searchBox === '') {
@@ -44,7 +44,7 @@ angular.module('interfaceApp')
                   scope.keywordSearch = true;
               }
               scope.search();
-          }
+          };
 
           scope.setSearchType(scope.searchType);
 
