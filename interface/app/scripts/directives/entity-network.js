@@ -411,13 +411,18 @@ angular.module('interfaceApp')
                         path.enter()
                             .append('line') // path doesn't work as expected with d3 V5...
                             //.append("svg:path")
-                            .attr("class", "link")
+                            .attr('class', 'link')
                             .attr('id', function (d) {
                                 return 'link_' + d.sid + '_' + d.tid;
                             })
                             .attr('stroke', '#ccc')
                             .attr('stroke-width', 2);
-                        
+                        // add a div to handle the mouse over events
+                        var textDiv = d3.select('body')
+                            .append('div')
+                            .attr('class', 'tooltip')
+                            .style('opacity', 0);
+
                         // draw the nodes
                         node.enter()
                             .append('circle')
@@ -434,15 +439,28 @@ angular.module('interfaceApp')
                             .on('click', function (d) {
                                 scope.$apply(function () {
                                     scope.showDetails(d);
-                                })
+                                });
+                            })
+                            .on('mouseover', function (d) {
+                                textDiv.transition()
+                                    .duration(200)
+                                    .style('opacity', 0.9);
+                                textDiv.html(d.id + ' : ' + d.name + '<br/>')
+                                    .style('left', (d3.event.pageX) + 'px')
+                                    .style('top', (d3.event.pageY - 28) + 'px');
+                            })
+                            .on('mouseout', function () {
+                                textDiv.transition()
+                                    .duration(500)
+                                    .style('opacity', 0);
                             });
 
                         scope.centerGraph();
-                    }
+                    };
 
                     scope.close = function () {
                         $rootScope.$broadcast('destroy-entity-network-view');
-                    }
+                    };
                     scope.highlightFirstOrderConnections = function () {
                         scope.highlight = !scope.highlight;
 
@@ -483,7 +501,7 @@ angular.module('interfaceApp')
                                     if (highlight.indexOf(d.id) !== -1) {
                                         return conf.opacity.default;
                                     } else {
-                                        conf.opacity.unselected;
+                                        return conf.opacity.unselected;
                                     }
                                 });
                         } else {
