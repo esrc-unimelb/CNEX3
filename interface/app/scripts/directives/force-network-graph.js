@@ -204,31 +204,31 @@ angular.module('interfaceApp')
                                     d3s.highlightNodeAndLocalEnvironment(d.id, '#site_graph');
                                 });
                             })
-                            .on("mouseover", function (d) {
+                            .on('mouseover', function (d) {
                                 textDiv.transition()
                                     .duration(200)
-                                    .style("opacity", .9);
-                                textDiv.html(d.id +" : " + scope.nodes.find(o => o.id === d.id).name +"<br/>" )
-                                    .style("left", (d3.event.pageX) + "px")
-                                    .style("top", (d3.event.pageY - 28) + "px");
+                                    .style('opacity', 0.9)
+                                    .style('pointer-events','none');
+                                textDiv.html(
+                                  '<a href=' + d.url + '>'
+                                    + d.id + ' <br/> '
+                                    + d.name + '<br/>'
+                                    + d.url
+                                    + '</a>'
+                                )
+                                    .style('left', (d3.event.pageX) + 'px')
+                                    .style('top', (d3.event.pageY - 28) + 'px');
                             })
-                            .on("mouseout", function (d) {
+                            .on('mouseout', function () {
                                 textDiv.transition()
-                                    .duration(500)
-                                    .style("opacity", 0);
+                                    .duration(200)
+                                    .style('opacity', 0);
                             });
                         node.exit().remove();
 
-                        // handle the node click event
-                        // node.on('click', function(d) {
-                        //     scope.$apply(function() {
-                        //         d3s.highlightNodeAndLocalEnvironment(d.id, '#site_graph');
-                        //     });
-                    //});
-
-centerGraph();
-                    }
-scope.drawGraph();
+                        centerGraph();
+                    };
+                    scope.drawGraph();
 
                 }
             };
