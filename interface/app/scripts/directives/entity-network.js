@@ -9,7 +9,7 @@ angular.module('interfaceApp')
                 scope: {
                     sizeToParent: '@'
                 },
-                link: function postLink(scope, element, attrs) {
+                link: function postLink(scope, element) {
 
                     scope.highlight = false;
 
@@ -28,7 +28,7 @@ angular.module('interfaceApp')
 
                         scope.contextNode = scope.data.datamap[DataService.currentEntity];
                         scope.graphLink = $location.absUrl().replace('site', 'entity').replace('byEntity', scope.contextNode.id) + '?link=false';
-                        scope.iframeCode = "<iframe src='" + scope.graphLink + "' style='border:0; width: 1024; height: 90%;' seamless='true' ></iframe>";
+                        scope.iframeCode = '<iframe src=\'' + scope.graphLink + '\' style=\'border:0; width: 1024; height: 90%;\' seamless=\'true\' ></iframe>';
 
                         // construct the entity stats object
                         var bytype = _.groupBy(scope.data.nodes, function (d) { return d.type; });
@@ -47,18 +47,16 @@ angular.module('interfaceApp')
                         });
                         scope.ready = true;
                         scope.drawGraph();
-                    })
+                    });
 
                     // cancel the timeout if the location changes
                     scope.$on('$locationChangeStart', function () {
                         $timeout.cancel(scope.timer);
-                    })
+                    });
 
                     // handle color changes
                     scope.$on('colours-changed', function () {
-                        var nodes = d3.select('#entity_graph')
-                            .selectAll('.node')
-                            .data();
+ 
                         d3.select('#entity_graph')
                             .transition()
                             .duration(500)
@@ -72,10 +70,10 @@ angular.module('interfaceApp')
 
                         angular.forEach(scope.data.types, function (v, k) {
                             scope.data.types[k] = DataService.types[k].color;
-                        })
+                        });
                     });
 
-                    if ($routeParams.link === "false") {
+                    if ($routeParams.link === 'false') {
                         scope.hideLinks = true;
                         scope.removeClose = true;
                     }
@@ -84,7 +82,7 @@ angular.module('interfaceApp')
                     scope.showIframeCode = false;
 
                     var sizeThePanels = function () {
-                        if (scope.sizeToParent === "true") {
+                        if (scope.sizeToParent === 'true') {
                             var e = angular.element(element[0].parentNode);
                             scope.w = e[0].clientWidth;
                             scope.h = scope.w * 0.6;
@@ -102,7 +100,7 @@ angular.module('interfaceApp')
                                 'height': scope.h + 'px',
                                 'padding': '0px 10px',
                                 'background-color': 'white'
-                            }
+                            };
                             scope.mainpanelStyle = {
                                 'position': 'fixed',
                                 'top': '0px',
@@ -111,14 +109,14 @@ angular.module('interfaceApp')
                                 'height': scope.h + 'px',
                                 'background-color': 'white',
                                 'padding': '0px 0px 0px 15px'
-                            }
+                            };
                             scope.svgWidth = scope.w * 0.6 - 15;
                         } else {
                             scope.showSidePanel = false;
                             scope.mainpanelStyle = {
                                 'width': scope.w + 'px',
                                 'height': scope.h + 'px',
-                            }
+                            };
                             scope.svgWidth = scope.w;
                         }
 
@@ -130,20 +128,20 @@ angular.module('interfaceApp')
                             'overflow': 'auto',
                             'margin-top': '15px',
                             'height': scope.h - 30 + 'px'
-                        }
+                        };
 
                         d3.select('#entity_graph')
                             .select('svg')
                             .style('width', scope.svgWidth)
                             .style('height', scope.h);
-                    }
+                    };
                     sizeThePanels();
 
                     var w = angular.element($window);
                     w.bind('resize', function () {
                         scope.$apply(function () {
                             sizeThePanels();
-                        })
+                        });
                     });
 
                     scope.showDetails = function (d) {
@@ -163,7 +161,7 @@ angular.module('interfaceApp')
                                 .attr('fill', DataService.getColor(d.type));
 
                             // highlight the relevant links
-                            angular.forEach(scope.selections, function (v, k) {
+                            angular.forEach(scope.selections, function (v) {
                                 //
                                 //we have to try the linkid with source and
                                 //   target flipped
@@ -173,7 +171,7 @@ angular.module('interfaceApp')
                                 d3.select('#entity_graph')
                                     .select('#link_' + d.id + '_' + v)
                                     .style('stroke', 'black');
-                            })
+                            });
 
                             // where is the node located relative to the underlying svg
                             var coords = d3s.determineLabelPosition('#entity_graph', d);
@@ -215,7 +213,7 @@ angular.module('interfaceApp')
                                 .attr('stroke', DataService.getColor(d.type));
 
                             // remove link highlight
-                            angular.forEach(scope.selections, function (v, k) {
+                            angular.forEach(scope.selections, function (v) {
                                 // we have to try the linkid with source and
                                 //   target flipped
                                 d3.select('#entity_graph')
@@ -224,7 +222,7 @@ angular.module('interfaceApp')
                                 d3.select('#entity_graph')
                                     .select('#link_' + d.id + '_' + v)
                                     .attr('stroke', '#ccc');
-                            })
+                            });
                         }
 
                         if (scope.selections.length === 0) {
@@ -233,7 +231,7 @@ angular.module('interfaceApp')
 
                             d3.select('#entity_graph')
                                 .selectAll('.link')
-                                .filter(function (d) {
+                                .filter(function () {
                                     if (d3.select(this).style('stroke') === 'rgb(0, 0, 0)') {
                                         var id = d3.select(this).attr('id').split('link_')[1];
                                         var s = id.split('_')[0];
@@ -261,7 +259,7 @@ angular.module('interfaceApp')
                             // fade out links not between selected nodes
                             d3.select('#entity_graph')
                                 .selectAll('.link')
-                                .style('opacity', function (d) {
+                                .style('opacity', function () {
                                     if (d3.select(this).style('stroke') === 'rgb(0, 0, 0)') {
                                         return conf.opacity.default;
                                     } else {
@@ -272,12 +270,12 @@ angular.module('interfaceApp')
 
                         scope.multiplePanels = {
                             'activePanels': [scope.selections.length - 1]
-                        }
-                    }
+                        };
+                    };
 
                     scope.closeInfoPanel = function () {
                         scope.showInfoPanel = false;
-                    }
+                    };
                     scope.reset = function () {
                         // remove node highlight
                         d3.select('#entity_graph')
@@ -307,29 +305,29 @@ angular.module('interfaceApp')
                         scope.closeInfoPanel();
 
                         scope.labelMainEntities();
-                    }
+                    };
 
                     scope.centerGraph = function () {
                         if (scope.force.alpha() > 0.004) {
-                            scope.timer = $timeout(function (d) {
+                            scope.timer = $timeout(function () {
                                 scope.centerGraph();
                             }, 200);
                         } else {
-                            var t = d3s.calculateTransformAndScale('#entity_graph')
+                            var t = d3s.calculateTransformAndScale('#entity_graph');
                             // scope.zoom.translate(t.translate).scale(t.scale);
                             d3.select('#entity_graph')
                                 .selectAll('g')
                                 .transition()
                                 .duration(200)
-                                .attr('transform', 'translate(' + t.translate + ')' + ' scale(' + t.scale + ')');
+                                .attr('transform', 'translate(' + t.translate + ') scale(' + t.scale + ')');
                             scope.labelMainEntities();
                             scope.relaxed = true;
                         }
-                    }
+                    };
 
                     scope.labelMainEntities = function () {
                         d3s.renderLabels('#entity_graph');
-                    }
+                    };
 
                     scope.drawGraph = function () {
                         scope.selections = [];
@@ -363,13 +361,13 @@ angular.module('interfaceApp')
                                     scope.processed = scope.force.alpha();
                                 });
                             }
-                        }
+                        };
                         // redraw the view when zooming
                         scope.redraw = function () {
                             var svg = d3.select('#entity_graph').selectAll('g');
-                            svg.attr("transform", d3.event.transform);
+                            svg.attr('transform', d3.event.transform);
 
-                        }
+                        };
 
                         scope.zoom = d3.zoom()
                             .scaleExtent([0, 8]).on('zoom', scope.redraw);
@@ -380,16 +378,16 @@ angular.module('interfaceApp')
                                 .distance(200) // TODO this should be a selectable value
                                 .strength(1) // TODO this should be a selectable value
                             )
-                            .force("charge", d3.forceManyBody()
+                            .force('charge', d3.forceManyBody()
                                 .strength(-2000) // TODO this should be a selectable value
                             )
-                            .force("xAxis", d3.forceX(scope.svgWidth / 2))
-                            .force("yAxis", d3.forceY(scope.h / 2))
+                            .force('xAxis', d3.forceX(scope.svgWidth / 2))
+                            .force('yAxis', d3.forceY(scope.h / 2))
                             .on('tick', tick);
 
 
                         var svg = d3.select('#entity_graph')
-                        .classed("svg-container", true)
+                        .classed('svg-container', true)
                         .append('svg')
                             .attr('width', scope.svgWidth)
                             .attr('height', scope.h)
@@ -399,7 +397,7 @@ angular.module('interfaceApp')
                             .call(scope.zoom)
                             .append('g')
                             .attr('class', 'node-container')
-                            .classed("svg-content-responsive", true);
+                            .classed('svg-content-responsive', true);
 
                         // add a group for the text elements we add later
                         d3.select('#entity_graph')
@@ -498,7 +496,7 @@ angular.module('interfaceApp')
                                 .selectAll('.link')
                                 .attr('opacity', conf.opacity.default);
                         }
-                    }
+                    };
                 }
             };
         }]);
