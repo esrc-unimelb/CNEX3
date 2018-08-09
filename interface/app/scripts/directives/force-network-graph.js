@@ -119,10 +119,10 @@ angular.module('interfaceApp')
                             });
 
 
-                            // we can't update on every cycle as the html 
+                            // we can't update on every cycle as the html
                             //  element doesn't keep up
                             scope.tickCounter += 1;
-                            if (scope.tickCounter === 2) {
+                            if (scope.tickCounter > 2) {
                                 scope.tickCounter = 0;
                                 scope.$apply(function () {
                                     scope.total = 0.1;
@@ -131,6 +131,7 @@ angular.module('interfaceApp')
                             }
                         };
 
+                        // setup the simulation
                         scope.force = d3.forceSimulation()
                             .nodes(scope.nodes)
                             .force('link', d3.forceLink().links(scope.links)
