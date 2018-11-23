@@ -89,7 +89,7 @@ angular.module('interfaceApp')
                              .range([10,scope.width - 10]);
 
               var xAxis = d3.axisBottom(xScale)
-                            .tickFormat(d3.timeFormat('%y'))
+                            .tickFormat(d3.timeFormat('%Y'))
                             .ticks(6);
 
               var svg = d3.select('#date_vis')
